@@ -12,28 +12,20 @@ open Amazon.SimpleWorkflow.Model
 open NUnit.Framework
 open FsUnit
 
-module TestExecuteActivityTask =
+module TestStartAndWaitForActivityTask =
 
-    let Foo() = 
-        let gg = FlowSharp.Builder(new DecisionTask()) {
-                return "OK"
-            }
-
-        ()
-
-
-    let ``Execute Activity Task with One Completed Activity Task``() =
-        let workflowId = "Execute Activity Task with One Completed Activity Task"
+    let ``Start And Wait For Activity Task with One Completed Activity Task``() =
+        let workflowId = "Start And Wait For Activity Task with One Completed Activity Task"
         let activityId = "Test Activity 1"
-        let input = "Test Activity 1 Input"
+        let activityInput = "Test Activity 1 Input"
         
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
             // Start and Wait for an Activity Task
-            let! result = FlowSharp.ExecuteActivityTask (
+            let! result = FlowSharp.StartAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
-                            input=input,
+                            input=activityInput,
                             activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -43,7 +35,7 @@ module TestExecuteActivityTask =
                         )
 
             match result with
-            | ExecuteActivityTaskResult.Completed(taskresult) -> return "TEST PASS"
+            | WaitForActivityTaskResult.Completed(taskresult) -> return "TEST PASS"
             | _ -> ()
             return "TEST FAIL"            
         }
@@ -135,7 +127,7 @@ module TestExecuteActivityTask =
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
                                                         |> should equal TestConfiguration.TestActivityType.Version
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
-                                                        |> should equal input
+                                                        |> should equal activityInput
 
                 TestHelper.RespondDecisionTaskCompleted resp
                 TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) None                

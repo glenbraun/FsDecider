@@ -36,10 +36,13 @@ type StartActivityTaskResult =
     | Scheduled of Activity:ActivityType * Control:string * ActivityId:string
     | Started of Activity:ActivityType * Control:string * ActivityId:string
 
-type CompleteActivityTaskAction =
+type StartAndWaitForActivityTaskAction =
+    | Attributes of ScheduleActivityTaskDecisionAttributes
+
+type WaitForActivityTaskAction =
     | StartResult of StartActivityTaskResult
 
-type CompleteActivityTaskResult =
+type WaitForActivityTaskResult =
     | ScheduleFailed of Cause:ScheduleActivityTaskFailedCause
     | Completed of Result:string
     | Canceled of Details:string
@@ -53,16 +56,6 @@ type RequestCancelActivityTaskResult =
     | ScheduleFailed of Cause:ScheduleActivityTaskFailedCause
     | RequestCancelFailed of ActivityId:string * Cause:RequestCancelActivityTaskFailedCause
     | CancelRequested
-    | Completed of Result:string
-    | Canceled of Details:string
-    | TimedOut of TimeoutType:ActivityTaskTimeoutType * Details:string
-    | Failed of Reason:string * Details:string
-
-type ExecuteActivityTaskAction =
-    | Attributes of ScheduleActivityTaskDecisionAttributes
-
-type ExecuteActivityTaskResult =
-    | ScheduleFailed of Cause:ScheduleActivityTaskFailedCause
     | Completed of Result:string
     | Canceled of Details:string
     | TimedOut of TimeoutType:ActivityTaskTimeoutType * Details:string
@@ -141,7 +134,7 @@ type GetWorkflowExecutionInputAction =
     | Attributes of unit
 
 type FlowSharp = 
-    static member ExecuteActivityTask(activity:ActivityType, ?input:string, ?activityId:string, ?heartbeatTimeout:uint32, ?scheduleToCloseTimeout:uint32, ?scheduleToStartTimeout:uint32, ?startToCloseTimeout:uint32, ?taskList:TaskList, ?taskPriority:int) =
+    static member StartAndWaitForActivityTask(activity:ActivityType, ?input:string, ?activityId:string, ?heartbeatTimeout:uint32, ?scheduleToCloseTimeout:uint32, ?scheduleToStartTimeout:uint32, ?startToCloseTimeout:uint32, ?taskList:TaskList, ?taskPriority:int) =
         let attr = new ScheduleActivityTaskDecisionAttributes()
         attr.ActivityId <- if activityId.IsSome then activityId.Value else null
         attr.ActivityType <- activity
@@ -153,7 +146,7 @@ type FlowSharp =
         attr.TaskList <- if taskList.IsSome then taskList.Value else null
         attr.TaskPriority <- if taskPriority.IsSome then taskPriority.Value.ToString() else null
 
-        ExecuteActivityTaskAction.Attributes(attr)
+        StartAndWaitForActivityTaskAction.Attributes(attr)
 
     static member StartActivityTask(activity:ActivityType, ?input:string, ?activityId:string, ?heartbeatTimeout:uint32, ?scheduleToCloseTimeout:uint32, ?scheduleToStartTimeout:uint32, ?startToCloseTimeout:uint32, ?taskList:TaskList, ?taskPriority:int) =
         let attr = new ScheduleActivityTaskDecisionAttributes()
@@ -169,8 +162,8 @@ type FlowSharp =
 
         StartActivityTaskAction.Attributes(attr)
 
-    static member CompleteActivityTask(start:StartActivityTaskResult) =
-        CompleteActivityTaskAction.StartResult(start)
+    static member WaitForActivityTask(start:StartActivityTaskResult) =
+        WaitForActivityTaskAction.StartResult(start)
 
     static member RequestCancelActivityTask(start:StartActivityTaskResult) =
         RequestCancelActivityTaskAction.StartResult(start)
@@ -726,8 +719,8 @@ type Builder (DecisionTask:DecisionTask) =
     member this.Return(result:string) = this.Return(Complete(result))
     member this.Return(result:unit) = this.Return(Complete(null))
             
-    // Execute Activity
-    member this.Bind(ExecuteActivityTaskAction.Attributes(attr), f:(ExecuteActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
+    // Start and Wait for Activity Task
+    member this.Bind(StartAndWaitForActivityTaskAction.Attributes(attr), f:(WaitForActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
         // The idea is that with the same decider, the sequence of calls to Bind will be the same. The bindingId is used in the .Control 
         // properties and is used when matching the execution history to a DeciderAction
         let bindingId = NextBindingId()
@@ -737,25 +730,25 @@ type Builder (DecisionTask:DecisionTask) =
         match (combinedHistory) with
         // Completed
         | h when h.EventType = EventType.ActivityTaskCompleted -> 
-            f(ExecuteActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes.Result))
+            f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes.Result))
 
         // TimedOut
         | h when h.EventType = EventType.ActivityTaskTimedOut ->
-            f(ExecuteActivityTaskResult.TimedOut(TimeoutType=h.ActivityTaskTimedOutEventAttributes.TimeoutType, Details=h.ActivityTaskTimedOutEventAttributes.Details))
+            f(WaitForActivityTaskResult.TimedOut(TimeoutType=h.ActivityTaskTimedOutEventAttributes.TimeoutType, Details=h.ActivityTaskTimedOutEventAttributes.Details))
 
         // Canceled
         | h when h.EventType = EventType.ActivityTaskCanceled ->
-            f(ExecuteActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes.Details))
+            f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes.Details))
 
         // Failed
         | h when h.EventType = EventType.ActivityTaskFailed ->
-            f(ExecuteActivityTaskResult.Failed(Reason=h.ActivityTaskFailedEventAttributes.Reason, Details=h.ActivityTaskFailedEventAttributes.Details))
+            f(WaitForActivityTaskResult.Failed(Reason=h.ActivityTaskFailedEventAttributes.Reason, Details=h.ActivityTaskFailedEventAttributes.Details))
 
         // ScheduleActivityTaskFailed
         | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Name = attr.ActivityType.Name && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Version = attr.ActivityType.Version ->
-            f(ExecuteActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
+            f(WaitForActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
 
         // Not Scheduled
         | h when h.ActivityTaskScheduledEventAttributes = null ->
@@ -806,8 +799,8 @@ type Builder (DecisionTask:DecisionTask) =
 
         | _ -> failwith "error"
 
-    // Complete Activity
-    member this.Bind(CompleteActivityTaskAction.StartResult(result), f:(CompleteActivityTaskResult -> RespondDecisionTaskCompletedRequest)) =
+    // Wait For Activity Task
+    member this.Bind(WaitForActivityTaskAction.StartResult(result), f:(WaitForActivityTaskResult -> RespondDecisionTaskCompletedRequest)) =
 
         let bindWithHistory (activity:ActivityType) (control:string) (activityId:string) =
             let combinedHistory = FindActivityTaskHistory DecisionTask (Convert.ToInt32(control)) activityId
@@ -815,25 +808,25 @@ type Builder (DecisionTask:DecisionTask) =
             match (combinedHistory) with
             // Completed
             | h when h.EventType = EventType.ActivityTaskCompleted -> 
-                f(CompleteActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes.Result))
+                f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes.Result))
 
             // TimedOut
             | h when h.EventType = EventType.ActivityTaskTimedOut ->
-                f(CompleteActivityTaskResult.TimedOut(TimeoutType=h.ActivityTaskTimedOutEventAttributes.TimeoutType, Details=h.ActivityTaskTimedOutEventAttributes.Details))
+                f(WaitForActivityTaskResult.TimedOut(TimeoutType=h.ActivityTaskTimedOutEventAttributes.TimeoutType, Details=h.ActivityTaskTimedOutEventAttributes.Details))
 
             // Canceled
             | h when h.EventType = EventType.ActivityTaskCanceled ->
-                f(CompleteActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes.Details))
+                f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes.Details))
 
             // Failed
             | h when h.EventType = EventType.ActivityTaskFailed ->
-                f(CompleteActivityTaskResult.Failed(Reason=h.ActivityTaskFailedEventAttributes.Reason, Details=h.ActivityTaskFailedEventAttributes.Details))
+                f(WaitForActivityTaskResult.Failed(Reason=h.ActivityTaskFailedEventAttributes.Reason, Details=h.ActivityTaskFailedEventAttributes.Details))
 
             // ScheduleActivityTaskFailed
             | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
                         h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Name = activity.Name && 
                         h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Version = activity.Version ->
-                f(CompleteActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
+                f(WaitForActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
 
             | _ -> 
                 // This activity is still running, continue blocking
@@ -847,7 +840,7 @@ type Builder (DecisionTask:DecisionTask) =
             response
 
         // The StartActivityResult checks for scheduling failure so no need to check history again.
-        | StartActivityTaskResult.ScheduleFailed(cause) -> f(CompleteActivityTaskResult.ScheduleFailed(cause))
+        | StartActivityTaskResult.ScheduleFailed(cause) -> f(WaitForActivityTaskResult.ScheduleFailed(cause))
 
         | StartActivityTaskResult.Scheduled(activity:ActivityType, control:string, (activityId:string)) ->
             bindWithHistory activity control activityId
