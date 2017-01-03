@@ -1,6 +1,7 @@
 ﻿namespace FlowSharp.UnitTests
 
 open FlowSharp
+open FlowSharp.UnitTests.TestHelper
 open FlowSharp.UnitTests.OfflineHistory
 
 open System
@@ -13,16 +14,27 @@ open FsUnit
 
 module TestExecuteActivityTask =
 
-    let ``Execute Activity Task with One Completed Task``() =
+    let Foo() = 
+        let gg = FlowSharp.Builder(new DecisionTask()) {
+                return "OK"
+            }
+
+        ()
+
+
+    let ``Execute Activity Task with One Completed Activity Task``() =
+        let workflowId = "Execute Activity Task with One Completed Activity Task"
+        let activityId = "Test Activity 1"
+        let input = "Test Activity 1 Input"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharpDecider.create(dt) {
-
+            FlowSharp.Builder(dt) {
+            
             // Start and Wait for an Activity Task
             let! result = FlowSharp.ExecuteActivityTask (
                             TestConfiguration.TestActivityType, 
-                            input="Activity Instruction: Return Completed(OK)",
-                            activityId="Test Activity 1", 
+                            input=input,
+                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -32,11 +44,12 @@ module TestExecuteActivityTask =
 
             match result with
             | ExecuteActivityTaskResult.Completed(taskresult) -> return "TEST PASS"
-            | _ -> return "TEST FAIL"
+            | _ -> ()
+            return "TEST FAIL"            
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (WorkflowType(Name="Workflow1", Version="1")) (WorkflowExecution(RunId="23bCyBdBGdLPKwjr92SnGyQJKeA8O9C9mXg8vpWTKrlQg=", WorkflowId = "676dd27c-9e4c-4500-86b3-93a5949afd0d"))
+        let offlineFunc = OfflineDecisionTask (WorkflowType(Name="Workflow1", Version="1")) (WorkflowExecution(RunId="23bCyBdBGdLPKwjr92SnGyQJKeA8O9C9mXg8vpWTKrlQg=", WorkflowId = workflowId))
                             |> OfflineHistoryEvent (        // EventId = 1
                                 WorkflowExecutionStartedEventAttributes(
                                     ChildPolicy=ChildPolicy.TERMINATE,
@@ -105,27 +118,36 @@ module TestExecuteActivityTask =
                                 WorkflowExecutionCompletedEventAttributes(
                                     DecisionTaskCompletedEventId=10L,
                                     Result="Activity1 result, 1/2/2017 8:06:05 PM"))
-        //odt()
+
+        // Start the workflow
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None
+
+        // Poll and make decisions
+        for (i, resp) in TestHelper.PollAndDecide deciderFunc offlineFunc 2 do
+            match i with
+            | 1 -> 
+                resp.Decisions.Count                    |> should equal 1
+                resp.Decisions.[0].DecisionType         |> should equal DecisionType.ScheduleActivityTask
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
+                                                        |> should equal activityId
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
+                                                        |> should equal TestConfiguration.TestActivityType.Name
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
+                                                        |> should equal TestConfiguration.TestActivityType.Version
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
+                                                        |> should equal input
+
+                TestHelper.RespondDecisionTaskCompleted resp
+                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) None                
+                
+            | 2 -> 
+                resp.Decisions.Count                    |> should equal 1
+                resp.Decisions.[0].DecisionType         |> should equal DecisionType.CompleteWorkflowExecution
+                resp.Decisions.[0].CompleteWorkflowExecutionDecisionAttributes.Result 
+                                                        |> should equal "TEST PASS"
+
+                TestHelper.RespondDecisionTaskCompleted resp
+
+            | _ -> ()
+
         
-        (*
-            for (i, resp) in Helper.PollAndDecide(deciderFunc, offlineFunc, 2)
-                match i with
-                | 1 -> 
-                    Assert.IsTrue(resp.Decisions.Count = 1 && ((resp.Decisions.[0]).DecisionType = DecisionType.ScheduleActivityTask))
-                    // Complete Activity, etc.
-                    // Respond with decisions
-                | 2 -> 
-                    Assert...
-                    // Respond with decisions
-                    // Clean up
-                | _ -> Fail
-
-        //
-        // Poll
-        // Decide
-        // Verify correct decisions
-        // Respond
-
-        *)
-
-        ()

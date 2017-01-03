@@ -60,11 +60,11 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AWSSDK.Core">
-      <HintPath>..\packages\AWSSDK.Core.3.3.6\lib\net45\AWSSDK.Core.dll</HintPath>
+      <HintPath>..\packages\AWSSDK.Core.3.3.7.1\lib\net45\AWSSDK.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AWSSDK.SimpleWorkflow">
-      <HintPath>..\packages\AWSSDK.SimpleWorkflow.3.3.0.5\lib\net45\AWSSDK.SimpleWorkflow.dll</HintPath>
+      <HintPath>..\packages\AWSSDK.SimpleWorkflow.3.3.0.6\lib\net45\AWSSDK.SimpleWorkflow.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

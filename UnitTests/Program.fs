@@ -1,6 +1,7 @@
-﻿namespace FlowSharp.UnitTests
+﻿module FlowSharp.UnitTests.Main
 
 open System
+
 open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
@@ -8,7 +9,6 @@ open Amazon.SimpleWorkflow.Model
 open NUnit.Framework
 open FsUnit
 open Fuchu
-
 
 (*
     let inline add x y = x + y
@@ -34,11 +34,25 @@ open Fuchu
                 ``When 2.0 is added to 2.0 expect 4.01``
         ]
 *)
+(*
+let simpleTest = 
+    testCase "A simple test" <| 
+        //FlowSharp.FlowSharpDecider.test
+        fun _ -> 
+            printf "hi"
+            ()
+        //FlowSharp.UnitTests.TestExecuteActivityTask.``Execute Activity Task with One Completed Task``
+ *)
 
-module Main =
+let simpleTest = 
+    testCase "A simple test" <| 
+        TestExecuteActivityTask.``Execute Activity Task with One Completed Activity Task``
+       
 
-    [<EntryPoint>]
-    let main argv = 
-        0
-        //run tests 
+[<EntryPoint>]
+let main argv = 
+    TestConfiguration.IsConnected <- true
+
+    run simpleTest
+
 

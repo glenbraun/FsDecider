@@ -56,14 +56,15 @@
   <ItemGroup>
     <None Include="App.config" />
     <Content Include="packages.config" />
-    <Compile Include="OfflineHistory.fs" />
     <Compile Include="TestConfiguration.fs" />
+    <Compile Include="OfflineHistory.fs" />
+    <Compile Include="TestHelper.fs" />
     <Compile Include="TestExecuteActivityTask.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AWSSDK.Core">
-      <HintPath>..\packages\AWSSDK.Core.3.3.7\lib\net45\AWSSDK.Core.dll</HintPath>
+      <HintPath>..\packages\AWSSDK.Core.3.3.7.1\lib\net45\AWSSDK.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AWSSDK.SimpleWorkflow">
@@ -71,7 +72,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.3.1.2.5\lib\net40\FSharp.Core.dll</HintPath>
+      <HintPath>..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FsUnit.NUnit">

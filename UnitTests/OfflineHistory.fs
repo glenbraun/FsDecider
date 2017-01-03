@@ -288,17 +288,16 @@ module OfflineHistory =
 
             seq {
                 for i = 1 to dt.Events.Count do
-                    let event = dt.Events.[i]
+                    let event = dt.Events.[i-1]
                     events.Add event
 
                     if event.EventType = EventType.DecisionTaskStarted then
                         StartedEventId := event.EventId
 
-                    elif event.EventType = EventType.DecisionTaskCompleted && i <> dt.Events.Count then
-                        yield (!PreviousStartedEventId, !StartedEventId, events)
+                    elif event.EventType = EventType.DecisionTaskCompleted then
+                        yield (!PreviousStartedEventId, !StartedEventId, (new ResizeArray<HistoryEvent>(events)))
                         PreviousStartedEventId := !StartedEventId
 
-                yield (!PreviousStartedEventId, !StartedEventId, events)
             }
 
         seq {
@@ -306,6 +305,7 @@ module OfflineHistory =
                 let newdt = new DecisionTask()
                 newdt.WorkflowExecution <- dt.WorkflowExecution
                 newdt.WorkflowType <- dt.WorkflowType
+                newdt.TaskToken <- "OfflineHistory TaskToken"
                 newdt.Events <- events
                 newdt.PreviousStartedEventId <- prev
                 newdt.StartedEventId <- start
