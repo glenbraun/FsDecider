@@ -140,7 +140,7 @@ type WorkflowResult =
 type GetWorkflowExecutionInputAction =
     | Attributes of unit
 
-type DeciderX = 
+type FlowSharp = 
     static member ExecuteActivityTask(activity:ActivityType, ?input:string, ?activityId:string, ?heartbeatTimeout:uint32, ?scheduleToCloseTimeout:uint32, ?scheduleToStartTimeout:uint32, ?startToCloseTimeout:uint32, ?taskList:TaskList, ?taskPriority:int) =
         let attr = new ScheduleActivityTaskDecisionAttributes()
         attr.ActivityId <- if activityId.IsSome then activityId.Value else null
@@ -259,7 +259,7 @@ type DeciderX =
     static member GetWorkflowExecutionInput() =
         GetWorkflowExecutionInputAction.Attributes()
 
-module WFModule =
+module FlowSharpDecider =
     
 
     let FindSignalHistory (decisionTask:DecisionTask) (signalName:string) (input:string option) (markerName:string option) (markerDetails:string option) =
@@ -666,7 +666,7 @@ module WFModule =
         combinedHistory
 
 
-    type DeciderBuilder (DecisionTask:DecisionTask) =
+    type Builder (DecisionTask:DecisionTask) =
         let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
         let mutable bindingId = 0
         let mutable blockFlag = false
@@ -1301,5 +1301,5 @@ module WFModule =
             | e ->
                 exprWith e
 
-    let public decider(dt: DecisionTask) = new DeciderBuilder(dt);    
+    let public create(dt: DecisionTask) = new Builder(dt);    
 

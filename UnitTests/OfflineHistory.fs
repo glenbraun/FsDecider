@@ -1,4 +1,4 @@
-﻿namespace FlowSharp
+﻿namespace FlowSharp.UnitTests
 
 open System
 open System.IO
