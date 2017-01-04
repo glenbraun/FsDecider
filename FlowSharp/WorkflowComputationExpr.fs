@@ -34,7 +34,7 @@ type StartActivityTaskResult =
     | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
     | Scheduling of Activity:ActivityType * ActivityId:string
     | Scheduled of ActivityTaskScheduledEventAttributes
-    | Started of Attributes:ActivityTaskStartedEventAttributes * ActivityType:ActivityType * Contro:string * ActivityId:string
+    | Started of Attributes:ActivityTaskStartedEventAttributes * ActivityType:ActivityType * Control:string * ActivityId:string
 
 type StartAndWaitForActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes

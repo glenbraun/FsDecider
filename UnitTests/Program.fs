@@ -10,7 +10,7 @@ open Fuchu
 
       
 // StartAndWaitForActivityTask (done)
-// StartActivityTask 
+// StartActivityTask (done)
 // WaitForActivityTask
 // RequestCancelActivityTask
 // ExecuteLambdaFunction
@@ -26,6 +26,8 @@ open Fuchu
 // CheckForWorkflowExecutionCancelRequested
 // GetWorkflowExecutionInput
 
+
+
 let tests = 
     testList "Primary Decider Actions" [
             testList "StartAndWaitForActivityTask" [
@@ -35,16 +37,23 @@ let tests =
                 testCase "TimedOut"         <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Timed Out Activity Task``
                 testCase "ScheduleFailed"   <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with Activity Task Schedule Failure``
             ]
+
+            testList "StartActivityTask" [
+                testCase "Scheduling"        <| TestStartActivityTask.``Start Activity Task with result of Scheduling``
+                testCase "Scheduled"        <| TestStartActivityTask.``Start Activity Task with result of Scheduled``
+                testCase "Started"        <| TestStartActivityTask.``Start Activity Task with result of Started``
+                testCase "ScheduleFailed"        <| TestStartActivityTask.``Start Activity Task with Schedule Failure``
+            ]
         ]
 
 
 
 [<EntryPoint>]
 let main argv = 
-    TestConfiguration.GenerateOfflineHistory <- false
+    TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    //runParallel tests |> ignore
+    //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
     0
 

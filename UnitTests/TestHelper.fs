@@ -148,6 +148,56 @@ module TestHelper =
             if not (failedResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
                 failwith "Response failed in PollAndFailActivityTask"
 
+    let PollAndStartActivityTask (activity:ActivityType) =
+        if TestConfiguration.IsConnected then
+            use swf = TestConfiguration.GetSwfClient()
+
+            let pollRequest = new PollForActivityTaskRequest()
+            pollRequest.Domain <- TestConfiguration.TestDomain
+            pollRequest.Identity <- TestConfiguration.TestIdentity
+            pollRequest.TaskList <- TestConfiguration.TestTaskList
+
+            let pollResponse = swf.PollForActivityTask(pollRequest)
+            if not (pollResponse.ActivityTask.ActivityType <> null && pollResponse.ActivityTask.ActivityType.Name = activity.Name && pollResponse.ActivityTask.ActivityType.Version = activity.Version) then
+                failwith "Expected different activity in PollAndCompleteActivityTask"
+        
+            pollResponse.ActivityTask.TaskToken
+        else
+            "Offline TaskToken"
+
+    let SignalWorkflow (runId:string) (workflowId:string) (signalName:string) (input:string) =
+        if TestConfiguration.IsConnected then
+            use swf = TestConfiguration.GetSwfClient()
+
+            let signalRequest = new Amazon.SimpleWorkflow.Model.SignalWorkflowExecutionRequest();
+            signalRequest.Domain <- TestConfiguration.TestDomain
+            signalRequest.RunId <- runId
+            signalRequest.SignalName <- signalName
+            signalRequest.WorkflowId <- workflowId
+            signalRequest.Input <- input        
+
+            let signalResponse = swf.SignalWorkflowExecution(signalRequest)
+            if not (signalResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
+                failwith "Signal Workflow request failed in SignalWorkflow"
+
+
+    let TerminateWorkflow (runId:string) (workflowId:string) (reason:string) (details:string) =
+        if TestConfiguration.IsConnected then
+            use swf = new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2)
+
+            let terminateRequest = new TerminateWorkflowExecutionRequest();
+            terminateRequest.ChildPolicy <- ChildPolicy.TERMINATE
+            terminateRequest.Details <- details
+            terminateRequest.Domain <- TestConfiguration.TestDomain
+            terminateRequest.Reason <- reason
+            terminateRequest.RunId <- runId
+            terminateRequest.WorkflowId <- workflowId
+
+            let terminateResponse = swf.TerminateWorkflowExecution(terminateRequest)
+            if not (terminateResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
+                failwith "Terminate Workflow request failed in SignalWorkflow"
+
+
     let GenerateOfflineDecisionTaskCodeSnippet (runId:string) (workflowId:string) (subs:Map<string, string>) =
         // Generate Offline History
 

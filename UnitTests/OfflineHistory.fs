@@ -293,11 +293,9 @@ module OfflineHistory =
 
                     if event.EventType = EventType.DecisionTaskStarted then
                         StartedEventId := event.EventId
-
-                    elif event.EventType = EventType.DecisionTaskCompleted then
                         yield (!PreviousStartedEventId, !StartedEventId, (new ResizeArray<HistoryEvent>(events)))
                         PreviousStartedEventId := !StartedEventId
-
+                    
             }
 
         seq {
