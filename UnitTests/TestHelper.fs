@@ -165,6 +165,27 @@ module TestHelper =
         else
             "Offline TaskToken"
 
+    let HeartbeatAndCancelActivityTask (taskToken:string) (details:string)=
+        if TestConfiguration.IsConnected then
+            use swf = TestConfiguration.GetSwfClient()
+
+            // Send a heartbeat to check for cancel
+            let heartbeatRequest = new RecordActivityTaskHeartbeatRequest()
+            heartbeatRequest.TaskToken <- taskToken
+
+            let heartbeatResponse = swf.RecordActivityTaskHeartbeat(heartbeatRequest)
+            match heartbeatResponse.ActivityTaskStatus.CancelRequested with
+            | true ->
+                let canceledRequest = new Amazon.SimpleWorkflow.Model.RespondActivityTaskCanceledRequest()
+                canceledRequest.TaskToken <- taskToken
+                canceledRequest.Details <- details
+
+                let canceledResponse = swf.RespondActivityTaskCanceled(canceledRequest)
+                if not (canceledResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
+                    failwith "Canceled request failed in HeartbeatAndCancelActivityTask"
+            | false -> failwith "HeartbeatAndCancelActivityTask failed, expected canceled in heartbeat."
+
+
     let SignalWorkflow (runId:string) (workflowId:string) (signalName:string) (input:string) =
         if TestConfiguration.IsConnected then
             use swf = TestConfiguration.GetSwfClient()

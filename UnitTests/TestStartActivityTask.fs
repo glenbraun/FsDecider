@@ -105,7 +105,7 @@ module TestStartActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
+            // Start Activity Task
             let! result = FlowSharp.StartActivityTask (
                             TestConfiguration.TestActivityType, 
                             input=activityInput,
@@ -197,7 +197,7 @@ module TestStartActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
+            // Start Activity Task
             let! result = FlowSharp.StartActivityTask (
                             TestConfiguration.TestActivityType, 
                             input=activityInput,
@@ -296,7 +296,7 @@ module TestStartActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
+            // Start Activity Task
             let! result = FlowSharp.StartActivityTask (
                             activityType, 
                             input=activityInput,

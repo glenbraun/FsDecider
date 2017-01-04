@@ -506,7 +506,6 @@ type Builder (DecisionTask:DecisionTask) =
         let bindingIdString = bindingId.ToString()
         let mutable scheduledEventId = 0L
         let mutable startedEventId = 0L
-        let mutable activityId : string = null
         let mutable latestCancelRequestedEventId = 0L
             
         let setCommonProperties (h:HistoryEvent) =
@@ -523,7 +522,6 @@ type Builder (DecisionTask:DecisionTask) =
                 setCommonProperties(hev)
                 combinedHistory.ActivityTaskScheduledEventAttributes <- hev.ActivityTaskScheduledEventAttributes
                 scheduledEventId <- hev.EventId
-                activityId <- hev.ActivityTaskScheduledEventAttributes.ActivityId
 
             // ActivityTaskStarted
             elif hev.EventType = EventType.ActivityTaskStarted && hev.ActivityTaskStartedEventAttributes.ScheduledEventId = scheduledEventId then
@@ -883,24 +881,17 @@ type Builder (DecisionTask:DecisionTask) =
             | h when h.ActivityTaskCancelRequestedEventAttributes <> null ->
                 f(RequestCancelActivityTaskResult.CancelRequested)
 
-            // Task is scheduled
-            | h when h.ActivityTaskScheduledEventAttributes <> null && 
-                        h.ActivityTaskScheduledEventAttributes.ActivityType.Name = activity.Name && 
-                        h.ActivityTaskScheduledEventAttributes.ActivityType.Version = activity.Version ->
-                    
+            // Request Cancel
+            |_ ->
                 blockFlag <- true
 
-                // If started, it can be canceled
-                if h.ActivityTaskStartedEventAttributes <> null then
-                    let d = new Decision()
-                    d.DecisionType <- DecisionType.RequestCancelActivityTask
-                    d.RequestCancelActivityTaskDecisionAttributes <- new RequestCancelActivityTaskDecisionAttributes()
-                    d.RequestCancelActivityTaskDecisionAttributes.ActivityId <- h.ActivityTaskScheduledEventAttributes.ActivityId
-                    response.Decisions.Add(d)
+                let d = new Decision()
+                d.DecisionType <- DecisionType.RequestCancelActivityTask
+                d.RequestCancelActivityTaskDecisionAttributes <- new RequestCancelActivityTaskDecisionAttributes()
+                d.RequestCancelActivityTaskDecisionAttributes.ActivityId <- activityId
+                response.Decisions.Add(d)
 
-                response
-
-            | _ -> failwith "error"
+                response                    
 
         match result with 
         // If this activity is being scheduled then block. Return the decision to schedule the activity and pick up here next decistion task
