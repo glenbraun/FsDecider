@@ -39,10 +39,18 @@ let tests =
             ]
 
             testList "StartActivityTask" [
-                testCase "Scheduling"        <| TestStartActivityTask.``Start Activity Task with result of Scheduling``
+                testCase "Scheduling"       <| TestStartActivityTask.``Start Activity Task with result of Scheduling``
                 testCase "Scheduled"        <| TestStartActivityTask.``Start Activity Task with result of Scheduled``
-                testCase "Started"        <| TestStartActivityTask.``Start Activity Task with result of Started``
-                testCase "ScheduleFailed"        <| TestStartActivityTask.``Start Activity Task with Schedule Failure``
+                testCase "Started"          <| TestStartActivityTask.``Start Activity Task with result of Started``
+                testCase "ScheduleFailed"   <| TestStartActivityTask.``Start Activity Task with Schedule Failure``
+            ]
+            testList "WaitForActivityTask" [
+                testCase "Completed"        <| TestWaitForActivityTask.``Wait For Activity Task with One Completed Activity Task``
+                testCase "Canceled"         <| TestWaitForActivityTask.``Wait For Activity Task with One Canceled Activity Task``
+                testCase "Failed"           <| TestWaitForActivityTask.``Wait For Activity Task with One Failed Activity Task``
+                testCase "TimedOut"         <| TestWaitForActivityTask.``Wait For Activity Task with One Timed Out Activity Task``
+                testCase "ScheduleFailed"   <| TestWaitForActivityTask.``Wait For Activity Task with Activity Task Schedule Failure``
+
             ]
         ]
 
