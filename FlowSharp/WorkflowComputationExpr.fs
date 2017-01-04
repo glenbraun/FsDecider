@@ -81,10 +81,10 @@ type WaitForChildWorkflowExecutionResult =
     | Failed of ChildWorkflowExecutionFailedEventAttributes
     | Terminated of ChildWorkflowExecutionTerminatedEventAttributes
 
-type ExecuteLambdaFunctionAction =
+type StartAndWaitForLambdaFunctionAction =
     | Attributes of ScheduleLambdaFunctionDecisionAttributes
 
-type ExecuteLambdaFunctionResult =
+type StartAndWaitForLambdaFunctionResult =
     | ScheduleFailed of ScheduleLambdaFunctionFailedEventAttributes
     | StartFailed of StartLambdaFunctionFailedEventAttributes
     | Completed of LambdaFunctionCompletedEventAttributes
@@ -168,14 +168,14 @@ type FlowSharp =
     static member RequestCancelActivityTask(start:StartActivityTaskResult) =
         RequestCancelActivityTaskAction.StartResult(start)
 
-    static member ExecuteLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:uint32) =
+    static member StartAndWaitForLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:uint32) =
         let attr = new ScheduleLambdaFunctionDecisionAttributes()
         attr.Id <- id
         attr.Input <- if input.IsSome then input.Value else null
         attr.StartToCloseTimeout <- if startToCloseTimeout.IsSome then startToCloseTimeout.Value.ToString() else null
         attr.Name <- name
 
-        ExecuteLambdaFunctionAction.Attributes(attr)
+        StartAndWaitForLambdaFunctionAction.Attributes(attr)
 
     static member StartTimer(timerId:string, startToFireTimeout:uint32) =
         let attr = new StartTimerDecisionAttributes()
@@ -907,33 +907,33 @@ type Builder (DecisionTask:DecisionTask) =
         | StartActivityTaskResult.Started(a, activityType, control, activityId:string) ->
             bindWithHistory activityType control activityId
 
-    // Execute Lambda Function
-    member this.Bind(ExecuteLambdaFunctionAction.Attributes(attr), f:(ExecuteLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
+    // Start and Wait for Lambda Function
+    member this.Bind(StartAndWaitForLambdaFunctionAction.Attributes(attr), f:(StartAndWaitForLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
 
         let combinedHistory = FindLambdaFunctionHistory DecisionTask (attr.Id) (attr.Name)
 
         match (combinedHistory) with
-        // Lambda Function Completed
-        | h when h.EventType = EventType.LambdaFunctionCompleted -> 
-            f(ExecuteLambdaFunctionResult.Completed(h.LambdaFunctionCompletedEventAttributes))
-
-        // Lambda Function TimedOut
-        | h when h.EventType = EventType.LambdaFunctionTimedOut ->
-            f(ExecuteLambdaFunctionResult.TimedOut(h.LambdaFunctionTimedOutEventAttributes))
-
-        // Lambda Function Failed
-        | h when h.EventType = EventType.LambdaFunctionFailed ->
-            f(ExecuteLambdaFunctionResult.Failed(h.LambdaFunctionFailedEventAttributes))
-
         // ScheduleLambdaFunctionFailed
         | h when h.ScheduleLambdaFunctionFailedEventAttributes <> null && 
                     h.ScheduleLambdaFunctionFailedEventAttributes.Id = attr.Id && 
                     h.ScheduleLambdaFunctionFailedEventAttributes.Name = attr.Name -> 
-            f(ExecuteLambdaFunctionResult.ScheduleFailed(h.ScheduleLambdaFunctionFailedEventAttributes))
+            f(StartAndWaitForLambdaFunctionResult.ScheduleFailed(h.ScheduleLambdaFunctionFailedEventAttributes))
 
         // StartLambdaFunctionFailed
         | h when h.StartLambdaFunctionFailedEventAttributes <> null -> 
-            f(ExecuteLambdaFunctionResult.StartFailed(h.StartLambdaFunctionFailedEventAttributes))
+            f(StartAndWaitForLambdaFunctionResult.StartFailed(h.StartLambdaFunctionFailedEventAttributes))
+
+        // Lambda Function Completed
+        | h when h.EventType = EventType.LambdaFunctionCompleted -> 
+            f(StartAndWaitForLambdaFunctionResult.Completed(h.LambdaFunctionCompletedEventAttributes))
+
+        // Lambda Function TimedOut
+        | h when h.EventType = EventType.LambdaFunctionTimedOut ->
+            f(StartAndWaitForLambdaFunctionResult.TimedOut(h.LambdaFunctionTimedOutEventAttributes))
+
+        // Lambda Function Failed
+        | h when h.EventType = EventType.LambdaFunctionFailed ->
+            f(StartAndWaitForLambdaFunctionResult.Failed(h.LambdaFunctionFailedEventAttributes))
 
         // Not Scheduled
         | h when h.ScheduleLambdaFunctionFailedEventAttributes = null ->

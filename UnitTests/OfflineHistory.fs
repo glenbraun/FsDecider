@@ -331,7 +331,7 @@ module OfflineHistory =
             match value with
             | _ when subs.ContainsKey(attrname) ->                             fprintf tw "%s=%s" name (subs.[attrname])
             | _ when subs.ContainsKey(name) ->                                  fprintf tw "%s=%s" name (subs.[name])
-            | :? string as s ->                                                 fprintf tw "%s=\"%s\"" name s
+            | :? string as s ->                                                 fprintf tw "%s=\"%s\"" name (s.Replace("\"", "\\\""))
             | :? int64 as eventId ->                                            fprintf tw "%s=%dL" name eventId
             | :? ActivityType as at ->                                          fprintf tw "%s=ActivityType(Name=\"%s\", Version=\"%s\")" name (at.Name) (at.Version)
             | :? WorkflowType as wt ->                                          fprintf tw "%s=WorkflowType(Name=\"%s\", Version=\"%s\")" name (wt.Name) (wt.Version)

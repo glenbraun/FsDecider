@@ -14,6 +14,9 @@ type TestConfiguration() =
     static member val public TestTaskList = new TaskList(Name="main") with get, set
     static member val public TestWorkflowType = new WorkflowType(Name="Workflow1", Version="1") with get, set
     static member val public TestLambdaRole = "arn:aws:iam::538386600280:role/swf-lambda" with get, set
+    static member val public TestLambdaName = "SwfLambdaTest"
+    static member val public TestLambdaInput = "\"Test lambda input\""
+    static member val public TestLambdaResult = "\"Hello from Lambda\""
     static member val public TestActivityType = new ActivityType(Name = "Activity1", Version = "2") with get, set
     static member val public TwentyMinuteTimeout = uint32 ((TimeSpan.FromMinutes(20.0)).TotalSeconds)
 

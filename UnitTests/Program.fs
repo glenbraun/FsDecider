@@ -12,8 +12,8 @@ open Fuchu
 // StartAndWaitForActivityTask (done)
 // StartActivityTask (done)
 // WaitForActivityTask (done)
-// RequestCancelActivityTask
-// ExecuteLambdaFunction
+// RequestCancelActivityTask (done)
+// StartAndWaitForLambdaFunction (done)
 // StartTimer
 // CancelTimer
 // RecordMarker
@@ -62,6 +62,14 @@ let tests =
                 testCase "Canceled"             <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Canceled``
                 testCase "TimedOut"             <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of TimedOut``
                 testCase "Failed"               <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Failed``
+            ]
+
+            testList "StartAndWaitForLambdaFunction" [
+                testCase "ScheduleFailed"       <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of ScheduleFailed``
+                testCase "StartFailed"          <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of StartFailed``
+                testCase "Completed"            <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of Completed``
+                testCase "Failed"               <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of Failed``
+                testCase "TimedOut"             <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of TimedOut``
             ]
         ]
 

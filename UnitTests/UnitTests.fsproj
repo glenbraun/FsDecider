@@ -63,6 +63,7 @@
     <Compile Include="TestStartActivityTask.fs" />
     <Compile Include="TestWaitForActivityTask.fs" />
     <Compile Include="TestRequestCancelActivityTask.fs" />
+    <Compile Include="TestStartAndWaitForLambdaFunction.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
