@@ -109,3 +109,27 @@ module TestHelper =
         else 
             // nothing to do when offline
             ()
+
+    let GenerateOfflineDecisionTaskCodeSnippet (runId:string) (workflowId:string) (subs:Map<string, string>) =
+        // Generate Offline History
+
+        if TestConfiguration.GenerateOfflineHistory then
+            if TestConfiguration.IsConnected then
+                use swf = TestConfiguration.GetSwfClient()
+
+                let request = new GetWorkflowExecutionHistoryRequest
+                                (
+                                    Domain = TestConfiguration.TestDomain,
+                                    Execution = new WorkflowExecution(RunId=runId, WorkflowId=workflowId)
+                                )
+
+                let response = swf.GetWorkflowExecutionHistory(request)
+
+                use sw = new System.IO.StringWriter()
+                OfflineHistory.GenerateOfflineDecisionTaskCodeSnippet sw (response.History.Events) (Some(subs))
+                sw.Close()
+                        
+                System.Diagnostics.Debug.WriteLine(sw.ToString())
+            else
+                System.Diagnostics.Debug.WriteLine("GenerateOfflineDecisionTaskCodeSnippet skipped because TestConfiguration.IsConnected is false.")
+

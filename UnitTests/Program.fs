@@ -19,7 +19,8 @@ let tests =
 
 [<EntryPoint>]
 let main argv = 
-    TestConfiguration.IsConnected <- true
+    TestConfiguration.GenerateOfflineHistory <- true
+    TestConfiguration.IsConnected <- false
 
     run tests |> ignore
     0

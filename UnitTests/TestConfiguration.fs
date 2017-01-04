@@ -7,6 +7,7 @@ open Amazon.SimpleWorkflow.Model
 
 type TestConfiguration() =
     static member val public IsConnected = false with get, set
+    static member val public GenerateOfflineHistory = false with get, set
     static member val public GetSwfClient = fun () -> new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2) with get, set
     static member val public TestDomain = "wo_admin" with get, set
     static member val public TestIdentity = "DeciderTests" with get, set

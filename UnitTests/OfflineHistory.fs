@@ -312,19 +312,11 @@ module OfflineHistory =
                 yield newdt
         }
 
-    let GenerateOfflineDecisionTaskCodeSnippet (tw:System.IO.TextWriter) (info:WorkflowExecutionInfo) (history:History) =
-
-        let GenWorkflowType (tw:TextWriter) =
-            fprintf tw """
-let workflowType = WorkflowType(
-                        Name="%s",
-                        Version="%s")""" (info.WorkflowType.Name) (info.WorkflowType.Version)
-
-        let GenWorkflowExecution (tw:TextWriter) =
-            fprintf tw """
-let workflowExecution = WorkflowExecution(
-                            RunId="%s",
-                            WorkflowId = "%s")""" (info.Execution.RunId) (info.Execution.WorkflowId)
+    let GenerateOfflineDecisionTaskCodeSnippet (tw:System.IO.TextWriter) (events:ResizeArray<HistoryEvent>) (substitutions:Map<string, string> option) =
+        let subs =
+            match substitutions with
+            | Some(m) -> m
+            | None -> Map.empty<string, string>
 
         let PropertyValueIsEmpty ((name:string), (value:System.Object)) =
             match value with
@@ -333,9 +325,14 @@ let workflowExecution = WorkflowExecution(
             | :? ResizeArray<string> as taglist when name = "TagList" -> taglist.Count = 0
             | _ -> value = null
 
-        let GenAttributePropertyValueAssignment (tw:TextWriter) (name:string, value:System.Object) =
+        let GenAttributePropertyValueAssignment (tw:TextWriter) (event:HistoryEvent, name:string, value:System.Object) =
             // name=value (value with correct F# syntax)
+
+            let attrname = event.EventType.ToString() + "EventAttributes." + name
+
             match value with
+            | _ when subs.ContainsKey(attrname) ->                             fprintf tw "%s=%s" name (subs.[attrname])
+            | _ when subs.ContainsKey(name) ->                                  fprintf tw "%s=%s" name (subs.[name])
             | :? string as s ->                                                 fprintf tw "%s=\"%s\"" name s
             | :? int64 as eventId ->                                            fprintf tw "%s=%dL" name eventId
             | :? ActivityType as at ->                                          fprintf tw "%s=ActivityType(Name=\"%s\", Version=\"%s\")" name (at.Name) (at.Version)
@@ -371,20 +368,19 @@ let workflowExecution = WorkflowExecution(
         let GenOfflineHistoryEvent (tw:System.IO.TextWriter) (event:HistoryEvent) =
             // OfflineHistoryEvent function call
             fprintf tw """
-                  |> OfflineHistoryEvent (        // EventId = %d""" (event.EventId)
+                          |> OfflineHistoryEvent (        // EventId = %d""" (event.EventId)
             
             // Attribute Constructor
             fprintf tw """
-                      %sEventAttributes(""" (event.EventType.ToString())
+                              %sEventAttributes(""" (event.EventType.ToString())
 
             let rec GenAttributeProperties epv =
                 match epv with
-                | h :: t -> 
-                        fprintf tw """
-                          %a""" GenAttributePropertyValueAssignment h
+                | (n, v) :: t -> 
+                        fprintf tw "%a" GenAttributePropertyValueAssignment (event, n, v)
 
                         if t <> [] then
-                            tw.Write(",")
+                            tw.Write(", ")
 
                         GenAttributeProperties t
                 | [] -> 
@@ -408,22 +404,15 @@ let workflowExecution = WorkflowExecution(
                 List.filter (fun nvp -> not (PropertyValueIsEmpty nvp))
             
             GenAttributeProperties ThisEventAttributesNonEmptyProperties
-            tw.WriteLine(")")
-
-        // Write the WorkflowType
-        fprintfn tw "// WorkflowType%t" GenWorkflowType 
-
-        // Write the WorkflowExecution
-        fprintfn tw "// WorkflowExecution%t" GenWorkflowExecution
+            tw.Write(")")
 
         // Write the OfflineDecisionTask
-        fprintf tw """// OfflineDecisionTask
-let odt = OfflineDecisionTask workflowType workflowExecution"""
+        fprintf tw """
+        // OfflineDecisionTask
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))""" 
 
         // Write History Events
-        history.Events |>
+        events |>
         Seq.iter (fun event -> GenOfflineHistoryEvent tw event)
-
-        tw.WriteLine("odt()")
 
 

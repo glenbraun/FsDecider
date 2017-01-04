@@ -13,6 +13,17 @@ open NUnit.Framework
 open FsUnit
 
 module TestStartAndWaitForActivityTask =
+    let private OfflineHistorySubstitutions =  
+        Map.empty<string, string>
+        |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
+        |> Map.add "RunId" "\"Offline RunId\""
+        |> Map.add "WorkflowId" "workflowId"
+        |> Map.add "TaskList" "TestConfiguration.TestTaskList"
+        |> Map.add "Identity" "TestConfiguration.TestIdentity"
+        |> Map.add "ActivityId" "activityId"
+        |> Map.add "ActivityType" "TestConfiguration.TestActivityType"
+        |> Map.add "ActivityTaskScheduledEventAttributes.Input" "activityInput"
+
 
     let ``Start And Wait For Activity Task with One Completed Activity Task``() =
         let workflowId = "Start And Wait For Activity Task with One Completed Activity Task"
@@ -36,80 +47,33 @@ module TestStartAndWaitForActivityTask =
 
             match result with
             | WaitForActivityTaskResult.Completed(taskresult) -> return "TEST PASS"
-            | _ -> ()
-            return "TEST FAIL"            
+            | _ -> return "TEST FAIL"                        
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (WorkflowType(Name="Workflow1", Version="1")) (WorkflowExecution(RunId="23bCyBdBGdLPKwjr92SnGyQJKeA8O9C9mXg8vpWTKrlQg=", WorkflowId = workflowId))
-                            |> OfflineHistoryEvent (        // EventId = 1
-                                WorkflowExecutionStartedEventAttributes(
-                                    ChildPolicy=ChildPolicy.TERMINATE,
-                                    ExecutionStartToCloseTimeout="1200",
-                                    Input="Workflow input, 1/2/2017 8:06:05 PM",
-                                    LambdaRole="arn:aws:iam::538386600280:role/swf-lambda",
-                                    TaskList=TaskList(Name="main"),
-                                    TaskStartToCloseTimeout="1200",
-                                    WorkflowType=WorkflowType(Name="Workflow1", Version="1")))
-
-                            |> OfflineHistoryEvent (        // EventId = 2
-                                DecisionTaskScheduledEventAttributes(
-                                    StartToCloseTimeout="1200",
-                                    TaskList=TaskList(Name="main")))
-
-                            |> OfflineHistoryEvent (        // EventId = 3
-                                DecisionTaskStartedEventAttributes(
-                                    Identity="DeciderTests",
-                                    ScheduledEventId=2L))
-
-                            |> OfflineHistoryEvent (        // EventId = 4
-                                DecisionTaskCompletedEventAttributes(
-                                    ScheduledEventId=2L,
-                                    StartedEventId=3L))
-
-                            |> OfflineHistoryEvent (        // EventId = 5
-                                ActivityTaskScheduledEventAttributes(
-                                    ActivityId="772a9e72-dbb3-427d-a59a-ed516e3ecb74",
-                                    ActivityType=ActivityType(Name="Activity1", Version="2"),
-                                    Control="1",
-                                    DecisionTaskCompletedEventId=4L,
-                                    HeartbeatTimeout="1200",
-                                    Input="Activity1 input, 1/2/2017 8:06:05 PM",
-                                    ScheduleToCloseTimeout="1200",
-                                    ScheduleToStartTimeout="1200",
-                                    StartToCloseTimeout="1200",
-                                    TaskList=TaskList(Name="main")))
-
-                            |> OfflineHistoryEvent (        // EventId = 6
-                                ActivityTaskStartedEventAttributes(
-                                    Identity="DeciderTests",
-                                    ScheduledEventId=5L))
-
-                            |> OfflineHistoryEvent (        // EventId = 7
-                                ActivityTaskCompletedEventAttributes(
-                                    Result="Activity1 result, 1/2/2017 8:06:05 PM",
-                                    ScheduledEventId=5L,
-                                    StartedEventId=6L))
-
-                            |> OfflineHistoryEvent (        // EventId = 8
-                                DecisionTaskScheduledEventAttributes(
-                                    StartToCloseTimeout="1200",
-                                    TaskList=TaskList(Name="main")))
-
-                            |> OfflineHistoryEvent (        // EventId = 9
-                                DecisionTaskStartedEventAttributes(
-                                    Identity="DeciderTests",
-                                    ScheduledEventId=8L))
-
-                            |> OfflineHistoryEvent (        // EventId = 10
-                                DecisionTaskCompletedEventAttributes(
-                                    ScheduledEventId=8L,
-                                    StartedEventId=9L))
-
-                            |> OfflineHistoryEvent (        // EventId = 11
-                                WorkflowExecutionCompletedEventAttributes(
-                                    DecisionTaskCompletedEventId=10L,
-                                    Result="Activity1 result, 1/2/2017 8:06:05 PM"))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+                          |> OfflineHistoryEvent (        // EventId = 1
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole="arn:aws:iam::538386600280:role/swf-lambda", TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                          |> OfflineHistoryEvent (        // EventId = 2
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                          |> OfflineHistoryEvent (        // EventId = 3
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                          |> OfflineHistoryEvent (        // EventId = 4
+                              DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
+                          |> OfflineHistoryEvent (        // EventId = 5
+                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                          |> OfflineHistoryEvent (        // EventId = 6
+                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
+                          |> OfflineHistoryEvent (        // EventId = 7
+                              ActivityTaskCompletedEventAttributes(ScheduledEventId=5L, StartedEventId=6L))
+                          |> OfflineHistoryEvent (        // EventId = 8
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                          |> OfflineHistoryEvent (        // EventId = 9
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=8L))
+                          |> OfflineHistoryEvent (        // EventId = 10
+                              DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=9L))
+                          |> OfflineHistoryEvent (        // EventId = 11
+                              WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=10L, Result="TEST PASS"))
 
         // Start the workflow
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None
@@ -139,7 +103,8 @@ module TestStartAndWaitForActivityTask =
                                                         |> should equal "TEST PASS"
 
                 TestHelper.RespondDecisionTaskCompleted resp
-
             | _ -> ()
 
+        // Generate Offline History
+        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
         
