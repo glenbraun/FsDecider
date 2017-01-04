@@ -44,10 +44,10 @@ type WaitForActivityTaskAction =
 
 type WaitForActivityTaskResult =
     | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
-    | Completed of Result:string
-    | Canceled of Details:string
-    | TimedOut of TimeoutType:ActivityTaskTimeoutType * Details:string
-    | Failed of Reason:string * Details:string
+    | Completed of ActivityTaskCompletedEventAttributes
+    | Canceled of ActivityTaskCanceledEventAttributes
+    | TimedOut of ActivityTaskTimedOutEventAttributes
+    | Failed of ActivityTaskFailedEventAttributes
 
 type RequestCancelActivityTaskAction =
     | StartResult of StartActivityTaskResult
@@ -730,19 +730,19 @@ type Builder (DecisionTask:DecisionTask) =
         match (combinedHistory) with
         // Completed
         | h when h.EventType = EventType.ActivityTaskCompleted -> 
-            f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes.Result))
+            f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes))
 
         // TimedOut
         | h when h.EventType = EventType.ActivityTaskTimedOut ->
-            f(WaitForActivityTaskResult.TimedOut(TimeoutType=h.ActivityTaskTimedOutEventAttributes.TimeoutType, Details=h.ActivityTaskTimedOutEventAttributes.Details))
+            f(WaitForActivityTaskResult.TimedOut(h.ActivityTaskTimedOutEventAttributes))
 
         // Canceled
         | h when h.EventType = EventType.ActivityTaskCanceled ->
-            f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes.Details))
+            f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes))
 
         // Failed
         | h when h.EventType = EventType.ActivityTaskFailed ->
-            f(WaitForActivityTaskResult.Failed(Reason=h.ActivityTaskFailedEventAttributes.Reason, Details=h.ActivityTaskFailedEventAttributes.Details))
+            f(WaitForActivityTaskResult.Failed(h.ActivityTaskFailedEventAttributes))
 
         // ScheduleActivityTaskFailed
         | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
@@ -808,19 +808,19 @@ type Builder (DecisionTask:DecisionTask) =
             match (combinedHistory) with
             // Completed
             | h when h.EventType = EventType.ActivityTaskCompleted -> 
-                f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes.Result))
+                f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes))
 
             // TimedOut
             | h when h.EventType = EventType.ActivityTaskTimedOut ->
-                f(WaitForActivityTaskResult.TimedOut(TimeoutType=h.ActivityTaskTimedOutEventAttributes.TimeoutType, Details=h.ActivityTaskTimedOutEventAttributes.Details))
+                f(WaitForActivityTaskResult.TimedOut(h.ActivityTaskTimedOutEventAttributes))
 
             // Canceled
             | h when h.EventType = EventType.ActivityTaskCanceled ->
-                f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes.Details))
+                f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes))
 
             // Failed
             | h when h.EventType = EventType.ActivityTaskFailed ->
-                f(WaitForActivityTaskResult.Failed(Reason=h.ActivityTaskFailedEventAttributes.Reason, Details=h.ActivityTaskFailedEventAttributes.Details))
+                f(WaitForActivityTaskResult.Failed(h.ActivityTaskFailedEventAttributes))
 
             // ScheduleActivityTaskFailed
             | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 

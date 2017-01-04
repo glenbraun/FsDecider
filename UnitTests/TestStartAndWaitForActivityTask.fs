@@ -49,7 +49,7 @@ module TestStartAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.Completed(taskResult) when taskResult = activityResult -> return "TEST PASS"
+            | WaitForActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -133,7 +133,7 @@ module TestStartAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.Canceled(details) when details = activityDetails -> return "TEST PASS"
+            | WaitForActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -218,7 +218,7 @@ module TestStartAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.Failed(reason, details) when reason = activityReason && details = activityDetails -> return "TEST PASS"
+            | WaitForActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -302,8 +302,10 @@ module TestStartAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.TimedOut(toType, details) when toType = ActivityTaskTimeoutType.SCHEDULE_TO_START -> return "TEST PASS"
-            | _ -> return "TEST FAIL"                        
+            | WaitForActivityTaskResult.TimedOut(attr) 
+                when attr.TimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START &&
+                     attr.Details = null -> return "TEST PASS"
+            | _ -> return "TEST FAIL"
         }
 
         // OfflineDecisionTask

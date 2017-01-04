@@ -9,6 +9,23 @@ open Amazon.SimpleWorkflow.Model
 open Fuchu
 
       
+// StartAndWaitForActivityTask (done)
+// StartActivityTask 
+// WaitForActivityTask
+// RequestCancelActivityTask
+// ExecuteLambdaFunction
+// StartTimer
+// CancelTimer
+// RecordMarker
+// StartChildWorkflowExecution
+// CompleteChildWorkflowExecution
+// SignalExternalWorkflowExecution
+// RequestCancelExternalWorkflowExecution
+// SignalReceivedSinceMarker
+// SignalReceived
+// CheckForWorkflowExecutionCancelRequested
+// GetWorkflowExecutionInput
+
 let tests = 
     testList "Primary Decider Actions" [
             testList "StartAndWaitForActivityTask" [
@@ -19,6 +36,8 @@ let tests =
                 testCase "ScheduleFailed"   <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with Activity Task Schedule Failure``
             ]
         ]
+
+
 
 [<EntryPoint>]
 let main argv = 
