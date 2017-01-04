@@ -31,7 +31,7 @@ type StartActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes
 
 type StartActivityTaskResult =
-    | ScheduleFailed of Cause:ScheduleActivityTaskFailedCause
+    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
     | Scheduling of Activity:ActivityType * ActivityId:string
     | Scheduled of Activity:ActivityType * Control:string * ActivityId:string
     | Started of Activity:ActivityType * Control:string * ActivityId:string
@@ -43,7 +43,7 @@ type WaitForActivityTaskAction =
     | StartResult of StartActivityTaskResult
 
 type WaitForActivityTaskResult =
-    | ScheduleFailed of Cause:ScheduleActivityTaskFailedCause
+    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
     | Completed of Result:string
     | Canceled of Details:string
     | TimedOut of TimeoutType:ActivityTaskTimeoutType * Details:string
@@ -53,7 +53,7 @@ type RequestCancelActivityTaskAction =
     | StartResult of StartActivityTaskResult
 
 type RequestCancelActivityTaskResult =
-    | ScheduleFailed of Cause:ScheduleActivityTaskFailedCause
+    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
     | RequestCancelFailed of ActivityId:string * Cause:RequestCancelActivityTaskFailedCause
     | CancelRequested
     | Completed of Result:string
@@ -296,7 +296,7 @@ type Builder (DecisionTask:DecisionTask) =
 
     let FindMarkerHistory (decisionTask:DecisionTask) (markerName:string) (details:string) =
         let combinedHistory = new HistoryEvent()
-        let mutable decisionTaskCompletedEventId = -1L
+        let mutable decisionTaskCompletedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -319,9 +319,9 @@ type Builder (DecisionTask:DecisionTask) =
     let FindChildWorkflowExecutionHistory (decisionTask:DecisionTask) (bindingId:int) (workflowType:WorkflowType) (workflowId:string) =
         let combinedHistory = new HistoryEvent()
         let bindingIdString = bindingId.ToString()
-        let mutable decisionTaskCompletedEventId = -1L
-        let mutable initiatedEventId = -1L
-        let mutable startedEventId = -1L
+        let mutable decisionTaskCompletedEventId = 0L
+        let mutable initiatedEventId = 0L
+        let mutable startedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -419,7 +419,7 @@ type Builder (DecisionTask:DecisionTask) =
     let FindRequestCancelExternalWorkflowExecutionHistory (decisionTask:DecisionTask) (bindingId:int) (workflowId:string) =
         let combinedHistory = new HistoryEvent()
         let bindingIdString = bindingId.ToString()
-        let mutable initiatedEventId = -1L
+        let mutable initiatedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -453,7 +453,7 @@ type Builder (DecisionTask:DecisionTask) =
     let FindSignalExternalWorkflowExecutionHistory (decisionTask:DecisionTask) (bindingId:int) (signalName:string) (workflowId:string) =
         let combinedHistory = new HistoryEvent()
         let bindingIdString = bindingId.ToString()
-        let mutable decisionTaskCompletedEventId = -1L
+        let mutable decisionTaskCompletedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -480,7 +480,7 @@ type Builder (DecisionTask:DecisionTask) =
         
     let FindContinueAsNewWorkflowExecutionHistory (decisionTask:DecisionTask) =
         let combinedHistory = new HistoryEvent()
-        let mutable decisionTaskCompletedEventId = -1L
+        let mutable decisionTaskCompletedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -504,10 +504,10 @@ type Builder (DecisionTask:DecisionTask) =
     let FindActivityTaskHistory (decisionTask:DecisionTask) (bindingId:int) (activityId:string) =
         let combinedHistory = new HistoryEvent()
         let bindingIdString = bindingId.ToString()
-        let mutable scheduledEventId = -1L
-        let mutable startedEventId = -1L
+        let mutable scheduledEventId = 0L
+        let mutable startedEventId = 0L
         let mutable activityId : string = null
-        let mutable latestCancelRequestedEventId = -1L
+        let mutable latestCancelRequestedEventId = 0L
             
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -571,8 +571,8 @@ type Builder (DecisionTask:DecisionTask) =
     
     let FindLambdaFunctionHistory (decisionTask:DecisionTask) (id:string) (name:string) =
         let combinedHistory = new HistoryEvent()
-        let mutable scheduledEventId = -1L
-        let mutable startedEventId = -1L
+        let mutable scheduledEventId = 0L
+        let mutable startedEventId = 0L
             
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -748,7 +748,7 @@ type Builder (DecisionTask:DecisionTask) =
         | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Name = attr.ActivityType.Name && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Version = attr.ActivityType.Version ->
-            f(WaitForActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
+            f(WaitForActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes))
 
         // Not Scheduled
         | h when h.ActivityTaskScheduledEventAttributes = null ->
@@ -776,7 +776,7 @@ type Builder (DecisionTask:DecisionTask) =
         | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Name = attr.ActivityType.Name && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Version = attr.ActivityType.Version ->
-            f(StartActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
+            f(StartActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes))
 
         // Started
         | h when h.ActivityTaskStartedEventAttributes <> null && h.ActivityTaskScheduledEventAttributes <> null->
@@ -826,7 +826,7 @@ type Builder (DecisionTask:DecisionTask) =
             | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
                         h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Name = activity.Name && 
                         h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Version = activity.Version ->
-                f(WaitForActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
+                f(WaitForActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes))
 
             | _ -> 
                 // This activity is still running, continue blocking
@@ -840,7 +840,7 @@ type Builder (DecisionTask:DecisionTask) =
             response
 
         // The StartActivityResult checks for scheduling failure so no need to check history again.
-        | StartActivityTaskResult.ScheduleFailed(cause) -> f(WaitForActivityTaskResult.ScheduleFailed(cause))
+        | StartActivityTaskResult.ScheduleFailed(a) -> f(WaitForActivityTaskResult.ScheduleFailed(a))
 
         | StartActivityTaskResult.Scheduled(activity:ActivityType, control:string, (activityId:string)) ->
             bindWithHistory activity control activityId
@@ -857,7 +857,7 @@ type Builder (DecisionTask:DecisionTask) =
             | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
                         h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Name = activity.Name && 
                         h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Version = activity.Version ->
-                f(RequestCancelActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes.Cause))
+                f(RequestCancelActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes))
 
             // Canceled
             | h when h.ActivityTaskCanceledEventAttributes <> null ->
@@ -909,7 +909,7 @@ type Builder (DecisionTask:DecisionTask) =
             response
 
         // The StartActivityResult checks for scheduling failure so no need to check history again.
-        | StartActivityTaskResult.ScheduleFailed(cause) -> f(RequestCancelActivityTaskResult.ScheduleFailed(cause))
+        | StartActivityTaskResult.ScheduleFailed(a) -> f(RequestCancelActivityTaskResult.ScheduleFailed(a))
 
         | StartActivityTaskResult.Scheduled(activity:ActivityType, control:string, activityId:string) ->
             bindWithHistory activity control activityId

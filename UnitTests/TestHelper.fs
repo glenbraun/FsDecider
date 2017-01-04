@@ -47,7 +47,6 @@ module TestHelper =
         }
 
     let RespondDecisionTaskCompleted (request:RespondDecisionTaskCompletedRequest) =
-        
         if TestConfiguration.IsConnected then
             use swf = TestConfiguration.GetSwfClient()
 
@@ -55,9 +54,6 @@ module TestHelper =
 
             if not (response.HttpStatusCode = System.Net.HttpStatusCode.OK) then
                 failwith "Decision Task Completed request failed in PollAndCompleteActivityTask"
-        else
-            // nothing to do when offline
-            ()
 
     let StartWorkflowExecutionOnTaskList (workflow:WorkflowType) (workflowId:string) (taskList:TaskList) (input:string option) = 
         if TestConfiguration.IsConnected then
@@ -106,9 +102,51 @@ module TestHelper =
             let completedResponse = swf.RespondActivityTaskCompleted(completedRequest)
             if not (completedResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
                 failwith "Completed request failed in PollAndCompleteActivityTask"
-        else 
-            // nothing to do when offline
-            ()
+
+    let  PollAndCancelActivityTask (activity:ActivityType) (details:string option) =
+        if TestConfiguration.IsConnected then
+            use swf = TestConfiguration.GetSwfClient()
+
+            let pollRequest = new PollForActivityTaskRequest();
+            pollRequest.Domain <- TestConfiguration.TestDomain
+            pollRequest.Identity <- TestConfiguration.TestIdentity
+            pollRequest.TaskList <- TestConfiguration.TestTaskList
+
+            let pollResponse = swf.PollForActivityTask(pollRequest)
+
+            if not (pollResponse.ActivityTask.ActivityType <> null && pollResponse.ActivityTask.ActivityType.Name = activity.Name && pollResponse.ActivityTask.ActivityType.Version = activity.Version) then
+                failwith "Expected different activity in PollAndCancelActivityTask"
+
+            let canceledRequest = new RespondActivityTaskCanceledRequest();
+            canceledRequest.TaskToken <- pollResponse.ActivityTask.TaskToken
+            if details.IsSome then canceledRequest.Details <- details.Value
+
+            let canceledResponse = swf.RespondActivityTaskCanceled(canceledRequest)
+            if not (canceledResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
+                failwith "Response failed in PollAndCompleteActivityTask"
+
+    let  PollAndFailActivityTask (activity:ActivityType) (reason: string option) (details:string option) =
+        if TestConfiguration.IsConnected then
+            use swf = TestConfiguration.GetSwfClient()
+
+            let pollRequest = new PollForActivityTaskRequest();
+            pollRequest.Domain <- TestConfiguration.TestDomain
+            pollRequest.Identity <- TestConfiguration.TestIdentity
+            pollRequest.TaskList <- TestConfiguration.TestTaskList
+
+            let pollResponse = swf.PollForActivityTask(pollRequest)
+
+            if not (pollResponse.ActivityTask.ActivityType <> null && pollResponse.ActivityTask.ActivityType.Name = activity.Name && pollResponse.ActivityTask.ActivityType.Version = activity.Version) then
+                failwith "Expected different activity in PollAndCancelActivityTask"
+
+            let failRequest = new RespondActivityTaskFailedRequest();
+            failRequest.TaskToken <- pollResponse.ActivityTask.TaskToken
+            if reason.IsSome then failRequest.Reason <- reason.Value
+            if details.IsSome then failRequest.Details <- details.Value
+
+            let failedResponse = swf.RespondActivityTaskFailed(failRequest)
+            if not (failedResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
+                failwith "Response failed in PollAndFailActivityTask"
 
     let GenerateOfflineDecisionTaskCodeSnippet (runId:string) (workflowId:string) (subs:Map<string, string>) =
         // Generate Offline History
