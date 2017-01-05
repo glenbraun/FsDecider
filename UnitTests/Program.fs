@@ -27,11 +27,9 @@ open Fuchu
 // CheckForWorkflowExecutionCancelRequested
 // GetWorkflowExecutionInput
 
-
-
 let tests = 
     testList "Primary Decider Actions" [
-            (*
+           // (*
             testList "StartAndWaitForActivityTask" [
                 testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Canceled Activity Task``
@@ -92,12 +90,19 @@ let tests =
                 testCase "Canceled"             <| TestWaitForTimer.``Wait for Timer with result of Canceled``
                 testCase "Fired"                <| TestWaitForTimer.``Wait for Timer with result of Fired``
             ]
-            *)
 
             testList "RecordMarker" [
                 testCase "Recording"            <| TestRecordMarker.``Record Marker with result of Recording``
                 testCase "RecordMarkerFailed"   <| TestRecordMarker.``Record Marker with result of RecordMarkerFailed``
                 testCase "MarkerRecorded"       <| TestRecordMarker.``Record Marker with result of MarkerRecorded``
+            ]
+//            *)
+
+            testList "StartChildWorkflowExecution" [
+                testCase "Scheduling"           <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Scheduling``
+                testCase "StartFailed"          <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of StartFailed``
+                testCase "Initiated"            <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Initiated``
+                testCase "Started"              <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Started``
             ]
         ]
         

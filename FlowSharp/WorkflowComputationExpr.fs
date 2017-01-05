@@ -70,10 +70,10 @@ type StartChildWorkflowExecutionAction =
     | Attributes of StartChildWorkflowExecutionDecisionAttributes
 
 type StartChildWorkflowExecutionResult =
-    | Starting 
+    | Scheduling 
     | StartFailed of StartChildWorkflowExecutionFailedEventAttributes
     | Initiated of StartChildWorkflowExecutionInitiatedEventAttributes
-    | Started of ChildWorkflowExecutionStartedEventAttributes * string
+    | Started of Attributes:ChildWorkflowExecutionStartedEventAttributes * Control:string
 
 type WaitForChildWorkflowExecutionAction =
     | StartResult of StartChildWorkflowExecutionResult
@@ -363,7 +363,7 @@ type Builder (DecisionTask:DecisionTask) =
                                  hev.ChildWorkflowExecutionStartedEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.ChildWorkflowExecutionStartedEventAttributes.WorkflowExecution.WorkflowId = workflowId then
                 setCommonProperties(hev)
-                combinedHistory.StartChildWorkflowExecutionFailedEventAttributes <- hev.StartChildWorkflowExecutionFailedEventAttributes
+                combinedHistory.ChildWorkflowExecutionStartedEventAttributes <- hev.ChildWorkflowExecutionStartedEventAttributes
                 startedEventId <- hev.EventId
 
             // ChildWorkflowExecutionCompleted
@@ -836,7 +836,7 @@ type Builder (DecisionTask:DecisionTask) =
 
         match result with 
         // If this activity is being scheduled then block. Return the decision to schedule the activity and pick up here next decistion task
-        | Scheduling(_,_) -> 
+        | StartActivityTaskResult.Scheduling(_,_) -> 
             blockFlag <- true
             response
 
@@ -898,7 +898,7 @@ type Builder (DecisionTask:DecisionTask) =
 
         match result with 
         // If this activity is being scheduled then block. Return the decision to schedule the activity and pick up here next decistion task
-        | Scheduling(_,_) -> 
+        | StartActivityTaskResult.Scheduling(_,_) -> 
             blockFlag <- true
             response
 
@@ -1093,17 +1093,17 @@ type Builder (DecisionTask:DecisionTask) =
                     h.StartChildWorkflowExecutionFailedEventAttributes.WorkflowType.Version = attr.WorkflowType.Version ->
             f(StartChildWorkflowExecutionResult.StartFailed(h.StartChildWorkflowExecutionFailedEventAttributes))
 
+        // Started
+        | h when h.ChildWorkflowExecutionStartedEventAttributes <> null ->
+            f(StartChildWorkflowExecutionResult.Started(h.ChildWorkflowExecutionStartedEventAttributes, (bindingId.ToString())))
+
         // Initiated
         | h when h.StartChildWorkflowExecutionInitiatedEventAttributes <> null &&
                     h.StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowType.Name = attr.WorkflowType.Name && 
                     h.StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowType.Version = attr.WorkflowType.Version ->
             f(StartChildWorkflowExecutionResult.Initiated(h.StartChildWorkflowExecutionInitiatedEventAttributes))
 
-        // Started
-        | h when h.ChildWorkflowExecutionStartedEventAttributes <> null ->
-            f(StartChildWorkflowExecutionResult.Started(h.ChildWorkflowExecutionStartedEventAttributes, (bindingId.ToString())))
-
-        // Not Started
+        // Not Scheduled
         | h when h.ActivityTaskScheduledEventAttributes = null ->
             attr.Control <- bindingId.ToString()
 
@@ -1112,7 +1112,7 @@ type Builder (DecisionTask:DecisionTask) =
             d.StartChildWorkflowExecutionDecisionAttributes <- attr
             response.Decisions.Add(d)
                 
-            f(StartChildWorkflowExecutionResult.Starting)
+            f(StartChildWorkflowExecutionResult.Scheduling)
 
         | _ -> failwith "error"
 
@@ -1150,7 +1150,7 @@ type Builder (DecisionTask:DecisionTask) =
 
         match result with 
         // If this child workflow execution is being started then block. Return the decision to start the child workflow and pick up here next decision task
-        | StartChildWorkflowExecutionResult.Starting -> 
+        | StartChildWorkflowExecutionResult.Scheduling -> 
             blockFlag <- true
             response
 
