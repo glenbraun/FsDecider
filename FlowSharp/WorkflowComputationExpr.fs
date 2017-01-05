@@ -15,6 +15,11 @@ type SignalReceivedResult =
 type RecordMarkerAction = 
     | Attributes of RecordMarkerDecisionAttributes
 
+type RecordMarkerResult = 
+    | Recording
+    | RecordMarkerFailed of RecordMarkerFailedEventAttributes
+    | MarkerRecorded of MarkerRecordedEventAttributes
+
 type SignalExternalWorkflowExecutionAction = 
     | Attributes of SignalExternalWorkflowExecutionDecisionAttributes
 
@@ -296,7 +301,6 @@ type Builder (DecisionTask:DecisionTask) =
 
     let FindMarkerHistory (decisionTask:DecisionTask) (markerName:string) (details:string) =
         let combinedHistory = new HistoryEvent()
-        let mutable decisionTaskCompletedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -307,9 +311,8 @@ type Builder (DecisionTask:DecisionTask) =
             if hev.EventType = EventType.MarkerRecorded && hev.MarkerRecordedEventAttributes.MarkerName = markerName && hev.MarkerRecordedEventAttributes.Details = details then
                 setCommonProperties(hev)
                 combinedHistory.MarkerRecordedEventAttributes <- hev.MarkerRecordedEventAttributes
-                decisionTaskCompletedEventId <- hev.MarkerRecordedEventAttributes.DecisionTaskCompletedEventId
 
-            elif hev.EventType = EventType.RecordMarkerFailed && hev.RecordMarkerFailedEventAttributes.DecisionTaskCompletedEventId = decisionTaskCompletedEventId && hev.RecordMarkerFailedEventAttributes.MarkerName = markerName then
+            elif hev.EventType = EventType.RecordMarkerFailed && hev.RecordMarkerFailedEventAttributes.MarkerName = markerName then
                 setCommonProperties(hev)
                 combinedHistory.RecordMarkerFailedEventAttributes <- hev.RecordMarkerFailedEventAttributes
         
@@ -1055,18 +1058,27 @@ type Builder (DecisionTask:DecisionTask) =
         | StartTimerResult.Started(a) -> bindWithHistory (a.TimerId) (a.Control)
 
     // Record Marker
-    member this.Bind(RecordMarkerAction.Attributes(attr), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(RecordMarkerAction.Attributes(attr), f:(RecordMarkerResult -> RespondDecisionTaskCompletedRequest)) =
         let combinedHistory = FindMarkerHistory DecisionTask attr.MarkerName attr.Details
 
-        if combinedHistory.MarkerRecordedEventAttributes = null && combinedHistory.RecordMarkerFailedEventAttributes = null then
-            // The marker was never recorded, record it now
+        match combinedHistory with
+
+        // RecordMarkerFailed
+        | h when h.RecordMarkerFailedEventAttributes <> null ->
+            f(RecordMarkerResult.RecordMarkerFailed(h.RecordMarkerFailedEventAttributes))
+
+        // MarkerRecorded
+        | h when h.MarkerRecordedEventAttributes <> null ->
+            f(RecordMarkerResult.MarkerRecorded(h.MarkerRecordedEventAttributes))
+
+        // The marker was never recorded, record it now
+        | _ ->
             let d = new Decision();
             d.DecisionType <- DecisionType.RecordMarker
             d.RecordMarkerDecisionAttributes <- attr
             response.Decisions.Add(d)
 
-        // RecordMarker action does not block and returns nothing
-        f()
+            f(RecordMarkerResult.Recording)
 
     // Start Child Workflow Execution
     member this.Bind(StartChildWorkflowExecutionAction.Attributes(attr), f:(StartChildWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =

@@ -67,6 +67,7 @@
     <Compile Include="TestStartTimer.fs" />
     <Compile Include="TestCancelTimer.fs" />
     <Compile Include="TestWaitForTimer.fs" />
+    <Compile Include="TestRecordMarker.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

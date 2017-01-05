@@ -126,6 +126,11 @@ module OfflineHistory =
             event.EventType <- EventType.MarkerRecorded
             event.MarkerRecordedEventAttributes <- args :?> MarkerRecordedEventAttributes
 
+        // RecordMarkerFailedEventAttributes
+        | :? RecordMarkerFailedEventAttributes as attr ->
+            event.EventType <- EventType.RecordMarkerFailed
+            event.RecordMarkerFailedEventAttributes <- args :?> RecordMarkerFailedEventAttributes
+
         // TimerStarted: A timer was started for the workflow execution due to a StartTimer decision.
         | :? TimerStartedEventAttributes as attr ->
             event.EventType <- EventType.TimerStarted

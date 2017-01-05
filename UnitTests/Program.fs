@@ -16,8 +16,8 @@ open Fuchu
 // StartAndWaitForLambdaFunction (done)
 // StartTimer (done)
 // CancelTimer (done)
-// WaitForTimer
-// RecordMarker
+// WaitForTimer (done)
+// RecordMarker (done)
 // StartChildWorkflowExecution
 // CompleteChildWorkflowExecution
 // SignalExternalWorkflowExecution
@@ -31,7 +31,7 @@ open Fuchu
 
 let tests = 
     testList "Primary Decider Actions" [
-(*            
+            (*
             testList "StartAndWaitForActivityTask" [
                 testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Canceled Activity Task``
@@ -87,13 +87,18 @@ let tests =
                 testCase "Fired"                <| TestCancelTimer.``Cancel Timer with result of Fired``
             ]
 
-            *)
             testList "WaitForTimer" [
                 testCase "StartTimerFailed"     <| TestWaitForTimer.``Wait for Timer with result of StartTimerFailed``
                 testCase "Canceled"             <| TestWaitForTimer.``Wait for Timer with result of Canceled``
                 testCase "Fired"                <| TestWaitForTimer.``Wait for Timer with result of Fired``
             ]
+            *)
 
+            testList "RecordMarker" [
+                testCase "Recording"            <| TestRecordMarker.``Record Marker with result of Recording``
+                testCase "RecordMarkerFailed"   <| TestRecordMarker.``Record Marker with result of RecordMarkerFailed``
+                testCase "MarkerRecorded"       <| TestRecordMarker.``Record Marker with result of MarkerRecorded``
+            ]
         ]
         
 
