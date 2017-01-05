@@ -634,6 +634,14 @@ type Builder (DecisionTask:DecisionTask) =
             // Skip these common DecisionTask events right away
             if hev.EventType = EventType.DecisionTaskScheduled || hev.EventType = EventType.DecisionTaskStarted || hev.EventType = EventType.DecisionTaskCompleted then ()
             
+            // CancelTimerFailed
+            elif hev.EventType = EventType.CancelTimerFailed && hev.CancelTimerFailedEventAttributes.DecisionTaskCompletedEventId > decisionTask.PreviousStartedEventId then
+                combinedHistory.CancelTimerFailedEventAttributes <- hev.CancelTimerFailedEventAttributes
+
+            // StartTimerFailed
+            elif hev.EventType = EventType.StartTimerFailed && hev.StartTimerFailedEventAttributes.DecisionTaskCompletedEventId > decisionTask.PreviousStartedEventId then
+                combinedHistory.StartTimerFailedEventAttributes <- hev.StartTimerFailedEventAttributes
+
             // TimerStarted
             elif hev.EventType = EventType.TimerStarted && hev.TimerStartedEventAttributes.Control = bindingIdString then
                 setCommonProperties(hev)
@@ -650,14 +658,6 @@ type Builder (DecisionTask:DecisionTask) =
             elif hev.EventType = EventType.TimerCanceled && hev.TimerCanceledEventAttributes.StartedEventId = startedEventId then
                 setCommonProperties(hev)
                 combinedHistory.TimerCanceledEventAttributes <- hev.TimerCanceledEventAttributes
-
-            // StartTimerFailed
-            elif hev.EventType = EventType.StartTimerFailed && hev.StartTimerFailedEventAttributes.DecisionTaskCompletedEventId > decisionTask.PreviousStartedEventId then
-                combinedHistory.StartTimerFailedEventAttributes <- hev.StartTimerFailedEventAttributes
-
-            // CancelTimerFailed
-            elif hev.EventType = EventType.CancelTimerFailed && hev.CancelTimerFailedEventAttributes.DecisionTaskCompletedEventId > decisionTask.PreviousStartedEventId then
-                combinedHistory.CancelTimerFailedEventAttributes <- hev.CancelTimerFailedEventAttributes
 
         // Return the combined history
         combinedHistory

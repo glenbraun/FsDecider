@@ -14,8 +14,9 @@ open Fuchu
 // WaitForActivityTask (done)
 // RequestCancelActivityTask (done)
 // StartAndWaitForLambdaFunction (done)
-// StartTimer
+// StartTimer (done)
 // CancelTimer
+// WaitForTimer
 // RecordMarker
 // StartChildWorkflowExecution
 // CompleteChildWorkflowExecution
@@ -30,7 +31,7 @@ open Fuchu
 
 let tests = 
     testList "Primary Decider Actions" [
-
+            
             testList "StartAndWaitForActivityTask" [
                 testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Canceled Activity Task``
@@ -71,9 +72,22 @@ let tests =
                 testCase "Failed"               <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of Failed``
                 testCase "TimedOut"             <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of TimedOut``
             ]
+            
+            testList "StartTimer" [
+                testCase "StartTimerFailed"     <| TestStartTimer.``Start Timer with result of StartTimerFailed``
+                testCase "Starting"             <| TestStartTimer.``Start Timer with result of Starting``
+                testCase "Started"              <| TestStartTimer.``Start Timer with result of Started``
+            ]
+            
+            testList "CancelTimer" [
+                testCase "NotStarted"           <| TestCancelTimer.``Cancel Timer with result of NotStarted``
+                testCase "CancelTimerFailed"    <| TestCancelTimer.``Cancel Timer with result of CancelTimerFailed``
+                testCase "Canceling"            <| TestCancelTimer.``Cancel Timer with result of Canceling``
+                testCase "Canceled"             <| TestCancelTimer.``Cancel Timer with result of Canceled``
+                testCase "Fired"                <| TestCancelTimer.``Cancel Timer with result of Fired``
+            ]
         ]
-
-
+        
 
 [<EntryPoint>]
 let main argv = 
