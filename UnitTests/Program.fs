@@ -22,14 +22,14 @@ open Fuchu
 // WaitForChildWorkflowExecution (done)
 // SignalExternalWorkflowExecution (done)
 // RequestCancelExternalWorkflowExecution (done)
-// SignalReceivedSinceMarker
 // SignalReceived
+// SignalReceivedSinceMarker
 // CheckForWorkflowExecutionCancelRequested
 // GetWorkflowExecutionInput
 
 let tests = 
     testList "Primary Decider Actions" [
-            (*
+//            (*
             testList "StartAndWaitForActivityTask" [
                 testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Canceled Activity Task``
@@ -120,13 +120,18 @@ let tests =
                 testCase "Failed"               <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Failed``
             ]
 
-            *)
             testList "RequestCancelExternalWorkflowExecution" [
                 testCase "Requesting"           <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Requesting``
                 testCase "Initiated"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Initiated``
                 testCase "Delivered"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Delivered``
                 testCase "Failed"               <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Failed``
             ]
+  (*
+            testList "SignalReceived" [
+                //testCase "NotRecieved"          <| TestSignalReceived.``Signal Received with result of NotReceived``
+                //testCase "Recieved"             <| TestSignalReceived.``Signal Received with result of Received``
+            ]
+            *)
         ]
         
 

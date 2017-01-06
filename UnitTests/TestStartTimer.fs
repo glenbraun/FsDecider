@@ -37,8 +37,8 @@ module TestStartTimer =
 
             match timer1 with
             | StartTimerResult.Starting ->
-                let! signal = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
+
             | StartTimerResult.Started(attr) when attr.TimerId = timerId -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
@@ -166,13 +166,11 @@ module TestStartTimer =
             // Note: Requres intential changes to decision for testing purpose (below)
             match timer1 with
             | StartTimerResult.Starting ->
-                let! signal = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
 
             | StartTimerResult.Started(attr) ->
                 let! timer2 = FlowSharp.StartTimer(timerId="timer2", startToFireTimeout = startToFireTimeout)
-                let! signal = FlowSharp.SignalReceived(signalName + "2", wait=true)
-                ()
+                return ()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
                 return "TEST PASS"

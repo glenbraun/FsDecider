@@ -63,8 +63,7 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(attr.WorkflowExecution.WorkflowId, attr.WorkflowExecution.RunId)
@@ -175,16 +174,14 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(attr.WorkflowExecution.WorkflowId, attr.WorkflowExecution.RunId)
                 
                 match request with
                 | RequestCancelExternalWorkflowExecutionResult.Requesting -> 
-                    let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                    ()
+                    return ()
 
                 | RequestCancelExternalWorkflowExecutionResult.Initiated(ia) when
                         ia.WorkflowId = childWorkflowId -> return "TEST PASS"
@@ -304,16 +301,14 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(attr.WorkflowExecution.WorkflowId, attr.WorkflowExecution.RunId)
                 
                 match request with
                 | RequestCancelExternalWorkflowExecutionResult.Requesting -> 
-                    let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                    ()
+                    return ()
 
                 | RequestCancelExternalWorkflowExecutionResult.Delivered(da) when
                         da.WorkflowExecution.WorkflowId = childWorkflowId -> return "TEST PASS"
@@ -421,8 +416,7 @@ module TestRequestCancelExternalWorkflowExecution =
                 
             match request with
             | RequestCancelExternalWorkflowExecutionResult.Requesting -> 
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | RequestCancelExternalWorkflowExecutionResult.Failed(attr) when
                         attr.Cause = cause &&

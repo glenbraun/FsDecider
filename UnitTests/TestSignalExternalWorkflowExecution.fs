@@ -63,8 +63,7 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
                 let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
@@ -179,16 +178,14 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
                 let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> 
-                    let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                    ()
+                    return ()
 
                 | SignalExternalWorkflowExecutionResult.Initiated(ia) when
                         ia.SignalName = signalName &&
@@ -317,16 +314,14 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
                 let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> 
-                    let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                    ()
+                    return ()
 
                 | SignalExternalWorkflowExecutionResult.Signaled(sa) when
                         sa.WorkflowExecution.WorkflowId = childWorkflowId -> return "TEST PASS"
@@ -438,8 +433,7 @@ module TestSignalExternalWorkflowExecution =
                 
             match signal with
             | SignalExternalWorkflowExecutionResult.Signaling -> 
-                let! fakeSignal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
 
             | SignalExternalWorkflowExecutionResult.Failed(attr) when
                         attr.Cause = cause &&

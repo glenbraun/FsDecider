@@ -5,12 +5,18 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-type SignalReceivedAction =
-    | Attributes of SignalName:string * Input:string option * Wait:bool option * MarkerName:string option * MarkerDetails:string option
+type WorkflowExecutionSignaledAction =
+    | Attributes of SignalName:string
 
-type SignalReceivedResult =
-    | NotRecieved
-    | Received of WorkflowExecutionSignaledEventAttributes
+type WorkflowExecutionSignaledResult =
+    | NotSignaled
+    | Signaled of WorkflowExecutionSignaledEventAttributes
+
+type WaitForWorkflowExecutionSignaledAction =
+    | Attributes of SignalName:string
+
+type WaitForWorkflowExecutionSignaledResult =
+    | Signaled of WorkflowExecutionSignaledEventAttributes
 
 type RecordMarkerAction = 
     | Attributes of RecordMarkerDecisionAttributes
@@ -135,11 +141,12 @@ type CheckForWorkflowExecutionCancelRequestedResult =
     | NotRequested
     | Requested of WorkflowExecutionCancelRequestedEventAttributes
 
-type WorkflowResult = 
-    | Complete of Result:string
-    | Cancel of Details:string
-    | ContinueAsNew of ContinueAsNewWorkflowExecutionDecisionAttributes
-    | Fail of Reason:string * Details:string
+type ReturnResult = 
+    | RespondDecisionTaskCompleted
+    | CompleteWorkflowExecution of Result:string
+    | CancelWorkflowExecution of Details:string
+    | FailWorkflowExecution of Reason:string * Details:string
+    | ContinueAsNewWorkflowExecution of ContinueAsNewWorkflowExecutionDecisionAttributes
 
 type GetWorkflowExecutionInputAction =
     | Attributes of unit
@@ -251,11 +258,11 @@ type FlowSharp =
 
         RequestCancelExternalWorkflowExecutionAction.Attributes(attr)
 
-    static member SignalReceivedSinceMarker(signalName:string, markerName:string, ?input:string, ?wait:bool, ?markerDetails:string) =
-        SignalReceivedAction.Attributes(SignalName=signalName, Input=input, Wait=wait, MarkerName=Some(markerName), MarkerDetails=markerDetails)
+    static member WorkflowExecutionSignaled(signalName:string) =
+        WorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
 
-    static member SignalReceived(signalName:string, ?input:string, ?wait:bool) =
-        SignalReceivedAction.Attributes(SignalName=signalName, Input=input, Wait=wait, MarkerName=None, MarkerDetails=None)
+    static member WaitForWorkflowExecutionSignaled(signalName:string) =
+        WaitForWorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
 
     static member CheckForWorkflowExecutionCancelRequested() =
         CheckForWorkflowExecutionCancelRequestedAction.Attributes()
@@ -272,35 +279,20 @@ type Builder (DecisionTask:DecisionTask) =
         bindingId <- bindingId + 1
         bindingId
 
-    let FindSignalHistory (decisionTask:DecisionTask) (signalName:string) (input:string option) (markerName:string option) (markerDetails:string option) =
+    let FindSignalHistory (decisionTask:DecisionTask) (signalName:string) =
         let combinedHistory = new HistoryEvent()
-        let mutable markerEvent : HistoryEvent = null
 
-        let setCommonProperties (h:HistoryEvent) =
+        let findSignal =
+            decisionTask.Events
+            |> Seq.tryFindBack (fun hev -> hev.EventType = EventType.WorkflowExecutionSignaled && hev.WorkflowExecutionSignaledEventAttributes.SignalName = signalName)
+
+        match findSignal with
+        | Some(h) -> 
             combinedHistory.EventType <- h.EventType
             combinedHistory.EventId <- h.EventId
             combinedHistory.EventTimestamp <- h.EventTimestamp
-
-        for hev in decisionTask.Events do
-            // Capture the Marker event, if markerName is supplied. Also test marker details if that is supplied.
-            if hev.EventType = EventType.MarkerRecorded && 
-               markerName.IsSome &&
-               hev.MarkerRecordedEventAttributes.MarkerName = markerName.Value && 
-               ( (markerDetails.IsNone) || (hev.MarkerRecordedEventAttributes.Details = markerDetails.Value) ) then
-
-                setCommonProperties(hev)
-                combinedHistory.MarkerRecordedEventAttributes <- hev.MarkerRecordedEventAttributes
-                markerEvent <- hev
-
-            // Capture the Signal event, if the signal name matches, optionally if the signal input matches, and optionally if the specified marker was found
-            elif hev.EventType = EventType.WorkflowExecutionSignaled && 
-                 hev.WorkflowExecutionSignaledEventAttributes.SignalName = signalName &&
-                 ( (input.IsNone) || (hev.WorkflowExecutionSignaledEventAttributes.Input = input.Value) ) &&
-                 ( (markerName.IsNone) || (markerEvent <> null) ) then
-
-                setCommonProperties(hev)
-                combinedHistory.WorkflowExecutionSignaledEventAttributes <- hev.WorkflowExecutionSignaledEventAttributes
-                combinedHistory.EventType <- EventType.WorkflowExecutionSignaled
+            combinedHistory.WorkflowExecutionSignaledEventAttributes <- h.WorkflowExecutionSignaledEventAttributes
+        | None -> ()
         
         // Return the combined history
         combinedHistory
@@ -497,9 +489,12 @@ type Builder (DecisionTask:DecisionTask) =
         // Return the combined history
         combinedHistory
         
-    let FindContinueAsNewWorkflowExecutionHistory (decisionTask:DecisionTask) =
+    let FindReturnHistory (decisionTask:DecisionTask) =
         let combinedHistory = new HistoryEvent()
-        let mutable decisionTaskCompletedEventId = 0L
+        let mutable completedDecisionTaskCompletedEventId = 0L
+        let mutable canceledDecisionTaskCompletedEventId = 0L
+        let mutable failedDecisionTaskCompletedEventId = 0L
+        let mutable continueAsNewDecisionTaskCompletedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -507,13 +502,47 @@ type Builder (DecisionTask:DecisionTask) =
             combinedHistory.EventTimestamp <- h.EventTimestamp
 
         for hev in decisionTask.Events do
-            if hev.EventType = EventType.WorkflowExecutionContinuedAsNew then                
+            // WorkflowExecutionCompleted
+            if hev.EventType = EventType.WorkflowExecutionCompleted then                
+                setCommonProperties(hev)
+                combinedHistory.WorkflowExecutionCompletedEventAttributes <- hev.WorkflowExecutionCompletedEventAttributes
+                completedDecisionTaskCompletedEventId <- hev.WorkflowExecutionCompletedEventAttributes.DecisionTaskCompletedEventId
+
+            elif hev.EventType = EventType.CompleteWorkflowExecutionFailed && 
+                 hev.CompleteWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = completedDecisionTaskCompletedEventId then
+                setCommonProperties(hev)
+                combinedHistory.CompleteWorkflowExecutionFailedEventAttributes <- hev.CompleteWorkflowExecutionFailedEventAttributes
+
+            // WorkflowExecutionCanceled
+            elif hev.EventType = EventType.WorkflowExecutionCanceled then                
+                setCommonProperties(hev)
+                combinedHistory.WorkflowExecutionCanceledEventAttributes <- hev.WorkflowExecutionCanceledEventAttributes
+                canceledDecisionTaskCompletedEventId <- hev.WorkflowExecutionCanceledEventAttributes.DecisionTaskCompletedEventId
+
+            elif hev.EventType = EventType.CancelWorkflowExecutionFailed && 
+                 hev.CancelWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = canceledDecisionTaskCompletedEventId then
+                setCommonProperties(hev)
+                combinedHistory.CancelWorkflowExecutionFailedEventAttributes <- hev.CancelWorkflowExecutionFailedEventAttributes
+
+            // WorkflowExecutionFailed
+            elif hev.EventType = EventType.WorkflowExecutionFailed then                
+                setCommonProperties(hev)
+                combinedHistory.WorkflowExecutionFailedEventAttributes <- hev.WorkflowExecutionFailedEventAttributes
+                failedDecisionTaskCompletedEventId <- hev.WorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId
+
+            elif hev.EventType = EventType.FailWorkflowExecutionFailed && 
+                 hev.FailWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = failedDecisionTaskCompletedEventId then
+                setCommonProperties(hev)
+                combinedHistory.FailWorkflowExecutionFailedEventAttributes <- hev.FailWorkflowExecutionFailedEventAttributes
+
+            // WorkflowExecutionContinuedAsNew
+            elif hev.EventType = EventType.WorkflowExecutionContinuedAsNew then                
                 setCommonProperties(hev)
                 combinedHistory.WorkflowExecutionContinuedAsNewEventAttributes <- hev.WorkflowExecutionContinuedAsNewEventAttributes
-                decisionTaskCompletedEventId <- hev.WorkflowExecutionContinuedAsNewEventAttributes.DecisionTaskCompletedEventId
+                continueAsNewDecisionTaskCompletedEventId <- hev.WorkflowExecutionContinuedAsNewEventAttributes.DecisionTaskCompletedEventId
 
             elif hev.EventType = EventType.ContinueAsNewWorkflowExecutionFailed && 
-                                 hev.ContinueAsNewWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = decisionTaskCompletedEventId then
+                 hev.ContinueAsNewWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = continueAsNewDecisionTaskCompletedEventId then
                 setCommonProperties(hev)
                 combinedHistory.ContinueAsNewWorkflowExecutionFailedEventAttributes <- hev.ContinueAsNewWorkflowExecutionFailedEventAttributes
                         
@@ -681,7 +710,6 @@ type Builder (DecisionTask:DecisionTask) =
         // Return the combined history
         combinedHistory
 
-
     member this.Delay(f) =
         if DecisionTask.TaskToken = null then 
             // When PollForDecisionTask times out, the TaskToken is null. There's nothing to decide in this case so null is returned.
@@ -696,24 +724,65 @@ type Builder (DecisionTask:DecisionTask) =
 
     member this.Zero() = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)
 
-    member this.Return(result:WorkflowResult) =
+    member this.Return(result:ReturnResult) =
         blockFlag <- true
-        let decision = new Decision();
 
         match result with
-        | Complete(r) -> 
-            decision.DecisionType <- DecisionType.CompleteWorkflowExecution
-            decision.CompleteWorkflowExecutionDecisionAttributes <- new CompleteWorkflowExecutionDecisionAttributes();
-            decision.CompleteWorkflowExecutionDecisionAttributes.Result <- r
+        | ReturnResult.RespondDecisionTaskCompleted ->
+            ()
 
-        | Cancel(details) ->
-            decision.DecisionType <- DecisionType.CancelWorkflowExecution
-            decision.CancelWorkflowExecutionDecisionAttributes <- new CancelWorkflowExecutionDecisionAttributes();
-            decision.CancelWorkflowExecutionDecisionAttributes.Details <- details
+        | ReturnResult.CompleteWorkflowExecution(r) -> 
+            // Look for possible failure of CompleteWorkflowExecution
+            let combinedHistory = FindReturnHistory DecisionTask
 
-        | ContinueAsNew(attr) ->
+            match (combinedHistory) with
+            | h when h.EventType = EventType.CompleteWorkflowExecutionFailed ->
+                // A previous attempt was made to complete this workflow, but it failed
+                // Raise an exception that the decider can process
+                failwith (sprintf "CompleteWorkflowExecutionFailed, %s" (h.CompleteWorkflowExecutionFailedEventAttributes.Cause.ToString()))
+            | _ ->
+                let decision = new Decision();
+                decision.DecisionType <- DecisionType.CompleteWorkflowExecution
+                decision.CompleteWorkflowExecutionDecisionAttributes <- new CompleteWorkflowExecutionDecisionAttributes();
+                decision.CompleteWorkflowExecutionDecisionAttributes.Result <- r
+                response.Decisions.Add(decision)
+
+        | ReturnResult.CancelWorkflowExecution(details) ->
+            // Look for possible failure of CancelWorkflowExecution
+            let combinedHistory = FindReturnHistory DecisionTask
+
+            match (combinedHistory) with
+            | h when h.EventType = EventType.CancelWorkflowExecutionFailed ->
+                // A previous attempt was made to cancel this workflow, but it failed
+                // Raise an exception that the decider can process
+                failwith (sprintf "CancelWorkflowExecutionFailed, %s" (h.CancelWorkflowExecutionFailedEventAttributes.Cause.ToString()))
+            | _ ->
+                let decision = new Decision();
+                decision.DecisionType <- DecisionType.CancelWorkflowExecution
+                decision.CancelWorkflowExecutionDecisionAttributes <- new CancelWorkflowExecutionDecisionAttributes();
+                decision.CancelWorkflowExecutionDecisionAttributes.Details <- details
+                response.Decisions.Add(decision)
+
+        | ReturnResult.FailWorkflowExecution(reason, details) ->
+            // Look for possible failure of FailWorkflowExecution
+            let combinedHistory = FindReturnHistory DecisionTask
+
+            match (combinedHistory) with
+            | h when h.EventType = EventType.FailWorkflowExecutionFailed ->
+                // A previous attempt was made to fail this workflow, but it failed
+                // Raise an exception that the decider can process
+                failwith (sprintf "FailWorkflowExecutionFailed, %s" (h.FailWorkflowExecutionFailedEventAttributes.Cause.ToString()))
+            | _ ->
+                let decision = new Decision();
+                decision.DecisionType <- DecisionType.FailWorkflowExecution
+                decision.FailWorkflowExecutionDecisionAttributes <- new FailWorkflowExecutionDecisionAttributes();
+                decision.FailWorkflowExecutionDecisionAttributes.Reason <- reason
+                decision.FailWorkflowExecutionDecisionAttributes.Details <- details
+                response.Decisions.Add(decision)
+
+        | ReturnResult.ContinueAsNewWorkflowExecution(attr) ->
             // Look for possible failure of ContinueAsNewWorkflowExecution
-            let combinedHistory = FindContinueAsNewWorkflowExecutionHistory DecisionTask
+            let combinedHistory = FindReturnHistory DecisionTask
 
             match (combinedHistory) with
             | h when h.EventType = EventType.ContinueAsNewWorkflowExecutionFailed ->
@@ -721,20 +790,15 @@ type Builder (DecisionTask:DecisionTask) =
                 // Raise an exception that the decider can process
                 failwith (sprintf "ContinueAsNewWorkflowExecutionFailed, %s" (h.ContinueAsNewWorkflowExecutionFailedEventAttributes.Cause.ToString()))
             | _ ->
+                let decision = new Decision();
                 decision.DecisionType <- DecisionType.ContinueAsNewWorkflowExecution
                 decision.ContinueAsNewWorkflowExecutionDecisionAttributes <- new ContinueAsNewWorkflowExecutionDecisionAttributes();
-                 
-        | Fail(reason, details) ->
-            decision.DecisionType <- DecisionType.FailWorkflowExecution
-            decision.FailWorkflowExecutionDecisionAttributes <- new FailWorkflowExecutionDecisionAttributes();
-            decision.FailWorkflowExecutionDecisionAttributes.Reason <- reason
-            decision.FailWorkflowExecutionDecisionAttributes.Details <- details
+                response.Decisions.Add(decision)
 
-        response.Decisions.Add(decision)
         response
 
-    member this.Return(result:string) = this.Return(Complete(result))
-    member this.Return(result:unit) = this.Return(Complete(null))
+    member this.Return(result:string) = this.Return(ReturnResult.CompleteWorkflowExecution(result))
+    member this.Return(result:unit) = this.Return(ReturnResult.RespondDecisionTaskCompleted)
             
     // Start and Wait for Activity Task
     member this.Bind(StartAndWaitForActivityTaskAction.Attributes(attr), f:(WaitForActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
@@ -1238,23 +1302,32 @@ type Builder (DecisionTask:DecisionTask) =
             response.Decisions.Add(d)
             f(SignalExternalWorkflowExecutionResult.Signaling)
 
-
-    // Signal Received
-    member this.Bind(SignalReceivedAction.Attributes(signalName, input, wait, markerName, markerDetails), f:(SignalReceivedResult -> RespondDecisionTaskCompletedRequest)) =
-        let combinedHistory = FindSignalHistory DecisionTask signalName input markerName markerDetails
+    // Workflow Execution Signaled
+    member this.Bind(WorkflowExecutionSignaledAction.Attributes(signalName), f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
+        let combinedHistory = FindSignalHistory DecisionTask signalName
 
         match combinedHistory with
-        // Signal Received
+        // Signaled
         | h when h.WorkflowExecutionSignaledEventAttributes <> null ->
-            f(SignalReceivedResult.Received(h.WorkflowExecutionSignaledEventAttributes))
-        // Signal not received
+            f(WorkflowExecutionSignaledResult.Signaled(h.WorkflowExecutionSignaledEventAttributes))
+        
+        // Not Signaled
         | _ ->
-            match wait with
-            | Some(true) ->
-                blockFlag <- true
-                response
-            | Some(false) | None ->
-                f(SignalReceivedResult.NotRecieved)
+            f(WorkflowExecutionSignaledResult.NotSignaled)
+
+    // Wait For Workflow Execution Signaled
+    member this.Bind(WaitForWorkflowExecutionSignaledAction.Attributes(signalName), f:(WaitForWorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
+        let combinedHistory = FindSignalHistory DecisionTask signalName
+
+        match combinedHistory with
+        // Signaled
+        | h when h.WorkflowExecutionSignaledEventAttributes <> null ->
+            f(WaitForWorkflowExecutionSignaledResult.Signaled(h.WorkflowExecutionSignaledEventAttributes))
+        
+        // Not Signaled, keep waiting
+        | _ ->
+            blockFlag <- true
+            response
 
     // Check For Workflow Execution Cancel Requested
     member this.Bind(CheckForWorkflowExecutionCancelRequestedAction.Attributes(), f:(CheckForWorkflowExecutionCancelRequestedResult -> RespondDecisionTaskCompletedRequest)) =

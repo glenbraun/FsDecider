@@ -118,7 +118,8 @@ module TestStartActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
 
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
+
             match result with
             | StartActivityTaskResult.Scheduled(attr) 
                 when attr.ActivityId = activityId &&
@@ -210,7 +211,7 @@ module TestStartActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
 
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             match result with
             | StartActivityTaskResult.Started(attr, at, c, id) 
@@ -311,8 +312,7 @@ module TestStartActivityTask =
 
             match result with
             | StartActivityTaskResult.Scheduling(_, _) ->
-                let! wait = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
 
             | StartActivityTaskResult.ScheduleFailed(attr) 
                 when attr.Cause = activityCause &&

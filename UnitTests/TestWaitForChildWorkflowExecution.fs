@@ -212,9 +212,9 @@ module TestWaitForChildWorkflowExecution =
 
         let childDeciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
-                return WorkflowResult.Cancel(childCancelDetails)
+                return ReturnResult.CancelWorkflowExecution(childCancelDetails)
             }
-
+        
         // OfflineDecisionTask
         let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
@@ -357,7 +357,7 @@ module TestWaitForChildWorkflowExecution =
 
         let childDeciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
-                return WorkflowResult.Fail(Reason=childFailReason, Details=childFailDetails)
+                return ReturnResult.FailWorkflowExecution(Reason=childFailReason, Details=childFailDetails)
             }
 
         // OfflineDecisionTask
@@ -615,8 +615,8 @@ module TestWaitForChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! signal = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
+
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
                 childRunId := attr.WorkflowExecution.RunId
             | _ -> ()
@@ -755,8 +755,8 @@ module TestWaitForChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Scheduling -> 
-                let! signal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
+
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
                     attr.WorkflowId = childWorkflowId &&
                     attr.WorkflowType.Name = childWorkflowType.Name &&

@@ -53,11 +53,9 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! signal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                let! signal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
             | StartChildWorkflowExecutionResult.Started(attr, c) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -271,8 +269,8 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Scheduling ->
-                let! signal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()                
+               return ()
+                               
             | StartChildWorkflowExecutionResult.Initiated(attr) when
                     attr.ChildPolicy = ChildPolicy.TERMINATE &&
                     attr.Input = childInput &&
@@ -376,8 +374,8 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Scheduling -> 
-                let! signal = FlowSharp.SignalReceived("FakeSignal", wait=true)
-                ()
+                return ()
+
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
                     attr.WorkflowId = childWorkflowId &&
                     attr.WorkflowType.Name = childWorkflowType.Name &&

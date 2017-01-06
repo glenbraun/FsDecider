@@ -52,7 +52,7 @@ module TestRequestCancelActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
             
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             let! cancel = FlowSharp.RequestCancelActivityTask(start)
 
@@ -168,7 +168,7 @@ module TestRequestCancelActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
             
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             let! cancel = FlowSharp.RequestCancelActivityTask(start)
 
@@ -266,7 +266,7 @@ module TestRequestCancelActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
             
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             let! cancel = FlowSharp.RequestCancelActivityTask(start)
 
@@ -363,7 +363,7 @@ module TestRequestCancelActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
             
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             let! cancel = FlowSharp.RequestCancelActivityTask(start)
 
@@ -458,7 +458,7 @@ module TestRequestCancelActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
             
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             let! cancel = FlowSharp.RequestCancelActivityTask(start)
 
@@ -572,7 +572,7 @@ module TestRequestCancelActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
             
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             let! cancel = FlowSharp.RequestCancelActivityTask(start)
 
@@ -666,7 +666,7 @@ module TestRequestCancelActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
             
-            let! wait = FlowSharp.SignalReceived(signalName, wait=true)
+            let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             // Improper usage here but requried to force RequestCancelFailed 
             let fakeStart = 

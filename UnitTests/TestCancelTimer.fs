@@ -37,16 +37,14 @@ module TestCancelTimer =
 
             match timer1 with
             | StartTimerResult.Starting ->
-                let! signal = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 
                 let! cancel = FlowSharp.CancelTimer(timer1)
 
                 match cancel with
                 | CancelTimerResult.Canceling -> 
-                    let! signal = FlowSharp.SignalReceived(signalName + "2", wait=true)
-                    ()
+                    return ()
 
                 | CancelTimerResult.Canceled(a) when a.TimerId = timerId -> return "TEST PASS"
 
@@ -142,8 +140,7 @@ module TestCancelTimer =
 
             match timer1 with
             | StartTimerResult.Starting ->
-                let! signal = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 
                 let! cancel = FlowSharp.CancelTimer(timer1)
@@ -304,13 +301,11 @@ module TestCancelTimer =
             // Note: Requres intential changes to decision for testing purpose (below)
             match timer1 with
             | StartTimerResult.Starting ->
-                let! signal = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
 
             | StartTimerResult.Started(attr) ->
                 let! timer2 = FlowSharp.StartTimer(timerId="timer2", startToFireTimeout = startToFireTimeout)
-                let! signal = FlowSharp.SignalReceived(signalName + "2", wait=true)
-                ()
+                return ()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
                 let! cancel = FlowSharp.CancelTimer(timer1)
@@ -411,8 +406,7 @@ module TestCancelTimer =
 
             match timer1 with
             | StartTimerResult.Starting ->
-                let! signal = FlowSharp.SignalReceived(signalName, wait=true)
-                ()
+                return ()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 
                 let! cancel = FlowSharp.CancelTimer(timer1)
