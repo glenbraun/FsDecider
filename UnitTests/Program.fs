@@ -127,11 +127,14 @@ let tests =
                 testCase "Delivered"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Delivered``
                 testCase "Failed"               <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Failed``
             ]
-            *)
 
             testList "WorkflowExecutionSignaled" [
                 testCase "NotSignaled"          <| TestWorkflowExecutionSignaled.``Workflow Execution Signaled with result of NotSignaled``
                 testCase "Signaled"             <| TestWorkflowExecutionSignaled.``Workflow Execution Signaled with result of Signaled``
+            ]
+            *)
+            testList "WaitForWorkflowExecutionSignaled" [
+                testCase "Signaled"             <| TestWaitForWorkflowExecutionSignaled.``Wait For Workflow Execution Signaled with result of Signaled``
             ]
         ]
         
