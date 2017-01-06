@@ -20,8 +20,8 @@ open Fuchu
 // RecordMarker (done)
 // StartChildWorkflowExecution (done)
 // WaitForChildWorkflowExecution (done)
-// SignalExternalWorkflowExecution
-// RequestCancelExternalWorkflowExecution
+// SignalExternalWorkflowExecution (done)
+// RequestCancelExternalWorkflowExecution (done)
 // SignalReceivedSinceMarker
 // SignalReceived
 // CheckForWorkflowExecutionCancelRequested
@@ -112,12 +112,20 @@ let tests =
                 testCase "Failed"               <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Failed``
                 testCase "Terminated"           <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Terminated``
             ]
-            *)
+
             testList "SignalExternalWorkflowExecution" [
                 testCase "Signaling"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Signaling``
                 testCase "Initiated"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Initiated``
                 testCase "Signaled"             <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Signaled``
                 testCase "Failed"               <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Failed``
+            ]
+
+            *)
+            testList "RequestCancelExternalWorkflowExecution" [
+                testCase "Requesting"           <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Requesting``
+                testCase "Initiated"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Initiated``
+                testCase "Delivered"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Delivered``
+                testCase "Failed"               <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Failed``
             ]
         ]
         

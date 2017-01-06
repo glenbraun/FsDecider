@@ -34,9 +34,9 @@ type RequestCancelExternalWorkflowExecutionAction =
 
 type RequestCancelExternalWorkflowExecutionResult =
     | Requesting
-    | RequestFailed of RequestCancelExternalWorkflowExecutionFailedEventAttributes
-    | RequestInitiated of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
-    | RequestDelivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
+    | Initiated of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
+    | Delivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
+    | Failed of RequestCancelExternalWorkflowExecutionFailedEventAttributes
 
 type StartActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes
@@ -1187,15 +1187,15 @@ type Builder (DecisionTask:DecisionTask) =
         match (combinedHistory) with
         // Request Delivered
         | h when h.ExternalWorkflowExecutionCancelRequestedEventAttributes <> null ->
-            f(RequestCancelExternalWorkflowExecutionResult.RequestDelivered(h.ExternalWorkflowExecutionCancelRequestedEventAttributes))
+            f(RequestCancelExternalWorkflowExecutionResult.Delivered(h.ExternalWorkflowExecutionCancelRequestedEventAttributes))
 
         // Request Failed
         | h when h.RequestCancelExternalWorkflowExecutionFailedEventAttributes <> null ->
-            f(RequestCancelExternalWorkflowExecutionResult.RequestFailed(h.RequestCancelExternalWorkflowExecutionFailedEventAttributes))
+            f(RequestCancelExternalWorkflowExecutionResult.Failed(h.RequestCancelExternalWorkflowExecutionFailedEventAttributes))
  
         // Request Initiated
         | h when h.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes <> null ->
-            f(RequestCancelExternalWorkflowExecutionResult.RequestInitiated(h.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes))
+            f(RequestCancelExternalWorkflowExecutionResult.Initiated(h.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes))
 
         // Request not initiated yet
         | _ ->
