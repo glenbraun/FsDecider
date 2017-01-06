@@ -23,6 +23,12 @@ type RecordMarkerResult =
 type SignalExternalWorkflowExecutionAction = 
     | Attributes of SignalExternalWorkflowExecutionDecisionAttributes
 
+type SignalExternalWorkflowExecutionResult = 
+    | Signaling
+    | Initiated of SignalExternalWorkflowExecutionInitiatedEventAttributes
+    | Signaled of ExternalWorkflowExecutionSignaledEventAttributes
+    | Failed of SignalExternalWorkflowExecutionFailedEventAttributes
+
 type RequestCancelExternalWorkflowExecutionAction =
     | Attributes of RequestCancelExternalWorkflowExecutionDecisionAttributes
 
@@ -456,7 +462,7 @@ type Builder (DecisionTask:DecisionTask) =
     let FindSignalExternalWorkflowExecutionHistory (decisionTask:DecisionTask) (bindingId:int) (signalName:string) (workflowId:string) =
         let combinedHistory = new HistoryEvent()
         let bindingIdString = bindingId.ToString()
-        let mutable decisionTaskCompletedEventId = 0L
+        let mutable initiatedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -465,18 +471,28 @@ type Builder (DecisionTask:DecisionTask) =
 
         for hev in decisionTask.Events do
             if hev.EventType = EventType.SignalExternalWorkflowExecutionInitiated && 
-                               hev.SignalExternalWorkflowExecutionInitiatedEventAttributes.Control = bindingIdString &&
-                               hev.SignalExternalWorkflowExecutionInitiatedEventAttributes.SignalName = signalName && 
-                               hev.SignalExternalWorkflowExecutionInitiatedEventAttributes.WorkflowId = workflowId then
+               hev.SignalExternalWorkflowExecutionInitiatedEventAttributes.Control = bindingIdString &&
+               hev.SignalExternalWorkflowExecutionInitiatedEventAttributes.SignalName = signalName && 
+               hev.SignalExternalWorkflowExecutionInitiatedEventAttributes.WorkflowId = workflowId then
+                
                 setCommonProperties(hev)
                 combinedHistory.SignalExternalWorkflowExecutionInitiatedEventAttributes <- hev.SignalExternalWorkflowExecutionInitiatedEventAttributes
-                decisionTaskCompletedEventId <- hev.SignalExternalWorkflowExecutionInitiatedEventAttributes.DecisionTaskCompletedEventId
+                initiatedEventId <- hev.EventId
 
-            elif hev.EventType = EventType.SignalExternalWorkflowExecutionFailed && 
-                                 hev.SignalExternalWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = decisionTaskCompletedEventId && 
-                                 hev.SignalExternalWorkflowExecutionFailedEventAttributes.WorkflowId = workflowId then
+            elif hev.EventType = EventType.SignalExternalWorkflowExecutionFailed &&
+                 hev.SignalExternalWorkflowExecutionFailedEventAttributes.Control = bindingIdString &&
+                 hev.SignalExternalWorkflowExecutionFailedEventAttributes.InitiatedEventId = initiatedEventId &&
+                 hev.SignalExternalWorkflowExecutionFailedEventAttributes.WorkflowId = workflowId then
+
                 setCommonProperties(hev)
                 combinedHistory.SignalExternalWorkflowExecutionFailedEventAttributes <- hev.SignalExternalWorkflowExecutionFailedEventAttributes
+
+            elif hev.EventType = EventType.ExternalWorkflowExecutionSignaled &&
+                 hev.ExternalWorkflowExecutionSignaledEventAttributes.InitiatedEventId = initiatedEventId && 
+                 hev.ExternalWorkflowExecutionSignaledEventAttributes.WorkflowExecution.WorkflowId = workflowId then
+
+                setCommonProperties(hev)
+                combinedHistory.ExternalWorkflowExecutionSignaledEventAttributes <- hev.ExternalWorkflowExecutionSignaledEventAttributes
         
         // Return the combined history
         combinedHistory
@@ -1193,13 +1209,26 @@ type Builder (DecisionTask:DecisionTask) =
             f(RequestCancelExternalWorkflowExecutionResult.Requesting)
 
     // Signal External Workflow Execution
-    member this.Bind(SignalExternalWorkflowExecutionAction.Attributes(attr), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(SignalExternalWorkflowExecutionAction.Attributes(attr), f:(SignalExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
         let bindingId = NextBindingId()
 
         let combinedHistory = FindSignalExternalWorkflowExecutionHistory DecisionTask bindingId attr.SignalName attr.WorkflowId
 
-        if combinedHistory.SignalExternalWorkflowExecutionInitiatedEventAttributes = null && 
-            combinedHistory.SignalExternalWorkflowExecutionFailedEventAttributes = null then
+        match combinedHistory with
+        // Failed
+        | h when h.SignalExternalWorkflowExecutionFailedEventAttributes <> null ->
+            f(SignalExternalWorkflowExecutionResult.Failed(h.SignalExternalWorkflowExecutionFailedEventAttributes))
+        
+        // Signaled
+        | h when h.ExternalWorkflowExecutionSignaledEventAttributes <> null ->
+            f(SignalExternalWorkflowExecutionResult.Signaled(h.ExternalWorkflowExecutionSignaledEventAttributes))
+
+        // Initiated
+        | h when h.SignalExternalWorkflowExecutionInitiatedEventAttributes <> null ->
+            f(SignalExternalWorkflowExecutionResult.Initiated(h.SignalExternalWorkflowExecutionInitiatedEventAttributes))
+
+        // Signaling
+        | _ -> 
             // The signal was never sent, send it now
             attr.Control <- bindingId.ToString()
                 
@@ -1207,9 +1236,8 @@ type Builder (DecisionTask:DecisionTask) =
             d.DecisionType <- DecisionType.SignalExternalWorkflowExecution
             d.SignalExternalWorkflowExecutionDecisionAttributes <- attr
             response.Decisions.Add(d)
+            f(SignalExternalWorkflowExecutionResult.Signaling)
 
-        // SignalExternalWorkflowExecution action does not block and returns nothing
-        f()
 
     // Signal Received
     member this.Bind(SignalReceivedAction.Attributes(signalName, input, wait, markerName, markerDetails), f:(SignalReceivedResult -> RespondDecisionTaskCompletedRequest)) =

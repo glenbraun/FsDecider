@@ -29,7 +29,7 @@ open Fuchu
 
 let tests = 
     testList "Primary Decider Actions" [
-            //(*
+            (*
             testList "StartAndWaitForActivityTask" [
                 testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Canceled Activity Task``
@@ -103,7 +103,7 @@ let tests =
                 testCase "Initiated"            <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Initiated``
                 testCase "Started"              <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Started``
             ]
-            //*)
+
             testList "WaitForChildWorkflowExecution" [
                 testCase "StartFailed"          <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of StartFailed``
                 testCase "Completed"            <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Completed``
@@ -112,7 +112,13 @@ let tests =
                 testCase "Failed"               <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Failed``
                 testCase "Terminated"           <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Terminated``
             ]
-
+            *)
+            testList "SignalExternalWorkflowExecution" [
+                testCase "Signaling"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Signaling``
+                testCase "Initiated"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Initiated``
+                testCase "Signaled"             <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Signaled``
+                testCase "Failed"               <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Failed``
+            ]
         ]
         
 
