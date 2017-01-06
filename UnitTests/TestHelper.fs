@@ -8,7 +8,7 @@ open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
 module TestHelper =
-    let PollAndDecide (deciderFunc: (DecisionTask -> RespondDecisionTaskCompletedRequest)) (offlineFunc: (unit -> DecisionTask)) (roundtrips: int) : (int * RespondDecisionTaskCompletedRequest) seq =
+    let PollAndDecide (taskList:TaskList) (deciderFunc: (DecisionTask -> RespondDecisionTaskCompletedRequest)) (offlineFunc: (unit -> DecisionTask)) (roundtrips: int) : (int * RespondDecisionTaskCompletedRequest) seq =
         
         // Split the offline history into separate decision tasks
         let OfflineDecisionTasks =
@@ -29,7 +29,7 @@ module TestHelper =
                             (
                                 Domain = TestConfiguration.TestDomain,
                                 Identity = TestConfiguration.TestIdentity,
-                                TaskList = TestConfiguration.TestTaskList
+                                TaskList = taskList
                             )
             let response = swf.PollForDecisionTask(request)
             (response.DecisionTask)

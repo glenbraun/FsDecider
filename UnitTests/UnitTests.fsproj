@@ -69,6 +69,7 @@
     <Compile Include="TestWaitForTimer.fs" />
     <Compile Include="TestRecordMarker.fs" />
     <Compile Include="TestStartChildWorkflowExecution.fs" />
+    <Compile Include="TestWaitForChildWorkflowExecution.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

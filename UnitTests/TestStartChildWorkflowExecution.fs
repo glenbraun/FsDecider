@@ -22,6 +22,7 @@ module TestStartChildWorkflowExecution =
         |> Map.add "TaskList" "TestConfiguration.TestTaskList"
         |> Map.add "Identity" "TestConfiguration.TestIdentity"
         |> Map.add "SignalName" "signalName"
+        |> Map.add "StartChildWorkflowExecutionInitiatedEventAttributes.TaskList" "childTaskList"
         |> Map.add "StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowId" "childWorkflowId"
         |> Map.add "StartChildWorkflowExecutionFailedEventAttributes.WorkflowId" "childWorkflowId"
         |> Map.add "ChildWorkflowExecutionStartedEventAttributes.WorkflowId" "childWorkflowId"
@@ -30,6 +31,7 @@ module TestStartChildWorkflowExecution =
         let workflowId = "Start Child Workflow Execution with result of Started"
         let childWorkflowId = "Child of " + workflowId
         let childInput = "Test Child Input"
+        let childTaskList = TaskList(Name="Child")
         let signalName = "Test Signal"
         let childRunId = ref ""
 
@@ -44,7 +46,7 @@ module TestStartChildWorkflowExecution =
                             input=childInput,
                             childPolicy=ChildPolicy.TERMINATE,
                             lambdaRole=TestConfiguration.TestLambdaRole,
-                            taskList=TestConfiguration.TestTaskList,
+                            taskList=childTaskList,
                             executionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
@@ -83,13 +85,13 @@ module TestStartChildWorkflowExecution =
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId, WorkflowType=TestConfiguration.TestWorkflowType))
+                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId, WorkflowType=TestConfiguration.TestWorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="23fNlBlH2obTbujwT0mAPhQE/2ICVowZjCnXzf+CQlqJM=", WorkflowId="Child of Start Child Workflow Execution with result of Started"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="Child RunId", WorkflowId=childWorkflowId), WorkflowType=TestConfiguration.TestWorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 7
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=5L, Result="OK", StartedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="23fNlBlH2obTbujwT0mAPhQE/2ICVowZjCnXzf+CQlqJM=", WorkflowId="Child of Start Child Workflow Execution with result of Started"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=5L, Result="OK", StartedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="Child RunId", WorkflowId=childWorkflowId), WorkflowType=TestConfiguration.TestWorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 9
                               DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 10
@@ -100,7 +102,7 @@ module TestStartChildWorkflowExecution =
         // OfflineDecisionTask
         let childOfflineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                                   |> OfflineHistoryEvent (        // EventId = 1
-                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="23mPVCAFmO/F6aTAX1FQLkaXZo51NK+8az47FMTWmUCrE=", WorkflowId="Start Child Workflow Execution with result of Started"), TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="Child RunId", WorkflowId=childWorkflowId), TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
                                   |> OfflineHistoryEvent (        // EventId = 2
                                       DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                                   |> OfflineHistoryEvent (        // EventId = 3
@@ -114,7 +116,7 @@ module TestStartChildWorkflowExecution =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide deciderFunc offlineFunc 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -132,7 +134,7 @@ module TestStartChildWorkflowExecution =
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.LambdaRole  
                                                         |> should equal TestConfiguration.TestLambdaRole
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.TaskList.Name  
-                                                        |> should equal TestConfiguration.TestTaskList.Name
+                                                        |> should equal childTaskList.Name
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.ExecutionStartToCloseTimeout 
                                                         |> should equal (TestConfiguration.TwentyMinuteTimeout.ToString())
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.TaskStartToCloseTimeout 
@@ -141,7 +143,7 @@ module TestStartChildWorkflowExecution =
                 TestHelper.RespondDecisionTaskCompleted resp
 
                 // Process Child Workflow Decisions
-                for (j, childResp) in TestHelper.PollAndDecide childDeciderFunc childOfflineFunc 1 do
+                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc 1 do
                     match j with
                     | 1 -> 
                         childResp.Decisions.Count                    |> should equal 1
@@ -163,7 +165,7 @@ module TestStartChildWorkflowExecution =
             | _ -> ()
 
         // Generate Offline History
-        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
+        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Add("ChildWorkflowExecutionStartedEventAttributes.WorkflowExecution", "WorkflowExecution(RunId=\"Child RunId\", WorkflowId=childWorkflowId)").Add("ChildWorkflowExecutionCompletedEventAttributes.WorkflowExecution","WorkflowExecution(RunId=\"Child RunId\", WorkflowId=childWorkflowId)"))
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet (!childRunId) childWorkflowId OfflineHistorySubstitutions
 
     let ``Start Child Workflow Execution with result of Scheduling``() =
@@ -212,7 +214,7 @@ module TestStartChildWorkflowExecution =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide deciderFunc offlineFunc 1 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 1 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -313,7 +315,7 @@ module TestStartChildWorkflowExecution =
             let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
 
             // Poll and make decisions
-            for (i, resp) in TestHelper.PollAndDecide deciderFunc offlineFunc 2 do
+            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
                 match i with
                 | 1 -> 
                     resp.Decisions.Count                    |> should equal 1
@@ -409,7 +411,7 @@ module TestStartChildWorkflowExecution =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide deciderFunc offlineFunc 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -445,5 +447,5 @@ module TestStartChildWorkflowExecution =
             | _ -> ()
 
         // Generate Offline History
-        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Add("StartChildWorkflowExecutionFailedEventAttributes.WorkflowType", "childWorkflowType"))
+        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Add("ChildWorkflowExecutionStartedEventAttributes.WorkflowExecution", "WorkflowExecution(RunId=\"Child RunId\", WorkflowId=childWorkflowId)").Add("ChildWorkflowExecutionCompletedEventAttributes.WorkflowExecution","WorkflowExecution(RunId=\"Child RunId\", WorkflowId=childWorkflowId)"))
 

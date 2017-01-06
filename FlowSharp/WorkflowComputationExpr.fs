@@ -708,11 +708,11 @@ type Builder (DecisionTask:DecisionTask) =
                 decision.DecisionType <- DecisionType.ContinueAsNewWorkflowExecution
                 decision.ContinueAsNewWorkflowExecutionDecisionAttributes <- new ContinueAsNewWorkflowExecutionDecisionAttributes();
                  
-        | Fail(details, reason) ->
+        | Fail(reason, details) ->
             decision.DecisionType <- DecisionType.FailWorkflowExecution
             decision.FailWorkflowExecutionDecisionAttributes <- new FailWorkflowExecutionDecisionAttributes();
-            decision.FailWorkflowExecutionDecisionAttributes.Details <- details
             decision.FailWorkflowExecutionDecisionAttributes.Reason <- reason
+            decision.FailWorkflowExecutionDecisionAttributes.Details <- details
 
         response.Decisions.Add(decision)
         response
