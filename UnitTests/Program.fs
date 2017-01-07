@@ -22,9 +22,9 @@ open Fuchu
 // WaitForChildWorkflowExecution (done)
 // SignalExternalWorkflowExecution (done)
 // RequestCancelExternalWorkflowExecution (done)
-// WorkflowExecutionSignaled
-// WaitForWorkflowExecutionSignaled
-// CheckForWorkflowExecutionCancelRequested
+// WorkflowExecutionSignaled (done)
+// WaitForWorkflowExecutionSignaled (done)
+// WorkflowExecutionCancelRequested (done)
 // GetWorkflowExecutionInput
 // ReturnResult
 
@@ -132,9 +132,14 @@ let tests =
                 testCase "NotSignaled"          <| TestWorkflowExecutionSignaled.``Workflow Execution Signaled with result of NotSignaled``
                 testCase "Signaled"             <| TestWorkflowExecutionSignaled.``Workflow Execution Signaled with result of Signaled``
             ]
-            *)
+
             testList "WaitForWorkflowExecutionSignaled" [
                 testCase "Signaled"             <| TestWaitForWorkflowExecutionSignaled.``Wait For Workflow Execution Signaled with result of Signaled``
+            ]
+            *)
+            testList "WorkflowExecutionCancelRequested" [
+                testCase "NotRequested"         <| TestWorkflowExecutionCancelRequested.``Workflow Execution Cancel Requested with result of NotRequested``
+                testCase "CancelRequested"      <| TestWorkflowExecutionCancelRequested.``Workflow Execution Cancel Requested with result of CancelRequested``
             ]
         ]
         

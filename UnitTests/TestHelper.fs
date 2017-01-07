@@ -55,7 +55,7 @@ module TestHelper =
             if not (response.HttpStatusCode = System.Net.HttpStatusCode.OK) then
                 failwith "Decision Task Completed request failed in PollAndCompleteActivityTask"
 
-    let StartWorkflowExecutionOnTaskList (workflow:WorkflowType) (workflowId:string) (taskList:TaskList) (input:string option) (lambdaRoleOverride: string option) = 
+    let StartWorkflowExecutionOnTaskList (workflow:WorkflowType) (workflowId:string) (taskList:TaskList) (input:string option) (lambdaRoleOverride: string option) (childPolicy:ChildPolicy option) = 
         if TestConfiguration.IsConnected then
             use swf = TestConfiguration.GetSwfClient()
 
@@ -65,7 +65,7 @@ module TestHelper =
             startRequest.TaskList <- taskList
             if input.IsSome then startRequest.Input <- input.Value
 
-            startRequest.ChildPolicy <- ChildPolicy.TERMINATE
+            startRequest.ChildPolicy <- if childPolicy.IsSome then childPolicy.Value else ChildPolicy.TERMINATE
             startRequest.Domain <- TestConfiguration.TestDomain
             startRequest.ExecutionStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout.ToString()
             startRequest.TaskStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout.ToString()

@@ -134,12 +134,12 @@ type CancelTimerResult =
     | Canceled of TimerCanceledEventAttributes
     | Fired of TimerFiredEventAttributes
 
-type CheckForWorkflowExecutionCancelRequestedAction =
+type WorkflowExecutionCancelRequestedAction =
     | Attributes of unit
 
-type CheckForWorkflowExecutionCancelRequestedResult =
+type WorkflowExecutionCancelRequestedResult =
     | NotRequested
-    | Requested of WorkflowExecutionCancelRequestedEventAttributes
+    | CancelRequested of WorkflowExecutionCancelRequestedEventAttributes
 
 type ReturnResult = 
     | RespondDecisionTaskCompleted
@@ -264,8 +264,8 @@ type FlowSharp =
     static member WaitForWorkflowExecutionSignaled(signalName:string) =
         WaitForWorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
 
-    static member CheckForWorkflowExecutionCancelRequested() =
-        CheckForWorkflowExecutionCancelRequestedAction.Attributes()
+    static member WorkflowExecutionCancelRequested() =
+        WorkflowExecutionCancelRequestedAction.Attributes()
 
     static member GetWorkflowExecutionInput() =
         GetWorkflowExecutionInputAction.Attributes()
@@ -1329,8 +1329,8 @@ type Builder (DecisionTask:DecisionTask) =
             blockFlag <- true
             response
 
-    // Check For Workflow Execution Cancel Requested
-    member this.Bind(CheckForWorkflowExecutionCancelRequestedAction.Attributes(), f:(CheckForWorkflowExecutionCancelRequestedResult -> RespondDecisionTaskCompletedRequest)) =
+    // Workflow Execution Cancel Requested
+    member this.Bind(WorkflowExecutionCancelRequestedAction.Attributes(), f:(WorkflowExecutionCancelRequestedResult -> RespondDecisionTaskCompletedRequest)) =
         let cancelRequestedEvent = 
             DecisionTask.Events |>
             Seq.tryFindBack (fun hev -> hev.EventType = EventType.WorkflowExecutionCancelRequested)
@@ -1338,11 +1338,11 @@ type Builder (DecisionTask:DecisionTask) =
         match cancelRequestedEvent with
         // Workflow Cancel Requsted
         | Some(event) ->
-            f(CheckForWorkflowExecutionCancelRequestedResult.Requested(event.WorkflowExecutionCancelRequestedEventAttributes))
+            f(WorkflowExecutionCancelRequestedResult.CancelRequested(event.WorkflowExecutionCancelRequestedEventAttributes))
             
         // NotRequested
         | None ->
-            f(CheckForWorkflowExecutionCancelRequestedResult.NotRequested)            
+            f(WorkflowExecutionCancelRequestedResult.NotRequested)            
 
     // Get Workflow Execution Input
     member this.Bind(GetWorkflowExecutionInputAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =

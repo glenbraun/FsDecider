@@ -110,7 +110,7 @@ module TestWaitForChildWorkflowExecution =
                                       WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=4L, Result="OK"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
         for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
@@ -254,7 +254,7 @@ module TestWaitForChildWorkflowExecution =
                                       WorkflowExecutionCanceledEventAttributes(DecisionTaskCompletedEventId=4L, Details="Child Cancel Details"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
         for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
@@ -399,7 +399,7 @@ module TestWaitForChildWorkflowExecution =
                                       WorkflowExecutionFailedEventAttributes(DecisionTaskCompletedEventId=4L, Details="Child Fail Details", Reason="Child Fail Reason"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
         for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
@@ -541,7 +541,7 @@ module TestWaitForChildWorkflowExecution =
                                       WorkflowExecutionTimedOutEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, TimeoutType=WorkflowExecutionTimeoutType.START_TO_CLOSE))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
         for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
@@ -680,7 +680,7 @@ module TestWaitForChildWorkflowExecution =
                                       WorkflowExecutionTerminatedEventAttributes(Cause=WorkflowExecutionTerminatedCause.OPERATOR_INITIATED, ChildPolicy=ChildPolicy.TERMINATE, Details="Child Terminate Details", Reason="Child Terminate Reason"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
         for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 3 do
@@ -801,7 +801,7 @@ module TestWaitForChildWorkflowExecution =
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=8L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
         for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
