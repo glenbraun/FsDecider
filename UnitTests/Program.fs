@@ -25,8 +25,12 @@ open Fuchu
 // WorkflowExecutionSignaled (done)
 // WaitForWorkflowExecutionSignaled (done)
 // WorkflowExecutionCancelRequested (done)
-// GetWorkflowExecutionInput
+// GetWorkflowExecutionInput (done)
 // ReturnResult
+// For Loop
+// While Loop
+// Try Catch
+// Try Finally
 
 let tests = 
     testList "Primary Decider Actions" [
@@ -136,10 +140,15 @@ let tests =
             testList "WaitForWorkflowExecutionSignaled" [
                 testCase "Signaled"             <| TestWaitForWorkflowExecutionSignaled.``Wait For Workflow Execution Signaled with result of Signaled``
             ]
-            *)
+
             testList "WorkflowExecutionCancelRequested" [
                 testCase "NotRequested"         <| TestWorkflowExecutionCancelRequested.``Workflow Execution Cancel Requested with result of NotRequested``
                 testCase "CancelRequested"      <| TestWorkflowExecutionCancelRequested.``Workflow Execution Cancel Requested with result of CancelRequested``
+            ]
+            *)
+            testList "GetWorkflowExecutionInput" [
+                testCase "GetNonNullInput"      <| TestGetWorkflowExecutionInput.``Get Workflow Execution Input with non-null input``
+                testCase "GetNullInput"         <| TestGetWorkflowExecutionInput.``Get Workflow Execution Input with null input``
             ]
         ]
         
