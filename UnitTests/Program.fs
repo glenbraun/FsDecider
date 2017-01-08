@@ -26,7 +26,7 @@ open Fuchu
 // WaitForWorkflowExecutionSignaled (done)
 // WorkflowExecutionCancelRequested (done)
 // GetWorkflowExecutionInput (done)
-// ReturnResult
+// ReturnResult (done)
 // For Loop
 // While Loop
 // Try Catch
@@ -145,10 +145,23 @@ let tests =
                 testCase "NotRequested"         <| TestWorkflowExecutionCancelRequested.``Workflow Execution Cancel Requested with result of NotRequested``
                 testCase "CancelRequested"      <| TestWorkflowExecutionCancelRequested.``Workflow Execution Cancel Requested with result of CancelRequested``
             ]
-            *)
+
             testList "GetWorkflowExecutionInput" [
                 testCase "GetNonNullInput"      <| TestGetWorkflowExecutionInput.``Get Workflow Execution Input with non-null input``
                 testCase "GetNullInput"         <| TestGetWorkflowExecutionInput.``Get Workflow Execution Input with null input``
+            ]
+            *)
+
+            testList "ReturnResult" [
+                testCase "RespondDecisionTaskCompleted"         <| TestReturnResult.``Return Result of RespondDecisionTaskCompleted``
+                testCase "CompleteWorkflowExecution"            <| TestReturnResult.``Return Result of CompleteWorkflowExecution``
+                testCase "CompleteWorkflowExecutionFailed"      <| TestReturnResult.``Return Result of CompleteWorkflowExecutionFailed``
+                testCase "CancelWorkflowExecution"              <| TestReturnResult.``Return Result of CancelWorkflowExecution``
+                testCase "CancelWorkflowExecutionFailed"        <| TestReturnResult.``Return Result of CancelWorkflowExecutionFailed``
+                testCase "FailWorkflowExecution"                <| TestReturnResult.``Return Result of FailWorkflowExecution``
+                testCase "FailWorkflowExecutionFailed"          <| TestReturnResult.``Return Result of FailWorkflowExecutionFailed``
+                testCase "ContinueAsNewWorkflowExecution"       <| TestReturnResult.``Return Result of ContinueAsNewWorkflowExecution``
+                testCase "ContinueAsNewWorkflowExecutionFailed" <| TestReturnResult.``Return Result of ContinueAsNewWorkflowExecutionFailed``
             ]
         ]
         

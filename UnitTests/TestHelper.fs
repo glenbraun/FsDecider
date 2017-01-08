@@ -204,7 +204,7 @@ module TestHelper =
 
     let TerminateWorkflow (runId:string) (workflowId:string) (reason:string) (details:string) =
         if TestConfiguration.IsConnected then
-            use swf = new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2)
+            use swf = TestConfiguration.GetSwfClient()
 
             let terminateRequest = new TerminateWorkflowExecutionRequest();
             terminateRequest.ChildPolicy <- ChildPolicy.TERMINATE
@@ -218,6 +218,27 @@ module TestHelper =
             if not (terminateResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
                 failwith "Terminate Workflow request failed in SignalWorkflow"
 
+    let GetNewExecutionRunId (runId:string) (workflowId:string) =
+        if TestConfiguration.IsConnected then
+            use swf = TestConfiguration.GetSwfClient()
+
+            let request = GetWorkflowExecutionHistoryRequest(
+                            Domain=TestConfiguration.TestDomain,
+                            Execution=WorkflowExecution(RunId=runId, WorkflowId=workflowId)
+                          )
+
+            let response = swf.GetWorkflowExecutionHistory(request)
+            
+            let hev =
+                response.History.Events
+                |> Seq.tryFindBack( fun h -> h.EventType = EventType.WorkflowExecutionContinuedAsNew )
+
+            match hev with
+            | Some(h) -> h.WorkflowExecutionContinuedAsNewEventAttributes.NewExecutionRunId
+            | None -> failwith "Failed getting Continue As New RunId"
+
+        else 
+            "Offline Continued As New RunId"
 
     let GenerateOfflineDecisionTaskCodeSnippet (runId:string) (workflowId:string) (subs:Map<string, string>) =
         // Generate Offline History

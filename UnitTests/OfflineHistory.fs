@@ -21,10 +21,20 @@ module OfflineHistory =
             event.EventType <- EventType.WorkflowExecutionCompleted
             event.WorkflowExecutionCompletedEventAttributes <- args :?> WorkflowExecutionCompletedEventAttributes
 
+        // CompleteWorkflowExecutionFailed
+        | :? CompleteWorkflowExecutionFailedEventAttributes as attr ->
+            event.EventType <- EventType.CompleteWorkflowExecutionFailed
+            event.CompleteWorkflowExecutionFailedEventAttributes <- args :?> CompleteWorkflowExecutionFailedEventAttributes
+
         // WorkflowExecutionFailed: The workflow execution closed due to a failure.
         | :? WorkflowExecutionFailedEventAttributes as attr ->
             event.EventType <- EventType.WorkflowExecutionFailed
             event.WorkflowExecutionFailedEventAttributes <- args :?> WorkflowExecutionFailedEventAttributes
+
+        // FailWorkflowExecutionFailed
+        | :? FailWorkflowExecutionFailedEventAttributes as attr ->
+            event.EventType <- EventType.FailWorkflowExecutionFailed
+            event.FailWorkflowExecutionFailedEventAttributes <- args :?> FailWorkflowExecutionFailedEventAttributes
 
         // WorkflowExecutionTimedOut: The workflow execution was closed because a time out was exceeded.
         | :? WorkflowExecutionTimedOutEventAttributes as attr ->
@@ -36,6 +46,11 @@ module OfflineHistory =
             event.EventType <- EventType.WorkflowExecutionCanceled
             event.WorkflowExecutionCanceledEventAttributes <- args :?> WorkflowExecutionCanceledEventAttributes
 
+        // CancelWorkflowExecutionFailed
+        | :? CancelWorkflowExecutionFailedEventAttributes as attr ->
+            event.EventType <- EventType.CancelWorkflowExecutionFailed
+            event.CancelWorkflowExecutionFailedEventAttributes <- args :?> CancelWorkflowExecutionFailedEventAttributes
+
         // WorkflowExecutionTerminated: The workflow execution was terminated.
         | :? WorkflowExecutionTerminatedEventAttributes as attr ->
             event.EventType <- EventType.WorkflowExecutionTerminated
@@ -45,6 +60,11 @@ module OfflineHistory =
         | :? WorkflowExecutionContinuedAsNewEventAttributes as attr ->
             event.EventType <- EventType.WorkflowExecutionContinuedAsNew
             event.WorkflowExecutionContinuedAsNewEventAttributes <- args :?> WorkflowExecutionContinuedAsNewEventAttributes
+
+        // ContinueAsNewWorkflowExecutionFailed
+        | :? ContinueAsNewWorkflowExecutionFailedEventAttributes as attr ->
+            event.EventType <- EventType.ContinueAsNewWorkflowExecutionFailed
+            event.ContinueAsNewWorkflowExecutionFailedEventAttributes <- args :?> ContinueAsNewWorkflowExecutionFailedEventAttributes
 
         // WorkflowExecutionCancelRequested: A request to cancel this workflow execution was made.
         | :? WorkflowExecutionCancelRequestedEventAttributes as attr ->

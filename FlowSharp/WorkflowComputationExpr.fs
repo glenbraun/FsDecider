@@ -141,6 +141,9 @@ type WorkflowExecutionCancelRequestedResult =
     | NotRequested
     | CancelRequested of WorkflowExecutionCancelRequestedEventAttributes
 
+type GetWorkflowExecutionInputAction =
+    | Attributes of unit
+
 type ReturnResult = 
     | RespondDecisionTaskCompleted
     | CompleteWorkflowExecution of Result:string
@@ -148,8 +151,10 @@ type ReturnResult =
     | FailWorkflowExecution of Reason:string * Details:string
     | ContinueAsNewWorkflowExecution of ContinueAsNewWorkflowExecutionDecisionAttributes
 
-type GetWorkflowExecutionInputAction =
-    | Attributes of unit
+exception CompleteWorkflowExecutionFailedException of CompleteWorkflowExecutionFailedEventAttributes
+exception CancelWorkflowExecutionFailedException of CancelWorkflowExecutionFailedEventAttributes
+exception FailWorkflowExecutionFailedException of FailWorkflowExecutionFailedEventAttributes
+exception ContinueAsNewWorkflowExecutionFailedException of ContinueAsNewWorkflowExecutionFailedEventAttributes
 
 type FlowSharp = 
     static member StartAndWaitForActivityTask(activity:ActivityType, ?input:string, ?activityId:string, ?heartbeatTimeout:uint32, ?scheduleToCloseTimeout:uint32, ?scheduleToStartTimeout:uint32, ?startToCloseTimeout:uint32, ?taskList:TaskList, ?taskPriority:int) =
@@ -491,10 +496,6 @@ type Builder (DecisionTask:DecisionTask) =
         
     let FindReturnHistory (decisionTask:DecisionTask) =
         let combinedHistory = new HistoryEvent()
-        let mutable completedDecisionTaskCompletedEventId = 0L
-        let mutable canceledDecisionTaskCompletedEventId = 0L
-        let mutable failedDecisionTaskCompletedEventId = 0L
-        let mutable continueAsNewDecisionTaskCompletedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -506,10 +507,8 @@ type Builder (DecisionTask:DecisionTask) =
             if hev.EventType = EventType.WorkflowExecutionCompleted then                
                 setCommonProperties(hev)
                 combinedHistory.WorkflowExecutionCompletedEventAttributes <- hev.WorkflowExecutionCompletedEventAttributes
-                completedDecisionTaskCompletedEventId <- hev.WorkflowExecutionCompletedEventAttributes.DecisionTaskCompletedEventId
 
-            elif hev.EventType = EventType.CompleteWorkflowExecutionFailed && 
-                 hev.CompleteWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = completedDecisionTaskCompletedEventId then
+            elif hev.EventType = EventType.CompleteWorkflowExecutionFailed then
                 setCommonProperties(hev)
                 combinedHistory.CompleteWorkflowExecutionFailedEventAttributes <- hev.CompleteWorkflowExecutionFailedEventAttributes
 
@@ -517,10 +516,8 @@ type Builder (DecisionTask:DecisionTask) =
             elif hev.EventType = EventType.WorkflowExecutionCanceled then                
                 setCommonProperties(hev)
                 combinedHistory.WorkflowExecutionCanceledEventAttributes <- hev.WorkflowExecutionCanceledEventAttributes
-                canceledDecisionTaskCompletedEventId <- hev.WorkflowExecutionCanceledEventAttributes.DecisionTaskCompletedEventId
 
-            elif hev.EventType = EventType.CancelWorkflowExecutionFailed && 
-                 hev.CancelWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = canceledDecisionTaskCompletedEventId then
+            elif hev.EventType = EventType.CancelWorkflowExecutionFailed  then
                 setCommonProperties(hev)
                 combinedHistory.CancelWorkflowExecutionFailedEventAttributes <- hev.CancelWorkflowExecutionFailedEventAttributes
 
@@ -528,10 +525,8 @@ type Builder (DecisionTask:DecisionTask) =
             elif hev.EventType = EventType.WorkflowExecutionFailed then                
                 setCommonProperties(hev)
                 combinedHistory.WorkflowExecutionFailedEventAttributes <- hev.WorkflowExecutionFailedEventAttributes
-                failedDecisionTaskCompletedEventId <- hev.WorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId
 
-            elif hev.EventType = EventType.FailWorkflowExecutionFailed && 
-                 hev.FailWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = failedDecisionTaskCompletedEventId then
+            elif hev.EventType = EventType.FailWorkflowExecutionFailed then
                 setCommonProperties(hev)
                 combinedHistory.FailWorkflowExecutionFailedEventAttributes <- hev.FailWorkflowExecutionFailedEventAttributes
 
@@ -539,10 +534,8 @@ type Builder (DecisionTask:DecisionTask) =
             elif hev.EventType = EventType.WorkflowExecutionContinuedAsNew then                
                 setCommonProperties(hev)
                 combinedHistory.WorkflowExecutionContinuedAsNewEventAttributes <- hev.WorkflowExecutionContinuedAsNewEventAttributes
-                continueAsNewDecisionTaskCompletedEventId <- hev.WorkflowExecutionContinuedAsNewEventAttributes.DecisionTaskCompletedEventId
 
-            elif hev.EventType = EventType.ContinueAsNewWorkflowExecutionFailed && 
-                 hev.ContinueAsNewWorkflowExecutionFailedEventAttributes.DecisionTaskCompletedEventId = continueAsNewDecisionTaskCompletedEventId then
+            elif hev.EventType = EventType.ContinueAsNewWorkflowExecutionFailed then
                 setCommonProperties(hev)
                 combinedHistory.ContinueAsNewWorkflowExecutionFailedEventAttributes <- hev.ContinueAsNewWorkflowExecutionFailedEventAttributes
                         
@@ -725,75 +718,86 @@ type Builder (DecisionTask:DecisionTask) =
     member this.Zero() = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)
 
     member this.Return(result:ReturnResult) =
-        blockFlag <- true
 
         match result with
         | ReturnResult.RespondDecisionTaskCompleted ->
             ()
 
         | ReturnResult.CompleteWorkflowExecution(r) -> 
-            // Look for possible failure of CompleteWorkflowExecution
-            let combinedHistory = FindReturnHistory DecisionTask
+            if blockFlag = false then
+                // Look for possible failure of CompleteWorkflowExecution
+                let combinedHistory = FindReturnHistory DecisionTask
 
-            match (combinedHistory) with
-            | h when h.EventType = EventType.CompleteWorkflowExecutionFailed ->
-                // A previous attempt was made to complete this workflow, but it failed
-                // Raise an exception that the decider can process
-                failwith (sprintf "CompleteWorkflowExecutionFailed, %s" (h.CompleteWorkflowExecutionFailedEventAttributes.Cause.ToString()))
-            | _ ->
-                let decision = new Decision();
-                decision.DecisionType <- DecisionType.CompleteWorkflowExecution
-                decision.CompleteWorkflowExecutionDecisionAttributes <- new CompleteWorkflowExecutionDecisionAttributes();
-                decision.CompleteWorkflowExecutionDecisionAttributes.Result <- r
-                response.Decisions.Add(decision)
+                match (combinedHistory) with
+                | h when h.CompleteWorkflowExecutionFailedEventAttributes <> null ->
+                    // A previous attempt was made to complete this workflow, but it failed
+                    // Raise an exception that the decider can process
+                    blockFlag <- true
+                    raise (CompleteWorkflowExecutionFailedException(h.CompleteWorkflowExecutionFailedEventAttributes))
+                | _ -> ()            
+            
+            let decision = new Decision();
+            decision.DecisionType <- DecisionType.CompleteWorkflowExecution
+            decision.CompleteWorkflowExecutionDecisionAttributes <- new CompleteWorkflowExecutionDecisionAttributes();
+            decision.CompleteWorkflowExecutionDecisionAttributes.Result <- r
+            response.Decisions.Add(decision)
 
         | ReturnResult.CancelWorkflowExecution(details) ->
-            // Look for possible failure of CancelWorkflowExecution
-            let combinedHistory = FindReturnHistory DecisionTask
+            if blockFlag = false then
+                // Look for possible failure of CancelWorkflowExecution
+                let combinedHistory = FindReturnHistory DecisionTask
 
-            match (combinedHistory) with
-            | h when h.EventType = EventType.CancelWorkflowExecutionFailed ->
-                // A previous attempt was made to cancel this workflow, but it failed
-                // Raise an exception that the decider can process
-                failwith (sprintf "CancelWorkflowExecutionFailed, %s" (h.CancelWorkflowExecutionFailedEventAttributes.Cause.ToString()))
-            | _ ->
-                let decision = new Decision();
-                decision.DecisionType <- DecisionType.CancelWorkflowExecution
-                decision.CancelWorkflowExecutionDecisionAttributes <- new CancelWorkflowExecutionDecisionAttributes();
-                decision.CancelWorkflowExecutionDecisionAttributes.Details <- details
-                response.Decisions.Add(decision)
+                match (combinedHistory) with
+                | h when h.CancelWorkflowExecutionFailedEventAttributes <> null ->
+                    // A previous attempt was made to cancel this workflow, but it failed
+                    // Raise an exception that the decider can process
+                    blockFlag <- true
+                    raise (CancelWorkflowExecutionFailedException(h.CancelWorkflowExecutionFailedEventAttributes))
+                | _ -> ()
+
+            let decision = new Decision();
+            decision.DecisionType <- DecisionType.CancelWorkflowExecution
+            decision.CancelWorkflowExecutionDecisionAttributes <- new CancelWorkflowExecutionDecisionAttributes();
+            decision.CancelWorkflowExecutionDecisionAttributes.Details <- details
+            response.Decisions.Add(decision)
 
         | ReturnResult.FailWorkflowExecution(reason, details) ->
-            // Look for possible failure of FailWorkflowExecution
-            let combinedHistory = FindReturnHistory DecisionTask
+            if blockFlag = false then
+                // Look for possible failure of FailWorkflowExecution
+                let combinedHistory = FindReturnHistory DecisionTask
 
-            match (combinedHistory) with
-            | h when h.EventType = EventType.FailWorkflowExecutionFailed ->
-                // A previous attempt was made to fail this workflow, but it failed
-                // Raise an exception that the decider can process
-                failwith (sprintf "FailWorkflowExecutionFailed, %s" (h.FailWorkflowExecutionFailedEventAttributes.Cause.ToString()))
-            | _ ->
-                let decision = new Decision();
-                decision.DecisionType <- DecisionType.FailWorkflowExecution
-                decision.FailWorkflowExecutionDecisionAttributes <- new FailWorkflowExecutionDecisionAttributes();
-                decision.FailWorkflowExecutionDecisionAttributes.Reason <- reason
-                decision.FailWorkflowExecutionDecisionAttributes.Details <- details
-                response.Decisions.Add(decision)
+                match (combinedHistory) with
+                | h when h.FailWorkflowExecutionFailedEventAttributes <> null ->
+                    // A previous attempt was made to fail this workflow, but it failed
+                    // Raise an exception that the decider can process
+                    blockFlag <- true
+                    raise (FailWorkflowExecutionFailedException(h.FailWorkflowExecutionFailedEventAttributes))
+                | _ -> ()
+
+            let decision = new Decision();
+            decision.DecisionType <- DecisionType.FailWorkflowExecution
+            decision.FailWorkflowExecutionDecisionAttributes <- new FailWorkflowExecutionDecisionAttributes();
+            decision.FailWorkflowExecutionDecisionAttributes.Reason <- reason
+            decision.FailWorkflowExecutionDecisionAttributes.Details <- details
+            response.Decisions.Add(decision)
 
         | ReturnResult.ContinueAsNewWorkflowExecution(attr) ->
-            // Look for possible failure of ContinueAsNewWorkflowExecution
-            let combinedHistory = FindReturnHistory DecisionTask
+            if blockFlag = false then
+                // Look for possible failure of ContinueAsNewWorkflowExecution
+                let combinedHistory = FindReturnHistory DecisionTask
 
-            match (combinedHistory) with
-            | h when h.EventType = EventType.ContinueAsNewWorkflowExecutionFailed ->
-                // A previous attempt was made to continue this workflow as new, but it failed
-                // Raise an exception that the decider can process
-                failwith (sprintf "ContinueAsNewWorkflowExecutionFailed, %s" (h.ContinueAsNewWorkflowExecutionFailedEventAttributes.Cause.ToString()))
-            | _ ->
-                let decision = new Decision();
-                decision.DecisionType <- DecisionType.ContinueAsNewWorkflowExecution
-                decision.ContinueAsNewWorkflowExecutionDecisionAttributes <- new ContinueAsNewWorkflowExecutionDecisionAttributes();
-                response.Decisions.Add(decision)
+                match (combinedHistory) with
+                | h when h.ContinueAsNewWorkflowExecutionFailedEventAttributes <> null ->
+                    // A previous attempt was made to continue this workflow as new, but it failed
+                    // Raise an exception that the decider can process
+                    blockFlag <- true
+                    raise (ContinueAsNewWorkflowExecutionFailedException(h.ContinueAsNewWorkflowExecutionFailedEventAttributes))
+                | _ -> ()
+
+            let decision = new Decision();
+            decision.DecisionType <- DecisionType.ContinueAsNewWorkflowExecution
+            decision.ContinueAsNewWorkflowExecutionDecisionAttributes <- attr;
+            response.Decisions.Add(decision)
 
         response
 

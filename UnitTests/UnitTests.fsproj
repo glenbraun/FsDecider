@@ -76,6 +76,7 @@
     <Compile Include="TestWaitForWorkflowExecutionSignaled.fs" />
     <Compile Include="TestWorkflowExecutionCancelRequested.fs" />
     <Compile Include="TestGetWorkflowExecutionInput.fs" />
+    <Compile Include="TestReturnResult.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
