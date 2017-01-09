@@ -169,7 +169,7 @@ let tests =
 [<EntryPoint>]
 let main argv = 
     TestConfiguration.GenerateOfflineHistory <- true
-    TestConfiguration.IsConnected <- false
+    TestConfiguration.IsConnected <- true
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
