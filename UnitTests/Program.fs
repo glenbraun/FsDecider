@@ -27,14 +27,16 @@ open Fuchu
 // WorkflowExecutionCancelRequested (done)
 // GetWorkflowExecutionInput (done)
 // ReturnResult (done)
+// Zero (done)
 // For Loop
 // While Loop
 // Try Catch
 // Try Finally
 
 let tests = 
-    testList "Primary Decider Actions" [
-            (*
+    testList "Primary Unit Tests" [
+        (*
+        testList "Primary Decider Actions" [
             testList "StartAndWaitForActivityTask" [
                 testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Canceled Activity Task``
@@ -150,7 +152,6 @@ let tests =
                 testCase "GetNonNullInput"      <| TestGetWorkflowExecutionInput.``Get Workflow Execution Input with non-null input``
                 testCase "GetNullInput"         <| TestGetWorkflowExecutionInput.``Get Workflow Execution Input with null input``
             ]
-            *)
 
             testList "ReturnResult" [
                 testCase "RespondDecisionTaskCompleted"         <| TestReturnResult.``Return Result of RespondDecisionTaskCompleted``
@@ -164,7 +165,12 @@ let tests =
                 testCase "ContinueAsNewWorkflowExecutionFailed" <| TestReturnResult.``Return Result of ContinueAsNewWorkflowExecutionFailed``
             ]
         ]
+        *)
         
+        testList "Primary Builder Tests" [
+            testCase "EmptyComputationExpression"         <| TestZero.``An Empty Computation Expression which results in Unit``
+        ]
+    ]
 
 [<EntryPoint>]
 let main argv = 
