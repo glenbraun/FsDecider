@@ -98,7 +98,7 @@ module TestStartAndWaitForActivityTask =
                                                         |> should equal activityInput
 
                 TestHelper.RespondDecisionTaskCompleted resp
-                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(activityResult))
+                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(fun _ -> activityResult))
                 
             | 2 -> 
                 resp.Decisions.Count                    |> should equal 1

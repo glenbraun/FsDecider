@@ -28,7 +28,7 @@ open Fuchu
 // GetWorkflowExecutionInput (done)
 // ReturnResult (done)
 // Zero (done)
-// For Loop
+// For Loop (done)
 // While Loop
 // Try Catch
 // Try Finally
@@ -168,14 +168,25 @@ let tests =
         *)
         
         testList "Primary Builder Tests" [
-            testCase "EmptyComputationExpression"         <| TestZero.``An Empty Computation Expression which results in Unit``
+            (*
+            testList "Zero" [
+                testCase "EmptyComputationExpression"           <| TestZero.``An Empty Computation Expression which results in Unit``
+            ]
+            *)
+
+            testList "For Loop" [
+                testCase "ForToLoopUnitBody"                      <| TestForLoop.``A For To Loop with an empty body expression which results in Unit``
+                testCase "ForInLoopUnitBody"                      <| TestForLoop.``A For In Loop with an empty body expression which results in Unit``
+                testCase "ForToLoopStartWaitActivityBody"         <| TestForLoop.``A For To Loop with a body that Starts and Waits for an Activity Task with unique results per iteration``
+                testCase "ForInLoopStartActivityBody"             <| TestForLoop.``A For In Loop with a body that Starts an Activity Task with unique results per iteration``
+            ]
         ]
     ]
 
 [<EntryPoint>]
 let main argv = 
     TestConfiguration.GenerateOfflineHistory <- true
-    TestConfiguration.IsConnected <- true
+    TestConfiguration.IsConnected <- false
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

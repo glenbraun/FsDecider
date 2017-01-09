@@ -53,7 +53,7 @@ module TestHelper =
             let response = swf.RespondDecisionTaskCompleted(request)
 
             if not (response.HttpStatusCode = System.Net.HttpStatusCode.OK) then
-                failwith "Decision Task Completed request failed in PollAndCompleteActivityTask"
+                failwith "Decision Task Completed request failed in RespondDecisionTaskCompleted"
 
     let StartWorkflowExecutionOnTaskList (workflow:WorkflowType) (workflowId:string) (taskList:TaskList) (input:string option) (lambdaRoleOverride: string option) (childPolicy:ChildPolicy option) = 
         if TestConfiguration.IsConnected then
@@ -74,14 +74,14 @@ module TestHelper =
             let startResponse = swf.StartWorkflowExecution(startRequest)
 
             if not (startResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then
-                failwith "Start Workflow request failed in PollAndCompleteActivityTask"
+                failwith "Start Workflow request failed in StartWorkflowExecutionOnTaskList"
         
             // Return RunId
             startResponse.Run.RunId
         else
             "Offline RunId"
 
-    let  PollAndCompleteActivityTask (activity:ActivityType) (result:string option) =
+    let  PollAndCompleteActivityTask (activity:ActivityType) (result:(ActivityTask -> string) option) =
         if TestConfiguration.IsConnected then
             use swf = TestConfiguration.GetSwfClient()
 
@@ -97,7 +97,7 @@ module TestHelper =
 
             let completedRequest = new RespondActivityTaskCompletedRequest();
             completedRequest.TaskToken <- pollResponse.ActivityTask.TaskToken
-            if result.IsSome then completedRequest.Result <- result.Value
+            if result.IsSome then completedRequest.Result <- (result.Value) (pollResponse.ActivityTask)
 
             let completedResponse = swf.RespondActivityTaskCompleted(completedRequest)
             if not (completedResponse.HttpStatusCode = System.Net.HttpStatusCode.OK) then

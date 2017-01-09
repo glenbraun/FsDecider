@@ -225,7 +225,7 @@ module TestRequestCancelActivityTask =
 
                 TestHelper.RespondDecisionTaskCompleted resp
 
-                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(completedResult))
+                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(fun _ -> completedResult))
 
                 TestHelper.SignalWorkflow runId workflowId signalName "Signal Input"
 
