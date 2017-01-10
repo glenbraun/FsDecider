@@ -8,7 +8,7 @@ open Amazon.SimpleWorkflow.Model
 open FlowSharp.Actions
 
 type FlowSharp = 
-    /// <summary>Start an Activity Task and block further progress until the Activity Task has been Completed, Canceled, TimedOut, or Failed.</summary>
+    /// <summary>Starts an Activity Task and blocks further progress until the Activity Task has Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
     /// <param name="activityId">Required. The activityId of the activity task.
     ///                          The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
@@ -43,7 +43,7 @@ type FlowSharp =
 
         StartAndWaitForActivityTaskAction.Attributes(attr)
 
-    /// <summary>Start an Activity Task but do not block further progress.</summary>
+    /// <summary>Starts an Activity Task but does not block further progress.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
     /// <param name="activityId">Required. The activityId of the activity task.
     ///                          The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
@@ -78,15 +78,25 @@ type FlowSharp =
 
         StartActivityTaskAction.Attributes(attr)
 
-    /// <summary>Wait for an Activity Task and block further progress until the Activity Task has been Completed, Canceled, TimedOut, or Failed.</summary>
+    /// <summary>Waits for an Activity Task and blocks further progress until the Activity Task has been Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="start">Required. The result of a previous StartActivityTask call.</param>
     /// <returns>A WaitForActivityTaskResult of Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
     static member WaitForActivityTask(start:StartActivityTaskResult) =
         WaitForActivityTaskAction.StartResult(start)
 
+    /// <summary>Attempts to cancel a previously scheduled activity task. If the activity task was scheduled but has not been assigned to a worker, then it will be canceled. If the activity task was already assigned to a worker, then the worker will be informed that cancellation has been requested in the response to RecordActivityTaskHeartbeat.</summary>
+    /// <param name="start">Required. The result of a previous StartActivityTask call.</param>
+    /// <returns>A RequestCancelActivityTaskResult of CancelRequested, RequestCancelFailed, Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
     static member RequestCancelActivityTask(start:StartActivityTaskResult) =
         RequestCancelActivityTaskAction.StartResult(start)
 
+    /// <summary>Starts an AWS Lambda Function and blocks further progress until the Lambda Function has Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</summary>
+    /// <param name="id">Required. The SWF id of the AWS Lambda task.
+    ///                  The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
+    /// <param name="name">Required. The name of the AWS Lambda function to invoke.</param>
+    /// <param name="input">The input provided to the AWS Lambda function.</param>
+    /// <param name="startToCloseTimeout">If set, specifies the maximum duration the function may take to execute.</param>
+    /// <returns>A StartAndWaitForLambdaFunctionResult of Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
     static member StartAndWaitForLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:string) =
         let attr = new ScheduleLambdaFunctionDecisionAttributes()
         attr.Id <- id
@@ -96,25 +106,61 @@ type FlowSharp =
 
         StartAndWaitForLambdaFunctionAction.Attributes(attr)
 
+    /// <summary>Starts a timer for this workflow execution and records a TimerStarted event in the history. This timer will fire after the specified delay and record a TimerFired event.</summary>
+    /// <param name="timerId">Required. The unique ID of the timer.
+    ///                       The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
+    /// <param name="startToFireTimeout">Required. The duration to wait before firing the timer.
+    ///                                  The duration is specified in seconds; an integer greater than or equal to 0.</param>
+    /// <returns>A StartTimerResult of Starting, Started, or StartTimerFailed.</returns>
     static member StartTimer(timerId:string, startToFireTimeout:string) =
         let attr = new StartTimerDecisionAttributes()
         attr.TimerId <- timerId
-        attr.StartToFireTimeout <- startToFireTimeout.ToString()
+        attr.StartToFireTimeout <- startToFireTimeout
 
         StartTimerAction.Attributes(attr)
 
+    /// <summary>Cancels a previously started timer and records a TimerCanceled event in the history.</summary>
+    /// <param name="start">Required. The result of a previous StartTimer call.</param>
+    /// <returns>A CancelTimerResult of Canceling, Fired, Canceled, Fired, NotStarted, or CancelTimerFailed.</returns>
     static member CancelTimer(start:StartTimerResult) =
         CancelTimerAction.StartResult(start)
 
+    /// <summary>Waits for a previously started timer and blocks further progress until the timer has been Canceled, Fired, or StartTimerFailed.</summary>
+    /// <param name="start">Required. The result of a previous StartTimer call.</param>
+    /// <returns>A WaitForTimerResult of Canceled, Fired, or StartTimerFailed.</returns>
     static member WaitForTimer(start:StartTimerResult) =
         WaitForTimerAction.StartResult(start)
 
+    /// <summary>Records a MarkerRecorded event in the history. Markers can be used for adding custom information in the history for instance to let deciders know that they do not need to look at the history beyond the marker event.</summary>
+    /// <param name="markerName">Required. The name of the marker.</param>
+    /// <param name="details">Optional. details of the marker.</param>
+    /// <returns>A RecordMarkerResult of Recording, MarkerRecorded, or RecordMarkerFailed.</returns>
     static member RecordMarker(markerName:string, ?details:string) =
         let attr = new RecordMarkerDecisionAttributes(MarkerName=markerName);
         attr.Details <- if details.IsSome then details.Value else null
 
         RecordMarkerAction.Attributes(attr)
 
+    /// <summary>Requests that a child workflow execution be started and records a StartChildWorkflowExecutionInitiated event in the history. The child workflow execution is a separate workflow execution with its own history.</summary>
+    /// <param name="workflowType">Required. The type of the workflow execution to be started.</param>
+    /// <param name="workflowId">Required. The workflowId of the workflow execution.
+    ///                          The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
+    /// <param name="input">The input to be provided to the workflow execution.</param>
+    /// <param name="childPolicy">Optional. If set, specifies the policy to use for the child workflow executions if the workflow execution being started is terminated by calling the TerminateWorkflowExecution action explicitly or due to an expired timeout. This policy overrides the default child policy specified when registering the workflow type using RegisterWorkflowType.</param>
+    /// <param name="lambdaRole">The ARN of an IAM role that authorizes Amazon SWF to invoke AWS Lambda functions.
+    ///                          In order for this workflow execution to invoke AWS Lambda functions, an appropriate IAM role must be specified either as a default for the workflow type or through this field.</param>
+    /// <param name="tagList">The list of tags to associate with the child workflow execution. A maximum of 5 tags can be specified. You can list workflow executions with a specific tag by calling ListOpenWorkflowExecutions or ListClosedWorkflowExecutions and specifying a TagFilter.</param>
+    /// <param name="taskList">The name of the task list to be used for decision tasks of the child workflow execution.
+    ///                        A task list for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default task list was specified at registration time then a fault will be returned.
+    ///                        The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
+    /// <param name="taskPriority">Optional. A task priority that, if set, specifies the priority for a decision task of this workflow execution. This overrides the defaultTaskPriority specified when registering the workflow type. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority.</param>
+    /// <param name="executionStartToCloseTimeout">The total duration for this workflow execution. This overrides the defaultExecutionStartToCloseTimeout specified when registering the workflow type.
+    ///                                            The duration is specified in seconds; an integer greater than or equal to 0. The value "NONE" can be used to specify unlimited duration.
+    ///                                            An execution start-to-close timeout for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default execution start-to-close timeout was specified at registration time then a fault will be returned.</param>
+    /// <param name="taskStartToCloseTimeout">Specifies the maximum duration of decision tasks for this workflow execution. This parameter overrides the defaultTaskStartToCloseTimout specified when registering the workflow type using RegisterWorkflowType.
+    ///                                       The duration is specified in seconds; an integer greater than or equal to 0. The value "NONE" can be used to specify unlimited duration.
+    ///                                       A task start-to-close timeout for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default task start-to-close timeout was specified at registration time then a fault will be returned.</param>
+    /// <returns>A StartChildWorkflowExecutionResult of Scheduling, Initiated, Started, or StartFailed.</returns>
     static member StartChildWorkflowExecution 
         (
         workflowType:WorkflowType,
@@ -142,9 +188,18 @@ type FlowSharp =
 
         StartChildWorkflowExecutionAction.Attributes(attr)
 
+    /// <summary>Waits for a previously started child workflow execution and blocks further progress until the child workflow execution has been Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</summary>
+    /// <param name="start">Required. The result of a previous StartTimer call.</param>
+    /// <returns>A WaitForChildWorkflowExecutionResult of Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</returns>
     static member WaitForChildWorkflowExecution(start:StartChildWorkflowExecutionResult) =
         WaitForChildWorkflowExecutionAction.StartResult(start)
 
+    /// <summary>Requests a signal to be delivered to the specified external workflow execution and records a SignalExternalWorkflowExecutionInitiated event in the history.</summary>
+    /// <param name="signalName">Required. The name of the signal.The target workflow execution will use the signal name and input to process the signal.</param>
+    /// <param name="workflowId">Required. The workflowId of the workflow execution to be signaled.</param>
+    /// <param name="input">Optional. Input data to be provided with the signal. The target workflow execution will use the signal name and input data to process the signal.</param>
+    /// <param name="runId">Optional. The runId of the workflow execution to be signaled.</param>
+    /// <returns>A WorkflowExecutionSignaledResult of Signaled or NotSignaled.</returns>
     static member SignalExternalWorkflowExecution(signalName:string, workflowId:string, ?input:string, ?runId:string) =
         let attr = new SignalExternalWorkflowExecutionDecisionAttributes(SignalName=signalName, WorkflowId=workflowId);
         attr.Input <- if input.IsSome then input.Value else null
@@ -152,6 +207,10 @@ type FlowSharp =
 
         SignalExternalWorkflowExecutionAction.Attributes(attr)
 
+    /// <summary>Requests that a request be made to cancel the specified external workflow execution and records a RequestCancelExternalWorkflowExecutionInitiated event in the history.</summary>
+    /// <param name="workflowId">Required. The workflowId of the external workflow execution to cancel.</param>
+    /// <param name="runId">Optional. The runId of the external workflow execution to cancel.</param>
+    /// <returns>A RequestCancelExternalWorkflowExecutionResult of Requesting, Initiated, Delivered or Failed.</returns>
     static member RequestCancelExternalWorkflowExecution (workflowId:string, ?runId:string) =
         let attr = new RequestCancelExternalWorkflowExecutionDecisionAttributes()
         attr.RunId <- if runId.IsSome then runId.Value else null
@@ -159,15 +218,25 @@ type FlowSharp =
 
         RequestCancelExternalWorkflowExecutionAction.Attributes(attr)
 
+    /// <summary>Determines if an external signal was received for the workflow execution.</summary>
+    /// <param name="signalName">The name of the signal received. The decider can use the signal name and inputs to determine how to the process the signal.</param>
+    /// <returns>A WorkflowExecutionSignaledResult of Signaled, or NotSignaled.</returns>
     static member WorkflowExecutionSignaled(signalName:string) =
         WorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
 
+    /// <summary>Blocks further processing until an external signal was received for the workflow execution.</summary>
+    /// <param name="signalName">The name of the signal received. The decider can use the signal name and inputs to determine how to the process the signal.</param>
+    /// <returns>A WaitForWorkflowExecutionSignaledResult of Signaled.</returns>
     static member WaitForWorkflowExecutionSignaled(signalName:string) =
         WaitForWorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
 
+    /// <summary>Determines if a request to cancel this workflow execution was made.</summary>
+    /// <returns>A WorkflowExecutionCancelRequestedResult of CancelRequested or NotRequested.</returns>
     static member WorkflowExecutionCancelRequested() =
         WorkflowExecutionCancelRequestedAction.Attributes()
 
+    /// <summary>Determines the input provided to the workflow execution (if any).</summary>
+    /// <returns>The workflow execution input or null.</returns>
     static member GetWorkflowExecutionInput() =
         GetWorkflowExecutionInputAction.Attributes()
 
