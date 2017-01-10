@@ -29,13 +29,13 @@ open Fuchu
 // ReturnResult (done)
 // Zero (done)
 // For Loop (done)
-// While Loop
-// Try Catch
-// Try Finally
+// While Loop (done)
+// Try Catch (done)
+// Try Finally (done)
 
 let tests = 
     testList "Primary Unit Tests" [
-        (*
+
         testList "Primary Decider Actions" [
             testList "StartAndWaitForActivityTask" [
                 testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
@@ -165,10 +165,9 @@ let tests =
                 testCase "ContinueAsNewWorkflowExecutionFailed" <| TestReturnResult.``Return Result of ContinueAsNewWorkflowExecutionFailed``
             ]
         ]
-        *)
-        
+
         testList "Primary Builder Tests" [
-            (*
+
             testList "Zero" [
                 testCase "EmptyComputationExpression"           <| TestZero.``An Empty Computation Expression which results in Unit``
             ]
@@ -179,12 +178,24 @@ let tests =
                 testCase "ForToLoopStartWaitActivityBody"         <| TestForLoop.``A For To Loop with a body that Starts and Waits for an Activity Task with unique results per iteration``
                 testCase "ForInLoopStartActivityBody"             <| TestForLoop.``A For In Loop with a body that Starts an Activity Task with unique results per iteration``
             ]
-            *)
 
             testList "While Loop" [
-                ///testCase "WhileLoopUnitBody"                      <| TestWhileLoop.``A While Loop with an empty body expression which results in Unit``
+                //testCase "WhileLoopUnitBody"                      <| TestWhileLoop.``A While Loop with an empty body expression which results in Unit``
                 testCase "WhileLoopRetryActivity"                 <| TestWhileLoop.``A While Loop with a body that tries up to three times for a successful Activity Task completion``
             ]
+
+            testList "Try With" [
+                testCase "TryWithReturnCompleted"                 <| TestTryWith.``A Try With expression with a Return Completed``
+                testCase "TryWithException"                       <| TestTryWith.``A Try With expression with an exception raised in the body``
+                testCase "TryWithReturnException"                 <| TestTryWith.``A Try With expression with an excpetion from a ContinueAsNew``
+            ]
+    
+            testList "Try Finally" [
+                testCase "TryFinallyUnitBody"                     <| TestTryFinally.``A Try Finally expression with a body of Unit``
+                testCase "TryFinallyWithActivity"                 <| TestTryFinally.``A Try Finally expression with a Start and Wait for Activity Task``
+                testCase "TryFinallyContinueAsNew"                <| TestTryFinally.``A Try Finally expression with an excpetion from a ContinueAsNew``
+            ]
+            
         ]
     ]
 

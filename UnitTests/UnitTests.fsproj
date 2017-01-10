@@ -80,6 +80,8 @@
     <Compile Include="TestZero.fs" />
     <Compile Include="TestForLoop.fs" />
     <Compile Include="TestWhileLoop.fs" />
+    <Compile Include="TestTryWith.fs" />
+    <Compile Include="TestTryFinally.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

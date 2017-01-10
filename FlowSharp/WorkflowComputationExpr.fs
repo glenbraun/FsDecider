@@ -724,6 +724,7 @@ type Builder (DecisionTask:DecisionTask) =
             | h when h.CompleteWorkflowExecutionFailedEventAttributes <> null ->
                 // A previous attempt was made to complete this workflow, but it failed
                 // Raise an exception that the decider can process
+                blockFlag <- false
                 AddExceptionEventId (h.EventId)
                 raise (CompleteWorkflowExecutionFailedException(h.CompleteWorkflowExecutionFailedEventAttributes))
 
@@ -739,6 +740,7 @@ type Builder (DecisionTask:DecisionTask) =
             | h when h.CancelWorkflowExecutionFailedEventAttributes <> null ->
                 // A previous attempt was made to cancel this workflow, but it failed
                 // Raise an exception that the decider can process
+                blockFlag <- false
                 AddExceptionEventId (h.EventId)
                 raise (CancelWorkflowExecutionFailedException(h.CancelWorkflowExecutionFailedEventAttributes))
 
@@ -754,6 +756,7 @@ type Builder (DecisionTask:DecisionTask) =
             | h when h.FailWorkflowExecutionFailedEventAttributes <> null ->
                 // A previous attempt was made to fail this workflow, but it failed
                 // Raise an exception that the decider can process
+                blockFlag <- false
                 AddExceptionEventId (h.EventId)
                 raise (FailWorkflowExecutionFailedException(h.FailWorkflowExecutionFailedEventAttributes))
             | _ ->
@@ -769,6 +772,7 @@ type Builder (DecisionTask:DecisionTask) =
             | h when h.ContinueAsNewWorkflowExecutionFailedEventAttributes <> null ->
                 // A previous attempt was made to continue this workflow as new, but it failed
                 // Raise an exception that the decider can process
+                blockFlag <- false
                 AddExceptionEventId (h.EventId)
                 raise (ContinueAsNewWorkflowExecutionFailedException(h.ContinueAsNewWorkflowExecutionFailedEventAttributes))
             | _ ->
