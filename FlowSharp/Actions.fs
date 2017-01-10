@@ -5,44 +5,30 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-type WorkflowExecutionSignaledAction =
-    | Attributes of SignalName:string
+type WorkflowExecutionCancelRequestedAction =
+    | Attributes of unit
 
-type WorkflowExecutionSignaledResult =
-    | NotSignaled
-    | Signaled of WorkflowExecutionSignaledEventAttributes
+type WorkflowExecutionCancelRequestedResult =
+    | NotRequested
+    | CancelRequested of WorkflowExecutionCancelRequestedEventAttributes
 
-type WaitForWorkflowExecutionSignaledAction =
-    | Attributes of SignalName:string
+type GetWorkflowExecutionInputAction =
+    | Attributes of unit
 
-type WaitForWorkflowExecutionSignaledResult =
-    | Signaled of WorkflowExecutionSignaledEventAttributes
+type ReturnResult = 
+    | RespondDecisionTaskCompleted
+    | CompleteWorkflowExecution of Result:string
+    | CancelWorkflowExecution of Details:string
+    | FailWorkflowExecution of Reason:string * Details:string
+    | ContinueAsNewWorkflowExecution of ContinueAsNewWorkflowExecutionDecisionAttributes
 
-type RecordMarkerAction = 
-    | Attributes of RecordMarkerDecisionAttributes
+exception CompleteWorkflowExecutionFailedException of CompleteWorkflowExecutionFailedEventAttributes
+exception CancelWorkflowExecutionFailedException of CancelWorkflowExecutionFailedEventAttributes
+exception FailWorkflowExecutionFailedException of FailWorkflowExecutionFailedEventAttributes
+exception ContinueAsNewWorkflowExecutionFailedException of ContinueAsNewWorkflowExecutionFailedEventAttributes
 
-type RecordMarkerResult = 
-    | Recording
-    | RecordMarkerFailed of RecordMarkerFailedEventAttributes
-    | MarkerRecorded of MarkerRecordedEventAttributes
-
-type SignalExternalWorkflowExecutionAction = 
-    | Attributes of SignalExternalWorkflowExecutionDecisionAttributes
-
-type SignalExternalWorkflowExecutionResult = 
-    | Signaling
-    | Initiated of SignalExternalWorkflowExecutionInitiatedEventAttributes
-    | Signaled of ExternalWorkflowExecutionSignaledEventAttributes
-    | Failed of SignalExternalWorkflowExecutionFailedEventAttributes
-
-type RequestCancelExternalWorkflowExecutionAction =
-    | Attributes of RequestCancelExternalWorkflowExecutionDecisionAttributes
-
-type RequestCancelExternalWorkflowExecutionResult =
-    | Requesting
-    | Initiated of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
-    | Delivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
-    | Failed of RequestCancelExternalWorkflowExecutionFailedEventAttributes
+type ScheduleAndWaitForActivityTaskAction =
+    | Attributes of ScheduleActivityTaskDecisionAttributes
 
 type ScheduleActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes
@@ -52,9 +38,6 @@ type ScheduleActivityTaskResult =
     | Scheduling of Activity:ActivityType * ActivityId:string
     | Scheduled of ActivityTaskScheduledEventAttributes
     | Started of Attributes:ActivityTaskStartedEventAttributes * ActivityType:ActivityType * Control:string * ActivityId:string
-
-type ScheduleAndWaitForActivityTaskAction =
-    | Attributes of ScheduleActivityTaskDecisionAttributes
 
 type WaitForActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
@@ -78,6 +61,16 @@ type RequestCancelActivityTaskResult =
     | TimedOut of ActivityTaskTimedOutEventAttributes
     | Failed of ActivityTaskFailedEventAttributes
 
+type ScheduleAndWaitForLambdaFunctionAction =
+    | Attributes of ScheduleLambdaFunctionDecisionAttributes
+
+type ScheduleAndWaitForLambdaFunctionResult =
+    | ScheduleFailed of ScheduleLambdaFunctionFailedEventAttributes
+    | StartFailed of StartLambdaFunctionFailedEventAttributes
+    | Completed of LambdaFunctionCompletedEventAttributes
+    | Failed of LambdaFunctionFailedEventAttributes
+    | TimedOut of LambdaFunctionTimedOutEventAttributes
+
 type StartChildWorkflowExecutionAction =
     | Attributes of StartChildWorkflowExecutionDecisionAttributes
 
@@ -98,15 +91,14 @@ type WaitForChildWorkflowExecutionResult =
     | Failed of ChildWorkflowExecutionFailedEventAttributes
     | Terminated of ChildWorkflowExecutionTerminatedEventAttributes
 
-type ScheduleAndWaitForLambdaFunctionAction =
-    | Attributes of ScheduleLambdaFunctionDecisionAttributes
+type RequestCancelExternalWorkflowExecutionAction =
+    | Attributes of RequestCancelExternalWorkflowExecutionDecisionAttributes
 
-type ScheduleAndWaitForLambdaFunctionResult =
-    | ScheduleFailed of ScheduleLambdaFunctionFailedEventAttributes
-    | StartFailed of StartLambdaFunctionFailedEventAttributes
-    | Completed of LambdaFunctionCompletedEventAttributes
-    | Failed of LambdaFunctionFailedEventAttributes
-    | TimedOut of LambdaFunctionTimedOutEventAttributes
+type RequestCancelExternalWorkflowExecutionResult =
+    | Requesting
+    | Initiated of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
+    | Delivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
+    | Failed of RequestCancelExternalWorkflowExecutionFailedEventAttributes
 
 type StartTimerAction =
     | Attributes of StartTimerDecisionAttributes
@@ -134,24 +126,34 @@ type CancelTimerResult =
     | Canceled of TimerCanceledEventAttributes
     | Fired of TimerFiredEventAttributes
 
-type WorkflowExecutionCancelRequestedAction =
-    | Attributes of unit
+type WorkflowExecutionSignaledAction =
+    | Attributes of SignalName:string
 
-type WorkflowExecutionCancelRequestedResult =
-    | NotRequested
-    | CancelRequested of WorkflowExecutionCancelRequestedEventAttributes
+type WorkflowExecutionSignaledResult =
+    | NotSignaled
+    | Signaled of WorkflowExecutionSignaledEventAttributes
 
-type GetWorkflowExecutionInputAction =
-    | Attributes of unit
+type WaitForWorkflowExecutionSignaledAction =
+    | Attributes of SignalName:string
 
-type ReturnResult = 
-    | RespondDecisionTaskCompleted
-    | CompleteWorkflowExecution of Result:string
-    | CancelWorkflowExecution of Details:string
-    | FailWorkflowExecution of Reason:string * Details:string
-    | ContinueAsNewWorkflowExecution of ContinueAsNewWorkflowExecutionDecisionAttributes
+type WaitForWorkflowExecutionSignaledResult =
+    | Signaled of WorkflowExecutionSignaledEventAttributes
 
-exception CompleteWorkflowExecutionFailedException of CompleteWorkflowExecutionFailedEventAttributes
-exception CancelWorkflowExecutionFailedException of CancelWorkflowExecutionFailedEventAttributes
-exception FailWorkflowExecutionFailedException of FailWorkflowExecutionFailedEventAttributes
-exception ContinueAsNewWorkflowExecutionFailedException of ContinueAsNewWorkflowExecutionFailedEventAttributes
+type SignalExternalWorkflowExecutionAction = 
+    | Attributes of SignalExternalWorkflowExecutionDecisionAttributes
+
+type SignalExternalWorkflowExecutionResult = 
+    | Signaling
+    | Initiated of SignalExternalWorkflowExecutionInitiatedEventAttributes
+    | Signaled of ExternalWorkflowExecutionSignaledEventAttributes
+    | Failed of SignalExternalWorkflowExecutionFailedEventAttributes
+
+type RecordMarkerAction = 
+    | Attributes of RecordMarkerDecisionAttributes
+
+type RecordMarkerResult = 
+    | Recording
+    | RecordMarkerFailed of RecordMarkerFailedEventAttributes
+    | MarkerRecorded of MarkerRecordedEventAttributes
+
+

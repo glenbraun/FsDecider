@@ -8,6 +8,16 @@ open Amazon.SimpleWorkflow.Model
 open FlowSharp.Actions
 
 type FlowSharp = 
+    /// <summary>Determines the input provided to the workflow execution (if any).</summary>
+    /// <returns>The workflow execution input or null.</returns>
+    static member GetWorkflowExecutionInput() =
+        GetWorkflowExecutionInputAction.Attributes()
+
+    /// <summary>Determines if a request to cancel this workflow execution was made.</summary>
+    /// <returns>A WorkflowExecutionCancelRequestedResult of CancelRequested or NotRequested.</returns>
+    static member WorkflowExecutionCancelRequested() =
+        WorkflowExecutionCancelRequestedAction.Attributes()
+
     /// <summary>Schedules an Activity Task and blocks further progress until the Activity Task has Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
     /// <param name="activityId">Required. The activityId of the activity task.
@@ -106,41 +116,6 @@ type FlowSharp =
 
         ScheduleAndWaitForLambdaFunctionAction.Attributes(attr)
 
-    /// <summary>Starts a timer for this workflow execution and records a TimerStarted event in the history. This timer will fire after the specified delay and record a TimerFired event.</summary>
-    /// <param name="timerId">Required. The unique ID of the timer.
-    ///                       The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
-    /// <param name="startToFireTimeout">Required. The duration to wait before firing the timer.
-    ///                                  The duration is specified in seconds; an integer greater than or equal to 0.</param>
-    /// <returns>A StartTimerResult of Starting, Started, or StartTimerFailed.</returns>
-    static member StartTimer(timerId:string, startToFireTimeout:string) =
-        let attr = new StartTimerDecisionAttributes()
-        attr.TimerId <- timerId
-        attr.StartToFireTimeout <- startToFireTimeout
-
-        StartTimerAction.Attributes(attr)
-
-    /// <summary>Cancels a previously started timer and records a TimerCanceled event in the history.</summary>
-    /// <param name="start">Required. The result of a previous StartTimer call.</param>
-    /// <returns>A CancelTimerResult of Canceling, Fired, Canceled, Fired, NotStarted, or CancelTimerFailed.</returns>
-    static member CancelTimer(start:StartTimerResult) =
-        CancelTimerAction.StartResult(start)
-
-    /// <summary>Waits for a previously started timer and blocks further progress until the timer has been Canceled, Fired, or StartTimerFailed.</summary>
-    /// <param name="start">Required. The result of a previous StartTimer call.</param>
-    /// <returns>A WaitForTimerResult of Canceled, Fired, or StartTimerFailed.</returns>
-    static member WaitForTimer(start:StartTimerResult) =
-        WaitForTimerAction.StartResult(start)
-
-    /// <summary>Records a MarkerRecorded event in the history. Markers can be used for adding custom information in the history for instance to let deciders know that they do not need to look at the history beyond the marker event.</summary>
-    /// <param name="markerName">Required. The name of the marker.</param>
-    /// <param name="details">Optional. details of the marker.</param>
-    /// <returns>A RecordMarkerResult of Recording, MarkerRecorded, or RecordMarkerFailed.</returns>
-    static member RecordMarker(markerName:string, ?details:string) =
-        let attr = new RecordMarkerDecisionAttributes(MarkerName=markerName);
-        attr.Details <- if details.IsSome then details.Value else null
-
-        RecordMarkerAction.Attributes(attr)
-
     /// <summary>Requests that a child workflow execution be started and records a StartChildWorkflowExecutionInitiated event in the history. The child workflow execution is a separate workflow execution with its own history.</summary>
     /// <param name="workflowType">Required. The type of the workflow execution to be started.</param>
     /// <param name="workflowId">Required. The workflowId of the workflow execution.
@@ -194,19 +169,6 @@ type FlowSharp =
     static member WaitForChildWorkflowExecution(start:StartChildWorkflowExecutionResult) =
         WaitForChildWorkflowExecutionAction.StartResult(start)
 
-    /// <summary>Requests a signal to be delivered to the specified external workflow execution and records a SignalExternalWorkflowExecutionInitiated event in the history.</summary>
-    /// <param name="signalName">Required. The name of the signal.The target workflow execution will use the signal name and input to process the signal.</param>
-    /// <param name="workflowId">Required. The workflowId of the workflow execution to be signaled.</param>
-    /// <param name="input">Optional. Input data to be provided with the signal. The target workflow execution will use the signal name and input data to process the signal.</param>
-    /// <param name="runId">Optional. The runId of the workflow execution to be signaled.</param>
-    /// <returns>A WorkflowExecutionSignaledResult of Signaled or NotSignaled.</returns>
-    static member SignalExternalWorkflowExecution(signalName:string, workflowId:string, ?input:string, ?runId:string) =
-        let attr = new SignalExternalWorkflowExecutionDecisionAttributes(SignalName=signalName, WorkflowId=workflowId);
-        attr.Input <- if input.IsSome then input.Value else null
-        attr.RunId <- if runId.IsSome then runId.Value else null
-
-        SignalExternalWorkflowExecutionAction.Attributes(attr)
-
     /// <summary>Requests that a request be made to cancel the specified external workflow execution and records a RequestCancelExternalWorkflowExecutionInitiated event in the history.</summary>
     /// <param name="workflowId">Required. The workflowId of the external workflow execution to cancel.</param>
     /// <param name="runId">Optional. The runId of the external workflow execution to cancel.</param>
@@ -217,6 +179,31 @@ type FlowSharp =
         attr.WorkflowId <- workflowId
 
         RequestCancelExternalWorkflowExecutionAction.Attributes(attr)
+
+    /// <summary>Starts a timer for this workflow execution and records a TimerStarted event in the history. This timer will fire after the specified delay and record a TimerFired event.</summary>
+    /// <param name="timerId">Required. The unique ID of the timer.
+    ///                       The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
+    /// <param name="startToFireTimeout">Required. The duration to wait before firing the timer.
+    ///                                  The duration is specified in seconds; an integer greater than or equal to 0.</param>
+    /// <returns>A StartTimerResult of Starting, Started, or StartTimerFailed.</returns>
+    static member StartTimer(timerId:string, startToFireTimeout:string) =
+        let attr = new StartTimerDecisionAttributes()
+        attr.TimerId <- timerId
+        attr.StartToFireTimeout <- startToFireTimeout
+
+        StartTimerAction.Attributes(attr)
+
+    /// <summary>Cancels a previously started timer and records a TimerCanceled event in the history.</summary>
+    /// <param name="start">Required. The result of a previous StartTimer call.</param>
+    /// <returns>A CancelTimerResult of Canceling, Fired, Canceled, Fired, NotStarted, or CancelTimerFailed.</returns>
+    static member CancelTimer(start:StartTimerResult) =
+        CancelTimerAction.StartResult(start)
+
+    /// <summary>Waits for a previously started timer and blocks further progress until the timer has been Canceled, Fired, or StartTimerFailed.</summary>
+    /// <param name="start">Required. The result of a previous StartTimer call.</param>
+    /// <returns>A WaitForTimerResult of Canceled, Fired, or StartTimerFailed.</returns>
+    static member WaitForTimer(start:StartTimerResult) =
+        WaitForTimerAction.StartResult(start)
 
     /// <summary>Determines if an external signal was received for the workflow execution.</summary>
     /// <param name="signalName">The name of the signal received. The decider can use the signal name and inputs to determine how to the process the signal.</param>
@@ -230,13 +217,26 @@ type FlowSharp =
     static member WaitForWorkflowExecutionSignaled(signalName:string) =
         WaitForWorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
 
-    /// <summary>Determines if a request to cancel this workflow execution was made.</summary>
-    /// <returns>A WorkflowExecutionCancelRequestedResult of CancelRequested or NotRequested.</returns>
-    static member WorkflowExecutionCancelRequested() =
-        WorkflowExecutionCancelRequestedAction.Attributes()
+    /// <summary>Requests a signal to be delivered to the specified external workflow execution and records a SignalExternalWorkflowExecutionInitiated event in the history.</summary>
+    /// <param name="signalName">Required. The name of the signal.The target workflow execution will use the signal name and input to process the signal.</param>
+    /// <param name="workflowId">Required. The workflowId of the workflow execution to be signaled.</param>
+    /// <param name="input">Optional. Input data to be provided with the signal. The target workflow execution will use the signal name and input data to process the signal.</param>
+    /// <param name="runId">Optional. The runId of the workflow execution to be signaled.</param>
+    /// <returns>A WorkflowExecutionSignaledResult of Signaled or NotSignaled.</returns>
+    static member SignalExternalWorkflowExecution(signalName:string, workflowId:string, ?input:string, ?runId:string) =
+        let attr = new SignalExternalWorkflowExecutionDecisionAttributes(SignalName=signalName, WorkflowId=workflowId);
+        attr.Input <- if input.IsSome then input.Value else null
+        attr.RunId <- if runId.IsSome then runId.Value else null
 
-    /// <summary>Determines the input provided to the workflow execution (if any).</summary>
-    /// <returns>The workflow execution input or null.</returns>
-    static member GetWorkflowExecutionInput() =
-        GetWorkflowExecutionInputAction.Attributes()
+        SignalExternalWorkflowExecutionAction.Attributes(attr)
+
+    /// <summary>Records a MarkerRecorded event in the history. Markers can be used for adding custom information in the history for instance to let deciders know that they do not need to look at the history beyond the marker event.</summary>
+    /// <param name="markerName">Required. The name of the marker.</param>
+    /// <param name="details">Optional. details of the marker.</param>
+    /// <returns>A RecordMarkerResult of Recording, MarkerRecorded, or RecordMarkerFailed.</returns>
+    static member RecordMarker(markerName:string, ?details:string) =
+        let attr = new RecordMarkerDecisionAttributes(MarkerName=markerName);
+        attr.Details <- if details.IsSome then details.Value else null
+
+        RecordMarkerAction.Attributes(attr)
 
