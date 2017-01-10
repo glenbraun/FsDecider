@@ -465,7 +465,7 @@ module TestWaitForChildWorkflowExecution =
         let workflowId = "Wait for Child Workflow Execution with result of TimedOut"
         let childWorkflowId = "Child of " + workflowId
         let childInput = "Test Child Input"
-        let childExecutionStartToCloseTimeout = 5u
+        let childExecutionStartToCloseTimeout = "5"
         let childTimeoutType = WorkflowExecutionTimeoutType.START_TO_CLOSE
         let childTaskList = TaskList(Name="Child")
         let signalName = "Test Signal"

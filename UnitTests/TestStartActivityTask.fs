@@ -41,8 +41,8 @@ module TestStartActivityTask =
             // Start and Wait for an Activity Task
             let! result = FlowSharp.StartActivityTask (
                             TestConfiguration.TestActivityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -110,8 +110,8 @@ module TestStartActivityTask =
             // Start Activity Task
             let! result = FlowSharp.StartActivityTask (
                             TestConfiguration.TestActivityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -203,8 +203,8 @@ module TestStartActivityTask =
             // Start Activity Task
             let! result = FlowSharp.StartActivityTask (
                             TestConfiguration.TestActivityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -302,8 +302,8 @@ module TestStartActivityTask =
             // Start Activity Task
             let! result = FlowSharp.StartActivityTask (
                             activityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 

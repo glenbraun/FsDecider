@@ -30,7 +30,8 @@ module TestStartAndWaitForLambdaFunction =
     let ``Start and wait for Lambda Function with result of Completed``() =
         let workflowId = "Start and wait for Lambda Function with result of Completed"
         let lambdaId = "lambda1"
-        let FiveSeconds = 5u
+        let FiveSeconds = "5"
+
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -115,7 +116,7 @@ module TestStartAndWaitForLambdaFunction =
         let lambdaId = "lambda1"
         let lambdaInput = "\"timeout\""
         let timeoutType = LambdaFunctionTimeoutType.START_TO_CLOSE
-        let FiveSeconds = 5u   // Note: Lambda function must run for more than 5 seconds
+        let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -199,7 +200,7 @@ module TestStartAndWaitForLambdaFunction =
         let workflowId = "Start and wait for Lambda Function with result of Failed"
         let lambdaId = "lambda1"
         let lambdaInput = "\"fail\""
-        let FiveSeconds = 5u   // Note: Lambda function must run for more than 5 seconds
+        let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -283,7 +284,7 @@ module TestStartAndWaitForLambdaFunction =
         let workflowId = "Start and wait for Lambda Function with result of ScheduleFailed"
         let lambdaId = "lambda1"
         let cause = ScheduleLambdaFunctionFailedCause.ID_ALREADY_IN_USE
-        let FiveSeconds = 5u
+        let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -377,7 +378,7 @@ module TestStartAndWaitForLambdaFunction =
         let lambdaId = "lambda1"
         let lambdaRole = null
         let cause = StartLambdaFunctionFailedCause.ASSUME_ROLE_FAILED
-        let FiveSeconds = 5u
+        let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {

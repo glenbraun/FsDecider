@@ -41,8 +41,8 @@ module TestStartAndWaitForActivityTask =
             // Start and Wait for an Activity Task
             let! result = FlowSharp.StartAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -125,8 +125,8 @@ module TestStartAndWaitForActivityTask =
             // Start and Wait for an Activity Task
             let! result = FlowSharp.StartAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -210,8 +210,8 @@ module TestStartAndWaitForActivityTask =
             // Start and Wait for an Activity Task
             let! result = FlowSharp.StartAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -294,12 +294,12 @@ module TestStartAndWaitForActivityTask =
             // Start and Wait for an Activity Task
             let! result = FlowSharp.StartAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToStartTimeout=5u, // set to 5 second timeout
+                            scheduleToStartTimeout="5", // set to 5 second timeout
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
 
@@ -381,8 +381,8 @@ module TestStartAndWaitForActivityTask =
             // Start and Wait for an Activity Task
             let! result = FlowSharp.StartAndWaitForActivityTask (
                             activityType, 
+                            activityId, 
                             input=activityInput,
-                            activityId=activityId, 
                             taskList=TestConfiguration.TestTaskList, 
                             heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                             scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 

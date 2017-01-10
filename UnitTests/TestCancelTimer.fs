@@ -28,7 +28,7 @@ module TestCancelTimer =
         let workflowId = "Cancel Timer with result of Canceled"
         let signalName = "Test Signal"
         let timerId = "timer1"
-        let startToFireTimeout = uint32(TimeSpan.FromDays(100.0).TotalSeconds)
+        let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -131,7 +131,7 @@ module TestCancelTimer =
         let workflowId = "Cancel Timer with result of Canceling"
         let signalName = "Test Signal"
         let timerId = "timer1"
-        let startToFireTimeout = uint32(TimeSpan.FromDays(100.0).TotalSeconds)
+        let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -217,7 +217,7 @@ module TestCancelTimer =
     let ``Cancel Timer with result of Fired``() =
         let workflowId = "Cancel Timer with result of Fired"
         let timerId = "timer1"
-        let startToFireTimeout = 2u
+        let startToFireTimeout = "2"
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -291,7 +291,7 @@ module TestCancelTimer =
         let signalName = "Test Signal"
         let timerId = "timer1"
         let cause = StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE
-        let startToFireTimeout = uint32(TimeSpan.FromDays(100.0).TotalSeconds)
+        let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -397,7 +397,7 @@ module TestCancelTimer =
         let timerId = "timer1"
         let fakeTimerId = "fakeTimer_3CBD02C6-6B59-4787-B935-9AFAA6268457"
         let cause = CancelTimerFailedCause.TIMER_ID_UNKNOWN
-        let startToFireTimeout = uint32(TimeSpan.FromDays(100.0).TotalSeconds)
+        let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {

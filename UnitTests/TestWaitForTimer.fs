@@ -27,7 +27,7 @@ module TestWaitForTimer =
     let ``Wait for Timer with result of Fired``() =
         let workflowId = "Wait for Timer with result of Fired"
         let timerId = "timer1"
-        let startToFireTimeout = 5u
+        let startToFireTimeout = "5"
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -101,7 +101,7 @@ module TestWaitForTimer =
     let ``Wait for Timer with result of Canceled``() =
         let workflowId = "Wait for Timer with result of Canceled"
         let timerId = "timer1"
-        let startToFireTimeout = uint32(TimeSpan.FromDays(100.0).TotalSeconds)
+        let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -202,7 +202,7 @@ module TestWaitForTimer =
         let workflowId = "Wait for Timer with result of StartTimerFailed"
         let timerId = "timer1"
         let inUseTimerId = "Value Will Be Swapped Intentionally"
-        let startToFireTimeout = uint32(TimeSpan.FromDays(100.0).TotalSeconds)
+        let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
         let cause = StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE
 
         let deciderFunc(dt:DecisionTask) =

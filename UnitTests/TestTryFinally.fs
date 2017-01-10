@@ -94,8 +94,8 @@ module TestTryFinally =
                     // Start and Wait for an Activity Task
                     let! result = FlowSharp.StartAndWaitForActivityTask (
                                     TestConfiguration.TestActivityType, 
+                                    activityId, 
                                     input=activityInput,
-                                    activityId=activityId, 
                                     taskList=TestConfiguration.TestTaskList, 
                                     heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                     scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 

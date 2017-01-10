@@ -18,5 +18,5 @@ type TestConfiguration() =
     static member val public TestLambdaInput = "\"Test lambda input\""
     static member val public TestLambdaResult = "\"Hello from Lambda\""
     static member val public TestActivityType = new ActivityType(Name = "Activity1", Version = "2") with get, set
-    static member val public TwentyMinuteTimeout = uint32 ((TimeSpan.FromMinutes(20.0)).TotalSeconds)
+    static member val public TwentyMinuteTimeout = (TimeSpan.FromMinutes(20.0)).TotalSeconds.ToString()
 

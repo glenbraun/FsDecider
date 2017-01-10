@@ -532,7 +532,6 @@ type Builder (DecisionTask:DecisionTask) =
 
         let combinedHistory = FindActivityTaskHistory DecisionTask bindingId (attr.ActivityId)
 
-
         match (combinedHistory) with
         // Completed
         | EventOfType EventType.ActivityTaskCompleted h -> 

@@ -28,7 +28,7 @@ module TestStartTimer =
         let workflowId = "Start Timer with result of Started"
         let signalName = "Test Signal"
         let timerId = "timer1"
-        let startToFireTimeout = 5u
+        let startToFireTimeout = "5"
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -103,7 +103,7 @@ module TestStartTimer =
         let workflowId = "Start Timer with result of Starting"
         let signalName = "Test Signal"
         let timerId = "timer1"
-        let startToFireTimeout = 5u
+        let startToFireTimeout = "5"
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -155,7 +155,7 @@ module TestStartTimer =
         let workflowId = "Start Timer with result of StartTimerFailed"
         let signalName = "Test Signal"
         let timerId = "timer1"
-        let startToFireTimeout = uint32(TimeSpan.FromDays(100.0).TotalSeconds)
+        let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
         let cause = StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE
 
         let deciderFunc(dt:DecisionTask) =
