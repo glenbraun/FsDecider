@@ -5,156 +5,7 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-type WorkflowExecutionSignaledAction =
-    | Attributes of SignalName:string
-
-type WorkflowExecutionSignaledResult =
-    | NotSignaled
-    | Signaled of WorkflowExecutionSignaledEventAttributes
-
-type WaitForWorkflowExecutionSignaledAction =
-    | Attributes of SignalName:string
-
-type WaitForWorkflowExecutionSignaledResult =
-    | Signaled of WorkflowExecutionSignaledEventAttributes
-
-type RecordMarkerAction = 
-    | Attributes of RecordMarkerDecisionAttributes
-
-type RecordMarkerResult = 
-    | Recording
-    | RecordMarkerFailed of RecordMarkerFailedEventAttributes
-    | MarkerRecorded of MarkerRecordedEventAttributes
-
-type SignalExternalWorkflowExecutionAction = 
-    | Attributes of SignalExternalWorkflowExecutionDecisionAttributes
-
-type SignalExternalWorkflowExecutionResult = 
-    | Signaling
-    | Initiated of SignalExternalWorkflowExecutionInitiatedEventAttributes
-    | Signaled of ExternalWorkflowExecutionSignaledEventAttributes
-    | Failed of SignalExternalWorkflowExecutionFailedEventAttributes
-
-type RequestCancelExternalWorkflowExecutionAction =
-    | Attributes of RequestCancelExternalWorkflowExecutionDecisionAttributes
-
-type RequestCancelExternalWorkflowExecutionResult =
-    | Requesting
-    | Initiated of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
-    | Delivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
-    | Failed of RequestCancelExternalWorkflowExecutionFailedEventAttributes
-
-type StartActivityTaskAction =
-    | Attributes of ScheduleActivityTaskDecisionAttributes
-
-type StartActivityTaskResult =
-    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
-    | Scheduling of Activity:ActivityType * ActivityId:string
-    | Scheduled of ActivityTaskScheduledEventAttributes
-    | Started of Attributes:ActivityTaskStartedEventAttributes * ActivityType:ActivityType * Control:string * ActivityId:string
-
-type StartAndWaitForActivityTaskAction =
-    | Attributes of ScheduleActivityTaskDecisionAttributes
-
-type WaitForActivityTaskAction =
-    | StartResult of StartActivityTaskResult
-
-type WaitForActivityTaskResult =
-    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
-    | Completed of ActivityTaskCompletedEventAttributes
-    | Canceled of ActivityTaskCanceledEventAttributes
-    | TimedOut of ActivityTaskTimedOutEventAttributes
-    | Failed of ActivityTaskFailedEventAttributes
-
-type RequestCancelActivityTaskAction =
-    | StartResult of StartActivityTaskResult
-
-type RequestCancelActivityTaskResult =
-    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
-    | RequestCancelFailed of RequestCancelActivityTaskFailedEventAttributes
-    | CancelRequested
-    | Completed of ActivityTaskCompletedEventAttributes
-    | Canceled of ActivityTaskCanceledEventAttributes
-    | TimedOut of ActivityTaskTimedOutEventAttributes
-    | Failed of ActivityTaskFailedEventAttributes
-
-type StartChildWorkflowExecutionAction =
-    | Attributes of StartChildWorkflowExecutionDecisionAttributes
-
-type StartChildWorkflowExecutionResult =
-    | Scheduling 
-    | StartFailed of StartChildWorkflowExecutionFailedEventAttributes
-    | Initiated of StartChildWorkflowExecutionInitiatedEventAttributes
-    | Started of Attributes:ChildWorkflowExecutionStartedEventAttributes * Control:string
-
-type WaitForChildWorkflowExecutionAction =
-    | StartResult of StartChildWorkflowExecutionResult
-
-type WaitForChildWorkflowExecutionResult =
-    | StartFailed of StartChildWorkflowExecutionFailedEventAttributes
-    | Completed of ChildWorkflowExecutionCompletedEventAttributes
-    | Canceled of ChildWorkflowExecutionCanceledEventAttributes
-    | TimedOut of ChildWorkflowExecutionTimedOutEventAttributes
-    | Failed of ChildWorkflowExecutionFailedEventAttributes
-    | Terminated of ChildWorkflowExecutionTerminatedEventAttributes
-
-type StartAndWaitForLambdaFunctionAction =
-    | Attributes of ScheduleLambdaFunctionDecisionAttributes
-
-type StartAndWaitForLambdaFunctionResult =
-    | ScheduleFailed of ScheduleLambdaFunctionFailedEventAttributes
-    | StartFailed of StartLambdaFunctionFailedEventAttributes
-    | Completed of LambdaFunctionCompletedEventAttributes
-    | Failed of LambdaFunctionFailedEventAttributes
-    | TimedOut of LambdaFunctionTimedOutEventAttributes
-
-type StartTimerAction =
-    | Attributes of StartTimerDecisionAttributes
-
-type StartTimerResult =
-    | StartTimerFailed of StartTimerFailedEventAttributes
-    | Starting
-    | Started of TimerStartedEventAttributes
-
-type WaitForTimerAction =
-    | StartResult of StartTimerResult
-
-type WaitForTimerResult =
-    | StartTimerFailed of StartTimerFailedEventAttributes
-    | Canceled of TimerCanceledEventAttributes
-    | Fired of TimerFiredEventAttributes
-
-type CancelTimerAction =
-    | StartResult of StartTimerResult
-
-type CancelTimerResult =
-    | NotStarted
-    | CancelTimerFailed of CancelTimerFailedEventAttributes
-    | Canceling
-    | Canceled of TimerCanceledEventAttributes
-    | Fired of TimerFiredEventAttributes
-
-type WorkflowExecutionCancelRequestedAction =
-    | Attributes of unit
-
-type WorkflowExecutionCancelRequestedResult =
-    | NotRequested
-    | CancelRequested of WorkflowExecutionCancelRequestedEventAttributes
-
-type GetWorkflowExecutionInputAction =
-    | Attributes of unit
-
-type ReturnResult = 
-    | RespondDecisionTaskCompleted
-    | CompleteWorkflowExecution of Result:string
-    | CancelWorkflowExecution of Details:string
-    | FailWorkflowExecution of Reason:string * Details:string
-    | ContinueAsNewWorkflowExecution of ContinueAsNewWorkflowExecutionDecisionAttributes
-
-exception CompleteWorkflowExecutionFailedException of CompleteWorkflowExecutionFailedEventAttributes
-exception CancelWorkflowExecutionFailedException of CancelWorkflowExecutionFailedEventAttributes
-exception FailWorkflowExecutionFailedException of FailWorkflowExecutionFailedEventAttributes
-exception ContinueAsNewWorkflowExecutionFailedException of ContinueAsNewWorkflowExecutionFailedEventAttributes
+open FlowSharp.Actions
 
 type FlowSharp = 
     static member StartAndWaitForActivityTask(activity:ActivityType, ?input:string, ?activityId:string, ?heartbeatTimeout:uint32, ?scheduleToCloseTimeout:uint32, ?scheduleToStartTimeout:uint32, ?startToCloseTimeout:uint32, ?taskList:TaskList, ?taskPriority:int) =
@@ -695,6 +546,12 @@ type Builder (DecisionTask:DecisionTask) =
         // Return the combined history
         combinedHistory
 
+    let (|EventOfType|_|) (etype:EventType) (hev:HistoryEvent) =
+        if hev.EventType = etype then
+            Some(hev)
+        else
+            None
+
     member this.Delay(f) =
         if DecisionTask.TaskToken = null then 
             // When PollForDecisionTask times out, the TaskToken is null. There's nothing to decide in this case so null is returned.
@@ -794,21 +651,22 @@ type Builder (DecisionTask:DecisionTask) =
 
         let combinedHistory = FindActivityTaskHistory DecisionTask bindingId (attr.ActivityId)
 
+
         match (combinedHistory) with
         // Completed
-        | h when h.EventType = EventType.ActivityTaskCompleted -> 
+        | EventOfType EventType.ActivityTaskCompleted h -> 
             f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes))
 
         // TimedOut
-        | h when h.EventType = EventType.ActivityTaskTimedOut ->
+        | EventOfType EventType.ActivityTaskTimedOut h -> 
             f(WaitForActivityTaskResult.TimedOut(h.ActivityTaskTimedOutEventAttributes))
 
         // Canceled
-        | h when h.EventType = EventType.ActivityTaskCanceled ->
+        | EventOfType EventType.ActivityTaskCanceled h -> 
             f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes))
 
         // Failed
-        | h when h.EventType = EventType.ActivityTaskFailed ->
+        | EventOfType EventType.ActivityTaskFailed h -> 
             f(WaitForActivityTaskResult.Failed(h.ActivityTaskFailedEventAttributes))
 
         // ScheduleActivityTaskFailed
@@ -874,19 +732,19 @@ type Builder (DecisionTask:DecisionTask) =
 
             match (combinedHistory) with
             // Completed
-            | h when h.EventType = EventType.ActivityTaskCompleted -> 
+            | EventOfType EventType.ActivityTaskCompleted h -> 
                 f(WaitForActivityTaskResult.Completed(h.ActivityTaskCompletedEventAttributes))
 
             // TimedOut
-            | h when h.EventType = EventType.ActivityTaskTimedOut ->
+            | EventOfType EventType.ActivityTaskTimedOut h -> 
                 f(WaitForActivityTaskResult.TimedOut(h.ActivityTaskTimedOutEventAttributes))
 
             // Canceled
-            | h when h.EventType = EventType.ActivityTaskCanceled ->
+            | EventOfType EventType.ActivityTaskCanceled h -> 
                 f(WaitForActivityTaskResult.Canceled(h.ActivityTaskCanceledEventAttributes))
 
             // Failed
-            | h when h.EventType = EventType.ActivityTaskFailed ->
+            | EventOfType EventType.ActivityTaskFailed h -> 
                 f(WaitForActivityTaskResult.Failed(h.ActivityTaskFailedEventAttributes))
 
             // ScheduleActivityTaskFailed
@@ -997,11 +855,11 @@ type Builder (DecisionTask:DecisionTask) =
             f(StartAndWaitForLambdaFunctionResult.Completed(h.LambdaFunctionCompletedEventAttributes))
 
         // Lambda Function TimedOut
-        | h when h.EventType = EventType.LambdaFunctionTimedOut ->
+        | EventOfType EventType.LambdaFunctionTimedOut h -> 
             f(StartAndWaitForLambdaFunctionResult.TimedOut(h.LambdaFunctionTimedOutEventAttributes))
 
         // Lambda Function Failed
-        | h when h.EventType = EventType.LambdaFunctionFailed ->
+        | EventOfType EventType.LambdaFunctionFailed h -> 
             f(StartAndWaitForLambdaFunctionResult.Failed(h.LambdaFunctionFailedEventAttributes))
 
         // Not Scheduled
@@ -1055,11 +913,11 @@ type Builder (DecisionTask:DecisionTask) =
 
             match (combinedHistory) with
             // TimerCanceled
-            | h when h.EventType = EventType.TimerCanceled ->
+            | EventOfType EventType.TimerCanceled h -> 
                 f(CancelTimerResult.Canceled(h.TimerCanceledEventAttributes))
 
             // TimerFired, could have fired before canceled
-            | h when h.EventType = EventType.TimerFired ->
+            | EventOfType EventType.TimerFired h -> 
                 f(CancelTimerResult.Fired(h.TimerFiredEventAttributes))
 
             // CancelTimerFailed
@@ -1095,11 +953,11 @@ type Builder (DecisionTask:DecisionTask) =
 
             match (combinedHistory) with
             // TimerFired
-            | h when h.EventType = EventType.TimerFired -> 
+            | EventOfType EventType.TimerFired h -> 
                 f(WaitForTimerResult.Fired(h.TimerFiredEventAttributes))
 
             // TimerCanceled
-            | h when h.EventType = EventType.TimerCanceled ->
+            | EventOfType EventType.TimerCanceled h -> 
                 f(WaitForTimerResult.Canceled(h.TimerCanceledEventAttributes))
 
             // StartTimerFailed
@@ -1190,23 +1048,23 @@ type Builder (DecisionTask:DecisionTask) =
 
             match (combinedHistory) with
             // Completed
-            | h when h.EventType = EventType.ChildWorkflowExecutionCompleted -> 
+            | EventOfType EventType.ChildWorkflowExecutionCompleted h -> 
                 f(WaitForChildWorkflowExecutionResult.Completed(h.ChildWorkflowExecutionCompletedEventAttributes))
 
             // TimedOut
-            | h when h.EventType = EventType.ChildWorkflowExecutionTimedOut ->
+            | EventOfType EventType.ChildWorkflowExecutionTimedOut h -> 
                 f(WaitForChildWorkflowExecutionResult.TimedOut(h.ChildWorkflowExecutionTimedOutEventAttributes))
 
             // Canceled
-            | h when h.EventType = EventType.ChildWorkflowExecutionCanceled ->
+            | EventOfType EventType.ChildWorkflowExecutionCanceled h -> 
                 f(WaitForChildWorkflowExecutionResult.Canceled(h.ChildWorkflowExecutionCanceledEventAttributes))
 
             // Failed
-            | h when h.EventType = EventType.ChildWorkflowExecutionFailed ->
+            | EventOfType EventType.ChildWorkflowExecutionFailed h -> 
                 f(WaitForChildWorkflowExecutionResult.Failed(h.ChildWorkflowExecutionFailedEventAttributes))
 
             // Terminated
-            | h when h.EventType = EventType.ChildWorkflowExecutionTerminated ->
+            | EventOfType EventType.ChildWorkflowExecutionTerminated h -> 
                 f(WaitForChildWorkflowExecutionResult.Terminated(h.ChildWorkflowExecutionTerminatedEventAttributes))
 
             | _ -> 

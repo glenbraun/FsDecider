@@ -180,7 +180,7 @@ let tests =
             ]
 
             testList "While Loop" [
-                //testCase "WhileLoopUnitBody"                      <| TestWhileLoop.``A While Loop with an empty body expression which results in Unit``
+                testCase "WhileLoopUnitBody"                      <| TestWhileLoop.``A While Loop with an empty body expression which results in Unit``
                 testCase "WhileLoopRetryActivity"                 <| TestWhileLoop.``A While Loop with a body that tries up to three times for a successful Activity Task completion``
             ]
 
@@ -202,7 +202,7 @@ let tests =
 [<EntryPoint>]
 let main argv = 
     TestConfiguration.GenerateOfflineHistory <- true
-    TestConfiguration.IsConnected <- true
+    TestConfiguration.IsConnected <- false
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

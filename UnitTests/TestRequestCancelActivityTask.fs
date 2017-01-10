@@ -1,6 +1,7 @@
 ﻿namespace FlowSharp.UnitTests
 
 open FlowSharp
+open FlowSharp.Actions
 open FlowSharp.UnitTests.TestHelper
 open FlowSharp.UnitTests.OfflineHistory
 
