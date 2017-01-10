@@ -56,7 +56,8 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Actions.fs" />
-    <Compile Include="WorkflowComputationExpr.fs" />
+    <Compile Include="FlowSharp.fs" />
+    <Compile Include="Builder.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
