@@ -172,7 +172,6 @@ let tests =
             testList "Zero" [
                 testCase "EmptyComputationExpression"           <| TestZero.``An Empty Computation Expression which results in Unit``
             ]
-            *)
 
             testList "For Loop" [
                 testCase "ForToLoopUnitBody"                      <| TestForLoop.``A For To Loop with an empty body expression which results in Unit``
@@ -180,13 +179,19 @@ let tests =
                 testCase "ForToLoopStartWaitActivityBody"         <| TestForLoop.``A For To Loop with a body that Starts and Waits for an Activity Task with unique results per iteration``
                 testCase "ForInLoopStartActivityBody"             <| TestForLoop.``A For In Loop with a body that Starts an Activity Task with unique results per iteration``
             ]
+            *)
+
+            testList "While Loop" [
+                ///testCase "WhileLoopUnitBody"                      <| TestWhileLoop.``A While Loop with an empty body expression which results in Unit``
+                testCase "WhileLoopRetryActivity"                 <| TestWhileLoop.``A While Loop with a body that tries up to three times for a successful Activity Task completion``
+            ]
         ]
     ]
 
 [<EntryPoint>]
 let main argv = 
     TestConfiguration.GenerateOfflineHistory <- true
-    TestConfiguration.IsConnected <- false
+    TestConfiguration.IsConnected <- true
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
