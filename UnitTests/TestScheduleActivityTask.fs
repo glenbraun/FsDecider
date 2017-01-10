@@ -13,7 +13,7 @@ open Amazon.SimpleWorkflow.Model
 open NUnit.Framework
 open FsUnit
 
-module TestStartActivityTask =
+module TestScheduleActivityTask =
     let private OfflineHistorySubstitutions =  
         Map.empty<string, string>
         |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
@@ -29,8 +29,8 @@ module TestStartActivityTask =
         |> Map.add "ActivityTaskCanceled.Details" "activityDetails"
 
 
-    let ``Start Activity Task with result of Scheduling``() =
-        let workflowId = "Start Activity Task with result of Scheduling"
+    let ``Schedule Activity Task with result of Scheduling``() =
+        let workflowId = "Schedule Activity Task with result of Scheduling"
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
         let activityResult = "Test Activity 1 Result"
@@ -38,8 +38,8 @@ module TestStartActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartActivityTask (
+            // Schedule and Wait for an Activity Task
+            let! result = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -51,7 +51,7 @@ module TestStartActivityTask =
                         )
 
             match result with
-            | StartActivityTaskResult.Scheduling(activityType, id) 
+            | ScheduleActivityTaskResult.Scheduling(activityType, id) 
                 when activityType.Name = TestConfiguration.TestActivityType.Name &&
                      activityType.Version = TestConfiguration.TestActivityType.Version &&
                      id=activityId -> return "TEST PASS"
@@ -97,8 +97,8 @@ module TestStartActivityTask =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start Activity Task with result of Scheduled``() =
-        let workflowId = "Start Activity Task with result of Scheduled"
+    let ``Schedule Activity Task with result of Scheduled``() =
+        let workflowId = "Schedule Activity Task with result of Scheduled"
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
         let activityResult = "Test Activity 1 Result"
@@ -108,7 +108,7 @@ module TestStartActivityTask =
             FlowSharp.Builder(dt) {
             
             // Start Activity Task
-            let! result = FlowSharp.StartActivityTask (
+            let! result = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -122,7 +122,7 @@ module TestStartActivityTask =
             let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             match result with
-            | StartActivityTaskResult.Scheduled(attr) 
+            | ScheduleActivityTaskResult.Scheduled(attr) 
                 when attr.ActivityId = activityId &&
                      attr.ActivityType.Name = TestConfiguration.TestActivityType.Name &&
                      attr.ActivityType.Version = TestConfiguration.TestActivityType.Version &&
@@ -190,8 +190,8 @@ module TestStartActivityTask =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start Activity Task with result of Started``() =
-        let workflowId = "Start Activity Task with result of Started"
+    let ``Schedule Activity Task with result of Started``() =
+        let workflowId = "Schedule Activity Task with result of Started"
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
         let activityResult = "Test Activity 1 Result"
@@ -201,7 +201,7 @@ module TestStartActivityTask =
             FlowSharp.Builder(dt) {
             
             // Start Activity Task
-            let! result = FlowSharp.StartActivityTask (
+            let! result = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -215,7 +215,7 @@ module TestStartActivityTask =
             let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             match result with
-            | StartActivityTaskResult.Started(attr, at, c, id) 
+            | ScheduleActivityTaskResult.Started(attr, at, c, id) 
                 when attr.Identity = TestConfiguration.TestIdentity &&
                      at.Name = TestConfiguration.TestActivityType.Name &&
                      at.Version = TestConfiguration.TestActivityType.Version &&
@@ -288,8 +288,8 @@ module TestStartActivityTask =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start Activity Task with Schedule Failure``() =
-        let workflowId = "Start Activity Task with Schedule Failure"
+    let ``Schedule Activity Task with Schedule Failure``() =
+        let workflowId = "Schedule Activity Task with Schedule Failure"
         let activityType = ActivityType(Name="ActivityDoesNotExist_D8E3FFCA-E25A-4D2E-B328-584F2A387EF8", Version="1")
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
@@ -299,8 +299,8 @@ module TestStartActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start Activity Task
-            let! result = FlowSharp.StartActivityTask (
+            // Schedule Activity Task
+            let! result = FlowSharp.ScheduleActivityTask (
                             activityType, 
                             activityId, 
                             input=activityInput,
@@ -312,10 +312,10 @@ module TestStartActivityTask =
                         )
 
             match result with
-            | StartActivityTaskResult.Scheduling(_, _) ->
+            | ScheduleActivityTaskResult.Scheduling(_, _) ->
                 return ()
 
-            | StartActivityTaskResult.ScheduleFailed(attr) 
+            | ScheduleActivityTaskResult.ScheduleFailed(attr) 
                 when attr.Cause = activityCause &&
                      attr.ActivityId = activityId &&
                      attr.ActivityType.Name = activityType.Name &&

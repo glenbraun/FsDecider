@@ -84,8 +84,8 @@ module TestWhileLoop =
                 while !tries < 3 do
                     tries := !tries + 1
 
-                    // Start and Wait for an Activity Task
-                    let! result = FlowSharp.StartAndWaitForActivityTask (
+                    // Schedule and Wait for an Activity Task
+                    let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                                     TestConfiguration.TestActivityType, 
                                     activityId, 
                                     input=(!tries).ToString(),

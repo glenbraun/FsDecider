@@ -9,11 +9,11 @@ open Amazon.SimpleWorkflow.Model
 open Fuchu
 
       
-// StartAndWaitForActivityTask (done)
-// StartActivityTask (done)
+// ScheduleAndWaitForActivityTask (done)
+// ScheduleActivityTask (done)
 // WaitForActivityTask (done)
 // RequestCancelActivityTask (done)
-// StartAndWaitForLambdaFunction (done)
+// ScheduleAndWaitForLambdaFunction (done)
 // StartTimer (done)
 // CancelTimer (done)
 // WaitForTimer (done)
@@ -37,19 +37,19 @@ let tests =
     testList "Primary Unit Tests" [
 
         testList "Primary Decider Actions" [
-            testList "StartAndWaitForActivityTask" [
-                testCase "Completed"            <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Completed Activity Task``
-                testCase "Canceled"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Canceled Activity Task``
-                testCase "Failed"               <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Failed Activity Task``
-                testCase "TimedOut"             <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with One Timed Out Activity Task``
-                testCase "ScheduleFailed"       <| TestStartAndWaitForActivityTask.``Start And Wait For Activity Task with Activity Task Schedule Failure``
+            testList "ScheduleAndWaitForActivityTask" [
+                testCase "Completed"            <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Completed Activity Task``
+                testCase "Canceled"             <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Canceled Activity Task``
+                testCase "Failed"               <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Failed Activity Task``
+                testCase "TimedOut"             <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Timed Out Activity Task``
+                testCase "ScheduleFailed"       <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with Activity Task Schedule Failure``
             ]
 
-            testList "StartActivityTask" [
-                testCase "Scheduling"           <| TestStartActivityTask.``Start Activity Task with result of Scheduling``
-                testCase "Scheduled"            <| TestStartActivityTask.``Start Activity Task with result of Scheduled``
-                testCase "Started"              <| TestStartActivityTask.``Start Activity Task with result of Started``
-                testCase "ScheduleFailed"       <| TestStartActivityTask.``Start Activity Task with Schedule Failure``
+            testList "ScheduleActivityTask" [
+                testCase "Scheduling"           <| TestScheduleActivityTask.``Schedule Activity Task with result of Scheduling``
+                testCase "Scheduled"            <| TestScheduleActivityTask.``Schedule Activity Task with result of Scheduled``
+                testCase "Started"              <| TestScheduleActivityTask.``Schedule Activity Task with result of Started``
+                testCase "ScheduleFailed"       <| TestScheduleActivityTask.``Schedule Activity Task with Schedule Failure``
             ]
 
             testList "WaitForActivityTask" [
@@ -70,12 +70,12 @@ let tests =
                 testCase "Failed"               <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Failed``
             ]
 
-            testList "StartAndWaitForLambdaFunction" [
-                testCase "ScheduleFailed"       <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of ScheduleFailed``
-                testCase "StartFailed"          <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of StartFailed``
-                testCase "Completed"            <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of Completed``
-                testCase "Failed"               <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of Failed``
-                testCase "TimedOut"             <| TestStartAndWaitForLambdaFunction.``Start and wait for Lambda Function with result of TimedOut``
+            testList "ScheduleAndWaitForLambdaFunction" [
+                testCase "ScheduleFailed"       <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of ScheduleFailed``
+                testCase "StartFailed"          <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of StartFailed``
+                testCase "Completed"            <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of Completed``
+                testCase "Failed"               <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of Failed``
+                testCase "TimedOut"             <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of TimedOut``
             ]
             
             testList "StartTimer" [

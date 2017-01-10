@@ -8,7 +8,7 @@ open Amazon.SimpleWorkflow.Model
 open FlowSharp.Actions
 
 type FlowSharp = 
-    /// <summary>Starts an Activity Task and blocks further progress until the Activity Task has Completed, Canceled, TimedOut, or Failed.</summary>
+    /// <summary>Schedules an Activity Task and blocks further progress until the Activity Task has Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
     /// <param name="activityId">Required. The activityId of the activity task.
     ///                          The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
@@ -29,7 +29,7 @@ type FlowSharp =
     ///                        The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
     /// <param name="taskPriority">Optional. If set, specifies the priority with which the activity task is to be assigned to a worker. This overrides the defaultTaskPriority specified when registering the activity type using RegisterActivityType. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority.</param>
     /// <returns>A WaitForActivityTaskResult of Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
-    static member StartAndWaitForActivityTask(activityType:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string) =
+    static member ScheduleAndWaitForActivityTask(activityType:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string) =
         let attr = new ScheduleActivityTaskDecisionAttributes()
         attr.ActivityType <- activityType
         attr.ActivityId <- activityId
@@ -41,9 +41,9 @@ type FlowSharp =
         attr.TaskList <- if taskList.IsSome then taskList.Value else null
         attr.TaskPriority <- if taskPriority.IsSome then taskPriority.Value else null
 
-        StartAndWaitForActivityTaskAction.Attributes(attr)
+        ScheduleAndWaitForActivityTaskAction.Attributes(attr)
 
-    /// <summary>Starts an Activity Task but does not block further progress.</summary>
+    /// <summary>Schedules an Activity Task but does not block further progress.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
     /// <param name="activityId">Required. The activityId of the activity task.
     ///                          The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
@@ -63,8 +63,8 @@ type FlowSharp =
     ///                        A task list for this activity task must be specified either as a default for the activity type or through this field. If neither this field is set nor a default task list was specified at registration time then a fault will be returned.
     ///                        The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
     /// <param name="taskPriority">Optional. If set, specifies the priority with which the activity task is to be assigned to a worker. This overrides the defaultTaskPriority specified when registering the activity type using RegisterActivityType. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority.</param>
-    /// <returns>A StartActivityTaskResult of Scheduling, Scheduled, Started, or ScheduleFailed.</returns>
-    static member StartActivityTask(activity:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string) =
+    /// <returns>A ScheduleActivityTaskResult of Scheduling, Scheduled, Started, or ScheduleFailed.</returns>
+    static member ScheduleActivityTask(activity:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string) =
         let attr = new ScheduleActivityTaskDecisionAttributes()
         attr.ActivityType <- activity
         attr.ActivityId <- activityId
@@ -76,35 +76,35 @@ type FlowSharp =
         attr.TaskList <- if taskList.IsSome then taskList.Value else null
         attr.TaskPriority <- if taskPriority.IsSome then taskPriority.Value else null
 
-        StartActivityTaskAction.Attributes(attr)
+        ScheduleActivityTaskAction.Attributes(attr)
 
     /// <summary>Waits for an Activity Task and blocks further progress until the Activity Task has been Completed, Canceled, TimedOut, or Failed.</summary>
-    /// <param name="start">Required. The result of a previous StartActivityTask call.</param>
+    /// <param name="schedule">Required. The result of a previous StartActivityTask call.</param>
     /// <returns>A WaitForActivityTaskResult of Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
-    static member WaitForActivityTask(start:StartActivityTaskResult) =
-        WaitForActivityTaskAction.StartResult(start)
+    static member WaitForActivityTask(schedule:ScheduleActivityTaskResult) =
+        WaitForActivityTaskAction.ScheduleResult(schedule)
 
     /// <summary>Attempts to cancel a previously scheduled activity task. If the activity task was scheduled but has not been assigned to a worker, then it will be canceled. If the activity task was already assigned to a worker, then the worker will be informed that cancellation has been requested in the response to RecordActivityTaskHeartbeat.</summary>
-    /// <param name="start">Required. The result of a previous StartActivityTask call.</param>
+    /// <param name="schedule">Required. The result of a previous StartActivityTask call.</param>
     /// <returns>A RequestCancelActivityTaskResult of CancelRequested, RequestCancelFailed, Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
-    static member RequestCancelActivityTask(start:StartActivityTaskResult) =
-        RequestCancelActivityTaskAction.StartResult(start)
+    static member RequestCancelActivityTask(schedule:ScheduleActivityTaskResult) =
+        RequestCancelActivityTaskAction.ScheduleResult(schedule)
 
-    /// <summary>Starts an AWS Lambda Function and blocks further progress until the Lambda Function has Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</summary>
+    /// <summary>Schedules an AWS Lambda Function and blocks further progress until the Lambda Function has Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</summary>
     /// <param name="id">Required. The SWF id of the AWS Lambda task.
     ///                  The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
     /// <param name="name">Required. The name of the AWS Lambda function to invoke.</param>
     /// <param name="input">The input provided to the AWS Lambda function.</param>
     /// <param name="startToCloseTimeout">If set, specifies the maximum duration the function may take to execute.</param>
-    /// <returns>A StartAndWaitForLambdaFunctionResult of Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
-    static member StartAndWaitForLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:string) =
+    /// <returns>A ScheduleAndWaitForLambdaFunctionResult of Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
+    static member ScheduleAndWaitForLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:string) =
         let attr = new ScheduleLambdaFunctionDecisionAttributes()
         attr.Id <- id
         attr.Input <- if input.IsSome then input.Value else null
         attr.StartToCloseTimeout <- if startToCloseTimeout.IsSome then startToCloseTimeout.Value else null
         attr.Name <- name
 
-        StartAndWaitForLambdaFunctionAction.Attributes(attr)
+        ScheduleAndWaitForLambdaFunctionAction.Attributes(attr)
 
     /// <summary>Starts a timer for this workflow execution and records a TimerStarted event in the history. This timer will fire after the specified delay and record a TimerFired event.</summary>
     /// <param name="timerId">Required. The unique ID of the timer.

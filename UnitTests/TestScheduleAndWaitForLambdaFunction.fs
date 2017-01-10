@@ -13,7 +13,7 @@ open Amazon.SimpleWorkflow.Model
 open NUnit.Framework
 open FsUnit
 
-module TestStartAndWaitForLambdaFunction =
+module TestScheduleAndWaitForLambdaFunction =
     let private OfflineHistorySubstitutions =  
         Map.empty<string, string>
         |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
@@ -27,8 +27,8 @@ module TestStartAndWaitForLambdaFunction =
         |> Map.add "LambdaFunctionScheduledEventAttributes.Input" "TestConfiguration.TestLambdaInput"
         |> Map.add "LambdaFunctionCompletedEventAttributes.Result" "TestConfiguration.TestLambdaResult"
 
-    let ``Start and wait for Lambda Function with result of Completed``() =
-        let workflowId = "Start and wait for Lambda Function with result of Completed"
+    let ``Schedule and wait for Lambda Function with result of Completed``() =
+        let workflowId = "Schedule and wait for Lambda Function with result of Completed"
         let lambdaId = "lambda1"
         let FiveSeconds = "5"
 
@@ -36,8 +36,8 @@ module TestStartAndWaitForLambdaFunction =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForLambdaFunction (
+            // Schedule and Wait for a Lambda Function
+            let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.TestLambdaName,
                             input=TestConfiguration.TestLambdaInput,
@@ -45,7 +45,7 @@ module TestStartAndWaitForLambdaFunction =
                           )
 
             match result with
-            | StartAndWaitForLambdaFunctionResult.Completed(attr) when attr.Result = TestConfiguration.TestLambdaResult -> return "TEST PASS"
+            | ScheduleAndWaitForLambdaFunctionResult.Completed(attr) when attr.Result = TestConfiguration.TestLambdaResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -111,8 +111,8 @@ module TestStartAndWaitForLambdaFunction =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start and wait for Lambda Function with result of TimedOut``() =
-        let workflowId = "Start and wait for Lambda Function with result of TimedOut"
+    let ``Schedule and wait for Lambda Function with result of TimedOut``() =
+        let workflowId = "Schedule and wait for Lambda Function with result of TimedOut"
         let lambdaId = "lambda1"
         let lambdaInput = "\"timeout\""
         let timeoutType = LambdaFunctionTimeoutType.START_TO_CLOSE
@@ -121,8 +121,8 @@ module TestStartAndWaitForLambdaFunction =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForLambdaFunction (
+            // Schedule and Wait for a Lambda Function
+            let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.TestLambdaName,
                             input=lambdaInput,
@@ -130,7 +130,7 @@ module TestStartAndWaitForLambdaFunction =
                           )
 
             match result with
-            | StartAndWaitForLambdaFunctionResult.TimedOut(attr) when attr.TimeoutType = timeoutType -> return "TEST PASS"
+            | ScheduleAndWaitForLambdaFunctionResult.TimedOut(attr) when attr.TimeoutType = timeoutType -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -196,8 +196,8 @@ module TestStartAndWaitForLambdaFunction =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Remove("LambdaFunctionScheduledEventAttributes.Input").Add("LambdaFunctionScheduledEventAttributes.Input", "lambdaInput"))
 
-    let ``Start and wait for Lambda Function with result of Failed``() =
-        let workflowId = "Start and wait for Lambda Function with result of Failed"
+    let ``Schedule and wait for Lambda Function with result of Failed``() =
+        let workflowId = "Schedule and wait for Lambda Function with result of Failed"
         let lambdaId = "lambda1"
         let lambdaInput = "\"fail\""
         let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
@@ -205,8 +205,8 @@ module TestStartAndWaitForLambdaFunction =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForLambdaFunction (
+            // Schedule and Wait for a Lambda Function
+            let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.TestLambdaName,
                             input=lambdaInput,
@@ -214,7 +214,7 @@ module TestStartAndWaitForLambdaFunction =
                           )
 
             match result with
-            | StartAndWaitForLambdaFunctionResult.Failed(attr) -> return "TEST PASS"
+            | ScheduleAndWaitForLambdaFunctionResult.Failed(attr) -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -280,8 +280,8 @@ module TestStartAndWaitForLambdaFunction =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Remove("LambdaFunctionScheduledEventAttributes.Input").Add("LambdaFunctionScheduledEventAttributes.Input", "lambdaInput"))
 
-    let ``Start and wait for Lambda Function with result of ScheduleFailed``() =
-        let workflowId = "Start and wait for Lambda Function with result of ScheduleFailed"
+    let ``Schedule and wait for Lambda Function with result of ScheduleFailed``() =
+        let workflowId = "Schedule and wait for Lambda Function with result of ScheduleFailed"
         let lambdaId = "lambda1"
         let cause = ScheduleLambdaFunctionFailedCause.ID_ALREADY_IN_USE
         let FiveSeconds = "5"
@@ -289,8 +289,8 @@ module TestStartAndWaitForLambdaFunction =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForLambdaFunction (
+            // Schedule and Wait for a Lambda Function
+            let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.TestLambdaName,
                             input=TestConfiguration.TestLambdaInput,
@@ -299,7 +299,7 @@ module TestStartAndWaitForLambdaFunction =
             
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
-            | StartAndWaitForLambdaFunctionResult.ScheduleFailed(attr) 
+            | ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(attr) 
                 when attr.Id = lambdaId &&
                      attr.Name = TestConfiguration.TestLambdaName &&
                      attr.Cause = cause -> return "TEST PASS"
@@ -373,8 +373,8 @@ module TestStartAndWaitForLambdaFunction =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start and wait for Lambda Function with result of StartFailed``() =
-        let workflowId = "Start and wait for Lambda Function with result of StartFailed"
+    let ``Schedule and wait for Lambda Function with result of StartFailed``() =
+        let workflowId = "Schedule and wait for Lambda Function with result of StartFailed"
         let lambdaId = "lambda1"
         let lambdaRole = null
         let cause = StartLambdaFunctionFailedCause.ASSUME_ROLE_FAILED
@@ -383,8 +383,8 @@ module TestStartAndWaitForLambdaFunction =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForLambdaFunction (
+            // Schedule and Wait for a Lambda Function
+            let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.TestLambdaName,
                             input=TestConfiguration.TestLambdaInput,
@@ -393,7 +393,7 @@ module TestStartAndWaitForLambdaFunction =
             
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
-            | StartAndWaitForLambdaFunctionResult.StartFailed(attr) 
+            | ScheduleAndWaitForLambdaFunctionResult.StartFailed(attr) 
                 when attr.Cause = cause -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }

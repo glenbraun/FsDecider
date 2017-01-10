@@ -525,7 +525,7 @@ type Builder (DecisionTask:DecisionTask) =
     member this.Return(result:unit) = this.Return(ReturnResult.RespondDecisionTaskCompleted)
             
     // Start and Wait for Activity Task
-    member this.Bind(StartAndWaitForActivityTaskAction.Attributes(attr), f:(WaitForActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
+    member this.Bind(ScheduleAndWaitForActivityTaskAction.Attributes(attr), f:(WaitForActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
         // The idea is that with the same decider, the sequence of calls to Bind will be the same. The bindingId is used in the .Control 
         // properties and is used when matching the execution history to a DeciderAction
         let bindingId = NextBindingId()
@@ -570,8 +570,8 @@ type Builder (DecisionTask:DecisionTask) =
             blockFlag <- true
             response
 
-    // Start Activity Task
-    member this.Bind(StartActivityTaskAction.Attributes(attr), f:(StartActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
+    // Schedule Activity Task
+    member this.Bind(ScheduleActivityTaskAction.Attributes(attr), f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
         let bindingId = NextBindingId()
 
         let combinedHistory = FindActivityTaskHistory DecisionTask bindingId (attr.ActivityId)
@@ -581,15 +581,15 @@ type Builder (DecisionTask:DecisionTask) =
         | h when h.ScheduleActivityTaskFailedEventAttributes <> null && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Name = attr.ActivityType.Name && 
                     h.ScheduleActivityTaskFailedEventAttributes.ActivityType.Version = attr.ActivityType.Version ->
-            f(StartActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes))
+            f(ScheduleActivityTaskResult.ScheduleFailed(h.ScheduleActivityTaskFailedEventAttributes))
 
         // Started
         | h when h.ActivityTaskStartedEventAttributes <> null && h.ActivityTaskScheduledEventAttributes <> null->
-            f(StartActivityTaskResult.Started(h.ActivityTaskStartedEventAttributes,  h.ActivityTaskScheduledEventAttributes.ActivityType, h.ActivityTaskScheduledEventAttributes.Control, h.ActivityTaskScheduledEventAttributes.ActivityId))
+            f(ScheduleActivityTaskResult.Started(h.ActivityTaskStartedEventAttributes,  h.ActivityTaskScheduledEventAttributes.ActivityType, h.ActivityTaskScheduledEventAttributes.Control, h.ActivityTaskScheduledEventAttributes.ActivityId))
 
         // Scheduled
         | h when h.ActivityTaskScheduledEventAttributes <> null ->
-            f(StartActivityTaskResult.Scheduled(h.ActivityTaskScheduledEventAttributes))
+            f(ScheduleActivityTaskResult.Scheduled(h.ActivityTaskScheduledEventAttributes))
 
         // Not Scheduled
         | h when h.ActivityTaskScheduledEventAttributes = null ->
@@ -600,12 +600,12 @@ type Builder (DecisionTask:DecisionTask) =
             d.ScheduleActivityTaskDecisionAttributes <- attr
             response.Decisions.Add(d)
                 
-            f(StartActivityTaskResult.Scheduling(Activity=attr.ActivityType, ActivityId=attr.ActivityId))
+            f(ScheduleActivityTaskResult.Scheduling(Activity=attr.ActivityType, ActivityId=attr.ActivityId))
 
         | _ -> failwith "error"
 
     // Wait For Activity Task
-    member this.Bind(WaitForActivityTaskAction.StartResult(result), f:(WaitForActivityTaskResult -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(WaitForActivityTaskAction.ScheduleResult(result), f:(WaitForActivityTaskResult -> RespondDecisionTaskCompletedRequest)) =
 
         let bindWithHistory (activity:ActivityType) (control:string) (activityId:string) =
             let combinedHistory = FindActivityTaskHistory DecisionTask (Convert.ToInt32(control)) activityId
@@ -640,20 +640,20 @@ type Builder (DecisionTask:DecisionTask) =
 
         match result with 
         // If this activity is being scheduled then block. Return the decision to schedule the activity and pick up here next decistion task
-        | StartActivityTaskResult.Scheduling(_,_) -> 
+        | ScheduleActivityTaskResult.Scheduling(_,_) -> 
             blockFlag <- true
             response
 
         // The StartActivityResult checks for scheduling failure so no need to check history again.
-        | StartActivityTaskResult.ScheduleFailed(a) -> f(WaitForActivityTaskResult.ScheduleFailed(a))
+        | ScheduleActivityTaskResult.ScheduleFailed(a) -> f(WaitForActivityTaskResult.ScheduleFailed(a))
 
-        | StartActivityTaskResult.Scheduled(a) ->
+        | ScheduleActivityTaskResult.Scheduled(a) ->
             bindWithHistory (a.ActivityType) (a.Control) (a.ActivityId)
-        | StartActivityTaskResult.Started(a, activityType, control, activityId) ->
+        | ScheduleActivityTaskResult.Started(a, activityType, control, activityId) ->
             bindWithHistory activityType control activityId
 
     // Request Cancel Activity Task 
-    member this.Bind(RequestCancelActivityTaskAction.StartResult(result), f:(RequestCancelActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
+    member this.Bind(RequestCancelActivityTaskAction.ScheduleResult(result), f:(RequestCancelActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
         let bindWithHistory (activity:ActivityType) (control:string) (activityId:string) =
             let combinedHistory = FindActivityTaskHistory DecisionTask (Convert.ToInt32(control)) activityId
 
@@ -702,20 +702,20 @@ type Builder (DecisionTask:DecisionTask) =
 
         match result with 
         // If this activity is being scheduled then block. Return the decision to schedule the activity and pick up here next decistion task
-        | StartActivityTaskResult.Scheduling(_,_) -> 
+        | ScheduleActivityTaskResult.Scheduling(_,_) -> 
             blockFlag <- true
             response
 
         // The StartActivityResult checks for scheduling failure so no need to check history again.
-        | StartActivityTaskResult.ScheduleFailed(a) -> f(RequestCancelActivityTaskResult.ScheduleFailed(a))
+        | ScheduleActivityTaskResult.ScheduleFailed(a) -> f(RequestCancelActivityTaskResult.ScheduleFailed(a))
 
-        | StartActivityTaskResult.Scheduled(a) ->
+        | ScheduleActivityTaskResult.Scheduled(a) ->
             bindWithHistory (a.ActivityType) (a.Control) (a.ActivityId)
-        | StartActivityTaskResult.Started(a, activityType, control, activityId:string) ->
+        | ScheduleActivityTaskResult.Started(a, activityType, control, activityId:string) ->
             bindWithHistory activityType control activityId
 
     // Start and Wait for Lambda Function
-    member this.Bind(StartAndWaitForLambdaFunctionAction.Attributes(attr), f:(StartAndWaitForLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
+    member this.Bind(ScheduleAndWaitForLambdaFunctionAction.Attributes(attr), f:(ScheduleAndWaitForLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
 
         let combinedHistory = FindLambdaFunctionHistory DecisionTask (attr.Id) (attr.Name)
 
@@ -724,23 +724,23 @@ type Builder (DecisionTask:DecisionTask) =
         | h when h.ScheduleLambdaFunctionFailedEventAttributes <> null && 
                     h.ScheduleLambdaFunctionFailedEventAttributes.Id = attr.Id && 
                     h.ScheduleLambdaFunctionFailedEventAttributes.Name = attr.Name -> 
-            f(StartAndWaitForLambdaFunctionResult.ScheduleFailed(h.ScheduleLambdaFunctionFailedEventAttributes))
+            f(ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(h.ScheduleLambdaFunctionFailedEventAttributes))
 
         // StartLambdaFunctionFailed
         | h when h.StartLambdaFunctionFailedEventAttributes <> null -> 
-            f(StartAndWaitForLambdaFunctionResult.StartFailed(h.StartLambdaFunctionFailedEventAttributes))
+            f(ScheduleAndWaitForLambdaFunctionResult.StartFailed(h.StartLambdaFunctionFailedEventAttributes))
 
         // Lambda Function Completed
         | h when h.EventType = EventType.LambdaFunctionCompleted -> 
-            f(StartAndWaitForLambdaFunctionResult.Completed(h.LambdaFunctionCompletedEventAttributes))
+            f(ScheduleAndWaitForLambdaFunctionResult.Completed(h.LambdaFunctionCompletedEventAttributes))
 
         // Lambda Function TimedOut
         | EventOfType EventType.LambdaFunctionTimedOut h -> 
-            f(StartAndWaitForLambdaFunctionResult.TimedOut(h.LambdaFunctionTimedOutEventAttributes))
+            f(ScheduleAndWaitForLambdaFunctionResult.TimedOut(h.LambdaFunctionTimedOutEventAttributes))
 
         // Lambda Function Failed
         | EventOfType EventType.LambdaFunctionFailed h -> 
-            f(StartAndWaitForLambdaFunctionResult.Failed(h.LambdaFunctionFailedEventAttributes))
+            f(ScheduleAndWaitForLambdaFunctionResult.Failed(h.LambdaFunctionFailedEventAttributes))
 
         // Not Scheduled
         | h when h.ScheduleLambdaFunctionFailedEventAttributes = null ->

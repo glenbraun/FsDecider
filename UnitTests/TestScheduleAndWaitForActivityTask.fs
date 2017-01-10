@@ -13,7 +13,7 @@ open Amazon.SimpleWorkflow.Model
 open NUnit.Framework
 open FsUnit
 
-module TestStartAndWaitForActivityTask =
+module TestScheduleAndWaitForActivityTask =
     let private OfflineHistorySubstitutions =  
         Map.empty<string, string>
         |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
@@ -29,8 +29,8 @@ module TestStartAndWaitForActivityTask =
         |> Map.add "ActivityTaskCanceled.Details" "activityDetails"
 
 
-    let ``Start And Wait For Activity Task with One Completed Activity Task``() =
-        let workflowId = "Start And Wait For Activity Task with One Completed Activity Task"
+    let ``Schedule And Wait For Activity Task with One Completed Activity Task``() =
+        let workflowId = "Schedule And Wait For Activity Task with One Completed Activity Task"
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
         let activityResult = "Test Activity 1 Result"
@@ -38,8 +38,8 @@ module TestStartAndWaitForActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForActivityTask (
+            // Schedule and Wait for an Activity Task
+            let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -113,8 +113,8 @@ module TestStartAndWaitForActivityTask =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start And Wait For Activity Task with One Canceled Activity Task``() =
-        let workflowId = "Start And Wait For Activity Task with One Canceled Activity Task"
+    let ``Schedule And Wait For Activity Task with One Canceled Activity Task``() =
+        let workflowId = "Schedule And Wait For Activity Task with One Canceled Activity Task"
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
         let activityDetails = "Test Activity 1 Canceled Details"
@@ -122,8 +122,8 @@ module TestStartAndWaitForActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForActivityTask (
+            // Schedule and Wait for an Activity Task
+            let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -197,8 +197,8 @@ module TestStartAndWaitForActivityTask =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start And Wait For Activity Task with One Failed Activity Task``() =
-        let workflowId = "Start And Wait For Activity Task with One Failed Activity Task"
+    let ``Schedule And Wait For Activity Task with One Failed Activity Task``() =
+        let workflowId = "Schedule And Wait For Activity Task with One Failed Activity Task"
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
         let activityReason = "Test Activity 1 Failed Reason"
@@ -207,8 +207,8 @@ module TestStartAndWaitForActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForActivityTask (
+            // Schedule and Wait for an Activity Task
+            let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -282,8 +282,8 @@ module TestStartAndWaitForActivityTask =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start And Wait For Activity Task with One Timed Out Activity Task``() =
-        let workflowId = "Start And Wait For Activity Task with One Timed Out Activity Task"
+    let ``Schedule And Wait For Activity Task with One Timed Out Activity Task``() =
+        let workflowId = "Schedule And Wait For Activity Task with One Timed Out Activity Task"
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
         let activityTimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START
@@ -291,8 +291,8 @@ module TestStartAndWaitForActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForActivityTask (
+            // Schedule and Wait for an Activity Task
+            let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -368,8 +368,8 @@ module TestStartAndWaitForActivityTask =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Start And Wait For Activity Task with Activity Task Schedule Failure``() =
-        let workflowId = "Start And Wait For Activity Task with Activity Task Schedule Failure"
+    let ``Schedule And Wait For Activity Task with Activity Task Schedule Failure``() =
+        let workflowId = "Schedule And Wait For Activity Task with Activity Task Schedule Failure"
         let activityType = ActivityType(Name="ActivityDoesNotExist_25b71770-7e52-4d06-ba00-75f6475be394", Version="1")
         let activityId = "Test Activity 1"
         let activityInput = "Test Activity 1 Input"
@@ -378,8 +378,8 @@ module TestStartAndWaitForActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! result = FlowSharp.StartAndWaitForActivityTask (
+            // Schedule and Wait for an Activity Task
+            let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                             activityType, 
                             activityId, 
                             input=activityInput,

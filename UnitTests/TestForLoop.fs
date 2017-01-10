@@ -132,8 +132,8 @@ module TestForLoop =
 
             FlowSharp.Builder(dt) {
                 for i = 1 to 2 do
-                    // Start and Wait for an Activity Task
-                    let! result = FlowSharp.StartAndWaitForActivityTask (
+                    // Schedule and Wait for an Activity Task
+                    let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                                     TestConfiguration.TestActivityType, 
                                     activityId, 
                                     input=activityInput,
@@ -247,8 +247,8 @@ module TestForLoop =
 
             FlowSharp.Builder(dt) {
                 for i in [ 1 .. 2 ] do
-                    // Start an Activity Task
-                    let! start = FlowSharp.StartActivityTask (
+                    // Schedule an Activity Task
+                    let! start = FlowSharp.ScheduleActivityTask (
                                     TestConfiguration.TestActivityType, 
                                     activityId + (i.ToString()), 
                                     input=(i.ToString()),
@@ -260,9 +260,9 @@ module TestForLoop =
                                 )
 
                     match start with
-                    | StartActivityTaskResult.Scheduling(_, _) -> if i = 2 then return () else ()
-                    | StartActivityTaskResult.Scheduled(_) -> if i = 2 then return () else ()
-                    | StartActivityTaskResult.Started(attr, t, c, id) ->
+                    | ScheduleActivityTaskResult.Scheduling(_, _) -> if i = 2 then return () else ()
+                    | ScheduleActivityTaskResult.Scheduled(_) -> if i = 2 then return () else ()
+                    | ScheduleActivityTaskResult.Started(attr, t, c, id) ->
                         let! result = FlowSharp.WaitForActivityTask(start)
 
                         match result with 

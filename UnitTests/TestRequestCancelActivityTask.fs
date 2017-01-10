@@ -41,8 +41,8 @@ module TestRequestCancelActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! start = FlowSharp.StartActivityTask (
+            // Schedule an Activity Task
+            let! start = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -157,8 +157,8 @@ module TestRequestCancelActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! start = FlowSharp.StartActivityTask (
+            // Schedule an Activity Task
+            let! start = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -255,8 +255,8 @@ module TestRequestCancelActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! start = FlowSharp.StartActivityTask (
+            // Schedule an Activity Task
+            let! start = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -352,8 +352,8 @@ module TestRequestCancelActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! start = FlowSharp.StartActivityTask (
+            // Schedule an Activity Task
+            let! start = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -447,8 +447,8 @@ module TestRequestCancelActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! start = FlowSharp.StartActivityTask (
+            // Schedule an Activity Task
+            let! start = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -561,8 +561,8 @@ module TestRequestCancelActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! start = FlowSharp.StartActivityTask (
+            // Schedule an Activity Task
+            let! start = FlowSharp.ScheduleActivityTask (
                             activityType, 
                             activityId, 
                             input=activityInput,
@@ -655,8 +655,8 @@ module TestRequestCancelActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
             
-            // Start and Wait for an Activity Task
-            let! start = FlowSharp.StartActivityTask (
+            // Schedule an Activity Task
+            let! start = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 
                             input=activityInput,
@@ -672,7 +672,7 @@ module TestRequestCancelActivityTask =
             // Improper usage here but requried to force RequestCancelFailed 
             let fakeStart = 
                 match start with
-                | StartActivityTaskResult.Started(attr, at, control, id) -> StartActivityTaskResult.Started(attr, at, control, fakeActivityId)
+                | ScheduleActivityTaskResult.Started(attr, at, control, id) -> ScheduleActivityTaskResult.Started(attr, at, control, fakeActivityId)
                 | s -> s
 
             let! cancel = FlowSharp.RequestCancelActivityTask(fakeStart)

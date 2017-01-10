@@ -44,20 +44,20 @@ type RequestCancelExternalWorkflowExecutionResult =
     | Delivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
     | Failed of RequestCancelExternalWorkflowExecutionFailedEventAttributes
 
-type StartActivityTaskAction =
+type ScheduleActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes
 
-type StartActivityTaskResult =
+type ScheduleActivityTaskResult =
     | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
     | Scheduling of Activity:ActivityType * ActivityId:string
     | Scheduled of ActivityTaskScheduledEventAttributes
     | Started of Attributes:ActivityTaskStartedEventAttributes * ActivityType:ActivityType * Control:string * ActivityId:string
 
-type StartAndWaitForActivityTaskAction =
+type ScheduleAndWaitForActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes
 
 type WaitForActivityTaskAction =
-    | StartResult of StartActivityTaskResult
+    | ScheduleResult of ScheduleActivityTaskResult
 
 type WaitForActivityTaskResult =
     | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
@@ -67,7 +67,7 @@ type WaitForActivityTaskResult =
     | Failed of ActivityTaskFailedEventAttributes
 
 type RequestCancelActivityTaskAction =
-    | StartResult of StartActivityTaskResult
+    | ScheduleResult of ScheduleActivityTaskResult
 
 type RequestCancelActivityTaskResult =
     | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
@@ -98,10 +98,10 @@ type WaitForChildWorkflowExecutionResult =
     | Failed of ChildWorkflowExecutionFailedEventAttributes
     | Terminated of ChildWorkflowExecutionTerminatedEventAttributes
 
-type StartAndWaitForLambdaFunctionAction =
+type ScheduleAndWaitForLambdaFunctionAction =
     | Attributes of ScheduleLambdaFunctionDecisionAttributes
 
-type StartAndWaitForLambdaFunctionResult =
+type ScheduleAndWaitForLambdaFunctionResult =
     | ScheduleFailed of ScheduleLambdaFunctionFailedEventAttributes
     | StartFailed of StartLambdaFunctionFailedEventAttributes
     | Completed of LambdaFunctionCompletedEventAttributes
