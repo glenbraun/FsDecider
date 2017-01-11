@@ -59,9 +59,11 @@
     <Compile Include="TestConfiguration.fs" />
     <Compile Include="OfflineHistory.fs" />
     <Compile Include="TestHelper.fs" />
-    <Compile Include="TestScheduleAndWaitForActivityTask.fs" />
     <Compile Include="TestScheduleActivityTask.fs" />
+    <Compile Include="TestScheduleAndWaitForActivityTask.fs" />
     <Compile Include="TestWaitForActivityTask.fs" />
+    <Compile Include="TestWaitForAnyActivityTask.fs" />
+    <Compile Include="TestWaitForAllActivityTask.fs" />
     <Compile Include="TestRequestCancelActivityTask.fs" />
     <Compile Include="TestScheduleAndWaitForLambdaFunction.fs" />
     <Compile Include="TestStartTimer.fs" />

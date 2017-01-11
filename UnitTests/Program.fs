@@ -12,6 +12,8 @@ open Fuchu
 // ScheduleAndWaitForActivityTask (done)
 // ScheduleActivityTask (done)
 // WaitForActivityTask (done)
+// WaitForAnyActivityTasks (done)
+// WaitForAllActivityTasks (done)
 // RequestCancelActivityTask (done)
 // ScheduleAndWaitForLambdaFunction (done)
 // StartTimer (done)
@@ -36,8 +38,19 @@ open Fuchu
 
 let tests = 
     testList "Primary Unit Tests" [
-
+        
         testList "Primary Decider Actions" [
+            
+            testList "ScheduleActivityTask" [
+                testCase "Scheduling"           <| TestScheduleActivityTask.``Schedule Activity Task with result of Scheduling``
+                testCase "Scheduled"            <| TestScheduleActivityTask.``Schedule Activity Task with result of Scheduled``
+                testCase "Started"              <| TestScheduleActivityTask.``Schedule Activity Task with result of Started``
+                testCase "Completed"            <| TestScheduleActivityTask.``Schedule Activity Task with result of Completed``
+                testCase "Canceled"             <| TestScheduleActivityTask.``Schedule Activity Task with result of Canceled``
+                testCase "TimedOut"             <| TestScheduleActivityTask.``Schedule Activity Task with result of TimedOut``
+                testCase "Failed"               <| TestScheduleActivityTask.``Schedule Activity Task with result of Failed``
+                testCase "ScheduleFailed"       <| TestScheduleActivityTask.``Schedule Activity Task with Schedule Failure``
+            ]
             
             testList "ScheduleAndWaitForActivityTask" [
                 testCase "Completed"            <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Completed Activity Task``
@@ -47,13 +60,6 @@ let tests =
                 testCase "ScheduleFailed"       <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with Activity Task Schedule Failure``
             ]
 
-            testList "ScheduleActivityTask" [
-                testCase "Scheduling"           <| TestScheduleActivityTask.``Schedule Activity Task with result of Scheduling``
-                testCase "Scheduled"            <| TestScheduleActivityTask.``Schedule Activity Task with result of Scheduled``
-                testCase "Started"              <| TestScheduleActivityTask.``Schedule Activity Task with result of Started``
-                testCase "ScheduleFailed"       <| TestScheduleActivityTask.``Schedule Activity Task with Schedule Failure``
-            ]
-
             testList "WaitForActivityTask" [
                 testCase "Completed"            <| TestWaitForActivityTask.``Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestWaitForActivityTask.``Wait For Activity Task with One Canceled Activity Task``
@@ -61,17 +67,25 @@ let tests =
                 testCase "TimedOut"             <| TestWaitForActivityTask.``Wait For Activity Task with One Timed Out Activity Task``
                 testCase "ScheduleFailed"       <| TestWaitForActivityTask.``Wait For Activity Task with Activity Task Schedule Failure``
             ]
-
-            testList "RequestCancelActivityTask" [
-                testCase "ScheduleFailed"       <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ScheduleFailed``
-                testCase "RequestCancelFailed"  <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of RequestCancelFailed``
-                testCase "CancelRequested"      <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of CancelRequested``
-                testCase "Completed"            <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Completed``
-                testCase "Canceled"             <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Canceled``
-                testCase "TimedOut"             <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of TimedOut``
-                testCase "Failed"               <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Failed``
+            
+            testList "WaitForAnyActivityTask" [
+                testCase "AllCompleted"         <| TestWaitForAnyActivityTask.``Wait For Any Activity Task with All Completed Activity Tasks``
+                testCase "OneCompleted"         <| TestWaitForAnyActivityTask.``Wait For Any Activity Task with One Completed Activity Tasks``
+                testCase "NoneCompleted"        <| TestWaitForAnyActivityTask.``Wait For Any Activity Task with No Completed Activity Tasks``
             ]
-
+            
+            testList "WaitForAllActivityTask" [
+                testCase "AllCompleted"         <| TestWaitForAllActivityTask.``Wait For All Activity Task with All Completed Activity Tasks``
+                testCase "OneCompleted"         <| TestWaitForAllActivityTask.``Wait For All Activity Task with One Completed Activity Tasks``
+                testCase "NoneCompleted"        <| TestWaitForAllActivityTask.``Wait For All Activity Task with No Completed Activity Tasks``
+            ]
+            
+            testList "RequestCancelActivityTask" [
+                testCase "CancelRequested"      <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of CancelRequested``
+                testCase "RequestCancelFailed"  <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of RequestCancelFailed``
+                testCase "Finished "            <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Finished``
+            ]
+            
             testList "ScheduleAndWaitForLambdaFunction" [
                 testCase "ScheduleFailed"       <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of ScheduleFailed``
                 testCase "StartFailed"          <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of StartFailed``
@@ -175,19 +189,20 @@ let tests =
             
         ]
         
+        
         testList "Primary Builder Tests" [
-
+            
             testList "Zero" [
                 testCase "EmptyComputationExpression"           <| TestZero.``An Empty Computation Expression which results in Unit``
             ]
-
+            
             testList "For Loop" [
                 testCase "ForToLoopUnitBody"                      <| TestForLoop.``A For To Loop with an empty body expression which results in Unit``
                 testCase "ForInLoopUnitBody"                      <| TestForLoop.``A For In Loop with an empty body expression which results in Unit``
                 testCase "ForToLoopStartWaitActivityBody"         <| TestForLoop.``A For To Loop with a body that Starts and Waits for an Activity Task with unique results per iteration``
                 testCase "ForInLoopStartActivityBody"             <| TestForLoop.``A For In Loop with a body that Starts an Activity Task with unique results per iteration``
             ]
-
+            
             testList "While Loop" [
                 testCase "WhileLoopUnitBody"                      <| TestWhileLoop.``A While Loop with an empty body expression which results in Unit``
                 testCase "WhileLoopRetryActivity"                 <| TestWhileLoop.``A While Loop with a body that tries up to three times for a successful Activity Task completion``
@@ -203,10 +218,8 @@ let tests =
                 testCase "TryFinallyUnitBody"                     <| TestTryFinally.``A Try Finally expression with a body of Unit``
                 testCase "TryFinallyWithActivity"                 <| TestTryFinally.``A Try Finally expression with a Start and Wait for Activity Task``
                 testCase "TryFinallyContinueAsNew"                <| TestTryFinally.``A Try Finally expression with an excpetion from a ContinueAsNew``
-            ]
-            
-        ]
-        
+            ]            
+        ]        
     ]
 
 [<EntryPoint>]

@@ -145,7 +145,7 @@ module TestForLoop =
                                 )
 
                     match result with
-                    | WaitForActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> ()
+                    | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> ()
                     | _ -> return "TEST FAIL"
 
                 return "TEST PASS"
@@ -240,39 +240,45 @@ module TestForLoop =
     let ``A For In Loop with a body that Starts an Activity Task with unique results per iteration``() =
         let workflowId = "A For In Loop with a body that Starts an Activity Task with unique results per iteration"
         let activityId = "Test Activity 1"
-        let activityInput = "Test Activity 1 Input"
         let activityResult = "Test Activity 1 Result"
 
         let deciderFunc(dt:DecisionTask) =
 
             FlowSharp.Builder(dt) {
+                let results = ref List.empty<string * ScheduleActivityTaskResult>
+
                 for i in [ 1 .. 2 ] do
+                    let activityInput = (i.ToString())
+
                     // Schedule an Activity Task
-                    let! start = FlowSharp.ScheduleActivityTask (
-                                    TestConfiguration.TestActivityType, 
-                                    activityId + (i.ToString()), 
-                                    input=(i.ToString()),
-                                    taskList=TestConfiguration.TestTaskList, 
-                                    heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                                    scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                                    scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                                    startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
-                                )
+                    let! schedule = FlowSharp.ScheduleActivityTask (
+                                        TestConfiguration.TestActivityType, 
+                                        activityId + (i.ToString()), 
+                                        input=activityInput,
+                                        taskList=TestConfiguration.TestTaskList, 
+                                        heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                        scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                        scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                        startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
+                                    )
 
-                    match start with
-                    | ScheduleActivityTaskResult.Scheduling(_, _) -> if i = 2 then return () else ()
-                    | ScheduleActivityTaskResult.Scheduled(_) -> if i = 2 then return () else ()
-                    | ScheduleActivityTaskResult.Started(attr, t, c, id) ->
-                        let! result = FlowSharp.WaitForActivityTask(start)
+                    results := (activityInput, schedule) :: !results
 
-                        match result with 
-                        | WaitForActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> 
-                            if i = 2 then return "TEST PASS" else ()
-                        | _ -> return "TEST FAIL"
+                do! FlowSharp.WaitForAllActivityTask(!results |> List.map (fun (_, r) -> r))
 
-                    | _ -> return "TEST FAIL"
+                let allCompleted =
+                    !results
+                    |> List.map (
+                        fun (input, result) -> 
+                            match result with
+                            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + input -> true
+                            | _ -> false
+                        )
+                    |> List.forall ((=) true)
 
-                return "TEST FAIL"
+                match allCompleted with
+                | true  -> return "TEST PASS"
+                | false -> return "TEST FAIL"
             }
 
         // OfflineDecisionTask
@@ -290,15 +296,15 @@ module TestForLoop =
                           |> OfflineHistoryEvent (        // EventId = 6
                               ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 12", ActivityType=TestConfiguration.TestActivityType, Control="2", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input="2", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
+                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=6L))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              ActivityTaskCompletedEventAttributes(Result="Test Activity 1 Result1", ScheduledEventId=5L, StartedEventId=7L))
+                              ActivityTaskCompletedEventAttributes(Result="Test Activity 1 Result2", ScheduledEventId=6L, StartedEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 9
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=6L))
+                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              ActivityTaskCompletedEventAttributes(Result="Test Activity 1 Result2", ScheduledEventId=6L, StartedEventId=10L))
+                              ActivityTaskCompletedEventAttributes(Result="Test Activity 1 Result1", ScheduledEventId=5L, StartedEventId=10L))
                           |> OfflineHistoryEvent (        // EventId = 12
                               DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=9L))
                           |> OfflineHistoryEvent (        // EventId = 13

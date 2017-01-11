@@ -34,32 +34,40 @@ type ScheduleActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes
 
 type ScheduleActivityTaskResult =
-    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
-    | Scheduling of Activity:ActivityType * ActivityId:string
+    | Scheduling of ScheduleActivityTaskDecisionAttributes
     | Scheduled of ActivityTaskScheduledEventAttributes
-    | Started of Attributes:ActivityTaskStartedEventAttributes * ActivityType:ActivityType * Control:string * ActivityId:string
-
-type WaitForActivityTaskAction =
-    | ScheduleResult of ScheduleActivityTaskResult
-
-type WaitForActivityTaskResult =
-    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
+    | Started of StartedEvent:ActivityTaskStartedEventAttributes  * ScheduledEvent:ActivityTaskScheduledEventAttributes
     | Completed of ActivityTaskCompletedEventAttributes
     | Canceled of ActivityTaskCanceledEventAttributes
     | TimedOut of ActivityTaskTimedOutEventAttributes
     | Failed of ActivityTaskFailedEventAttributes
+    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
+
+    member this.IsFinished() =
+        match this with
+        | Completed(_) -> true
+        | Canceled(_) -> true
+        | TimedOut(_) -> true
+        | Failed(_) -> true
+        | ScheduleFailed(_) -> true
+        | _ -> false
+
+type WaitForActivityTaskAction =
+    | ScheduleResult of ScheduleActivityTaskResult
+
+type WaitForAnyActivityTasksAction =
+    | ScheduleResults of ScheduleActivityTaskResult list
+
+type WaitForAllActivityTasksAction =
+    | ScheduleResults of ScheduleActivityTaskResult list
 
 type RequestCancelActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
 
 type RequestCancelActivityTaskResult =
-    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
+    | CancelRequested of ActivityTaskCancelRequestedEventAttributes
     | RequestCancelFailed of RequestCancelActivityTaskFailedEventAttributes
-    | CancelRequested
-    | Completed of ActivityTaskCompletedEventAttributes
-    | Canceled of ActivityTaskCanceledEventAttributes
-    | TimedOut of ActivityTaskTimedOutEventAttributes
-    | Failed of ActivityTaskFailedEventAttributes
+    | Finished
 
 type ScheduleAndWaitForLambdaFunctionAction =
     | Attributes of ScheduleLambdaFunctionDecisionAttributes

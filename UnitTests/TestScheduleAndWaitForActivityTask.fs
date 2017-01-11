@@ -51,7 +51,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -135,7 +135,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -220,7 +220,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -304,7 +304,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.TimedOut(attr) 
+            | ScheduleActivityTaskResult.TimedOut(attr) 
                 when attr.TimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START &&
                      attr.Details = null -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -391,7 +391,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | WaitForActivityTaskResult.ScheduleFailed(attr) 
+            | ScheduleActivityTaskResult.ScheduleFailed(attr) 
                 when attr.Cause = activityCause &&
                      attr.ActivityId = activityId &&
                      attr.ActivityType.Name = activityType.Name &&

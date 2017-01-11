@@ -39,22 +39,22 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt) {
             
             // Schedule Activity Task
-            let! start = FlowSharp.ScheduleActivityTask (
-                            TestConfiguration.TestActivityType, 
-                            activityId, 
-                            input=activityInput,
-                            taskList=TestConfiguration.TestTaskList, 
-                            heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
-                        )
+            let! activity = FlowSharp.ScheduleActivityTask (
+                                TestConfiguration.TestActivityType, 
+                                activityId, 
+                                input=activityInput,
+                                taskList=TestConfiguration.TestTaskList, 
+                                heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
+                            )
 
             // Wait for Activity Task
-            let! result = FlowSharp.WaitForActivityTask(start)
+            do! FlowSharp.WaitForActivityTask(activity)
 
-            match result with
-            | WaitForActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
+            match activity with
+            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -126,22 +126,22 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt) {
             
             // Schedule Activity Task
-            let! start = FlowSharp.ScheduleActivityTask (
-                            TestConfiguration.TestActivityType, 
-                            activityId, 
-                            input=activityInput,
-                            taskList=TestConfiguration.TestTaskList, 
-                            heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
-                        )
+            let! activity = FlowSharp.ScheduleActivityTask (
+                                TestConfiguration.TestActivityType, 
+                                activityId, 
+                                input=activityInput,
+                                taskList=TestConfiguration.TestTaskList, 
+                                heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
+                            )
 
             // Wait for Activity Task
-            let! result = FlowSharp.WaitForActivityTask(start)
+            do! FlowSharp.WaitForActivityTask(activity)
 
-            match result with
-            | WaitForActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
+            match activity with
+            | ScheduleActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -214,22 +214,22 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt) {
             
             // Schedule Activity Task
-            let! start = FlowSharp.ScheduleActivityTask (
-                            TestConfiguration.TestActivityType, 
-                            activityId, 
-                            input=activityInput,
-                            taskList=TestConfiguration.TestTaskList, 
-                            heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
-                        )
+            let! activity = FlowSharp.ScheduleActivityTask (
+                                TestConfiguration.TestActivityType, 
+                                activityId, 
+                                input=activityInput,
+                                taskList=TestConfiguration.TestTaskList, 
+                                heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
+                            )
 
             // Wait for Activity Task
-            let! result = FlowSharp.WaitForActivityTask(start)
+            do! FlowSharp.WaitForActivityTask(activity)
 
-            match result with
-            | WaitForActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
+            match activity with
+            | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -301,21 +301,21 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt) {
             
             // Schedule Activity Task
-            let! start = FlowSharp.ScheduleActivityTask (
-                            TestConfiguration.TestActivityType, 
-                            activityId, 
-                            input=activityInput,
-                            taskList=TestConfiguration.TestTaskList, 
-                            heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToStartTimeout="5", // set to 5 second timeout
-                            startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
-                        )
+            let! activity = FlowSharp.ScheduleActivityTask (
+                                TestConfiguration.TestActivityType, 
+                                activityId, 
+                                input=activityInput,
+                                taskList=TestConfiguration.TestTaskList, 
+                                heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToStartTimeout="5", // set to 5 second timeout
+                                startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
+                            )
 
-            let! result = FlowSharp.WaitForActivityTask(start)
+            do! FlowSharp.WaitForActivityTask(activity)
 
-            match result with
-            | WaitForActivityTaskResult.TimedOut(attr) 
+            match activity with
+            | ScheduleActivityTaskResult.TimedOut(attr) 
                 when attr.TimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START &&
                      attr.Details = null -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -390,21 +390,21 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt) {
             
             // Schedule an Activity Task
-            let! start = FlowSharp.ScheduleActivityTask (
-                            activityType, 
-                            activityId, 
-                            input=activityInput,
-                            taskList=TestConfiguration.TestTaskList, 
-                            heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
-                            scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout,
-                            startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
-                        )
+            let! activity = FlowSharp.ScheduleActivityTask (
+                                activityType, 
+                                activityId, 
+                                input=activityInput,
+                                taskList=TestConfiguration.TestTaskList, 
+                                heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout,
+                                startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
+                            )
 
-            let! result = FlowSharp.WaitForActivityTask(start)
+            do! FlowSharp.WaitForActivityTask(activity)
 
-            match result with
-            | WaitForActivityTaskResult.ScheduleFailed(attr) 
+            match activity with
+            | ScheduleActivityTaskResult.ScheduleFailed(attr) 
                 when attr.Cause = activityCause &&
                      attr.ActivityId = activityId &&
                      attr.ActivityType.Name = activityType.Name &&
