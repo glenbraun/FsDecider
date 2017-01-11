@@ -42,7 +42,7 @@ type Builder (DecisionTask:DecisionTask) =
         // Return the combined history
         combinedHistory
 
-    let FindMarkerHistory (decisionTask:DecisionTask) (markerName:string) (details:string) =
+    let FindMarkerHistory (decisionTask:DecisionTask) (markerName:string) =
         let combinedHistory = new HistoryEvent()
 
         let setCommonProperties (h:HistoryEvent) =
@@ -51,7 +51,7 @@ type Builder (DecisionTask:DecisionTask) =
             combinedHistory.EventTimestamp <- h.EventTimestamp
 
         for hev in decisionTask.Events do
-            if hev.EventType = EventType.MarkerRecorded && hev.MarkerRecordedEventAttributes.MarkerName = markerName && hev.MarkerRecordedEventAttributes.Details = details then
+            if hev.EventType = EventType.MarkerRecorded && hev.MarkerRecordedEventAttributes.MarkerName = markerName then
                 setCommonProperties(hev)
                 combinedHistory.MarkerRecordedEventAttributes <- hev.MarkerRecordedEventAttributes
 
@@ -861,9 +861,26 @@ type Builder (DecisionTask:DecisionTask) =
 
         | StartTimerResult.Started(a) -> bindWithHistory (a.TimerId) (a.Control)
 
+    // Marker Recorded
+    member this.Bind(MarkerRecordedAction.Attributes(markerName), f:(MarkerRecordedResult -> RespondDecisionTaskCompletedRequest)) =
+        let combinedHistory = FindMarkerHistory DecisionTask markerName
+
+        match combinedHistory with
+        // RecordMarkerFailed
+        | h when h.RecordMarkerFailedEventAttributes <> null ->
+            f(MarkerRecordedResult.RecordMarkerFailed(h.RecordMarkerFailedEventAttributes))
+
+        // MarkerRecorded
+        | h when h.MarkerRecordedEventAttributes <> null ->
+            f(MarkerRecordedResult.MarkerRecorded(h.MarkerRecordedEventAttributes))
+
+        // The marker was never recorded, record it now
+        | _ ->
+            f(MarkerRecordedResult.NotRecorded)
+
     // Record Marker
     member this.Bind(RecordMarkerAction.Attributes(attr), f:(RecordMarkerResult -> RespondDecisionTaskCompletedRequest)) =
-        let combinedHistory = FindMarkerHistory DecisionTask attr.MarkerName attr.Details
+        let combinedHistory = FindMarkerHistory DecisionTask attr.MarkerName
 
         match combinedHistory with
 

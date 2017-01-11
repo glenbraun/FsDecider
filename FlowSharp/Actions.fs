@@ -148,6 +148,14 @@ type SignalExternalWorkflowExecutionResult =
     | Signaled of ExternalWorkflowExecutionSignaledEventAttributes
     | Failed of SignalExternalWorkflowExecutionFailedEventAttributes
 
+type MarkerRecordedAction = 
+    | Attributes of MarkerName:string
+
+type MarkerRecordedResult = 
+    | NotRecorded
+    | RecordMarkerFailed of RecordMarkerFailedEventAttributes
+    | MarkerRecorded of MarkerRecordedEventAttributes
+
 type RecordMarkerAction = 
     | Attributes of RecordMarkerDecisionAttributes
 
@@ -155,5 +163,4 @@ type RecordMarkerResult =
     | Recording
     | RecordMarkerFailed of RecordMarkerFailedEventAttributes
     | MarkerRecorded of MarkerRecordedEventAttributes
-
 

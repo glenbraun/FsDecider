@@ -17,6 +17,7 @@ open Fuchu
 // StartTimer (done)
 // CancelTimer (done)
 // WaitForTimer (done)
+// MarkerRecorded 
 // RecordMarker (done)
 // StartChildWorkflowExecution (done)
 // WaitForChildWorkflowExecution (done)
@@ -37,6 +38,7 @@ let tests =
     testList "Primary Unit Tests" [
 
         testList "Primary Decider Actions" [
+            
             testList "ScheduleAndWaitForActivityTask" [
                 testCase "Completed"            <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Canceled Activity Task``
@@ -97,7 +99,13 @@ let tests =
                 testCase "Canceled"             <| TestWaitForTimer.``Wait for Timer with result of Canceled``
                 testCase "Fired"                <| TestWaitForTimer.``Wait for Timer with result of Fired``
             ]
-
+            
+            testList "MarkerRecorded" [
+                testCase "NotRecorded"          <| TestMarkerRecorded.``Marker Recorded with result of NotRecorded``
+                testCase "RecordMarkerFailed"   <| TestMarkerRecorded.``Marker Recorded with result of RecordMarkerFailed``
+                testCase "MarkerRecorded"       <| TestMarkerRecorded.``Marker Recorded with result of MarkerRecorded``
+            ]
+            
             testList "RecordMarker" [
                 testCase "Recording"            <| TestRecordMarker.``Record Marker with result of Recording``
                 testCase "RecordMarkerFailed"   <| TestRecordMarker.``Record Marker with result of RecordMarkerFailed``
@@ -164,8 +172,9 @@ let tests =
                 testCase "ContinueAsNewWorkflowExecution"       <| TestReturnResult.``Return Result of ContinueAsNewWorkflowExecution``
                 testCase "ContinueAsNewWorkflowExecutionFailed" <| TestReturnResult.``Return Result of ContinueAsNewWorkflowExecutionFailed``
             ]
+            
         ]
-
+        
         testList "Primary Builder Tests" [
 
             testList "Zero" [
@@ -197,6 +206,7 @@ let tests =
             ]
             
         ]
+        
     ]
 
 [<EntryPoint>]

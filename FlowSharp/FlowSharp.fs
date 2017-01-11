@@ -230,6 +230,12 @@ type FlowSharp =
 
         SignalExternalWorkflowExecutionAction.Attributes(attr)
 
+    /// <summary>Determines if a marker was recorded in the workflow history as the result of a RecordMarker decision.</summary>
+    /// <param name="markerName">Required. The name of the marker.</param>
+    /// <returns>A MarkerRecordedResult of MarkerRecorded, NotRecorded, or RecordMarkerFailed.</returns>
+    static member MarkerRecorded(markerName:string) =
+        MarkerRecordedAction.Attributes(MarkerName=markerName)
+
     /// <summary>Records a MarkerRecorded event in the history. Markers can be used for adding custom information in the history for instance to let deciders know that they do not need to look at the history beyond the marker event.</summary>
     /// <param name="markerName">Required. The name of the marker.</param>
     /// <param name="details">Optional. details of the marker.</param>
