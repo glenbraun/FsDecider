@@ -153,6 +153,7 @@ module TestWaitForChildWorkflowExecution =
 
                         // Sleep a little to let all the history make it to the parent workflow
                         if TestConfiguration.IsConnected then
+                            System.Diagnostics.Debug.WriteLine("Sleep a little to let all the history make it to the parent workflow.")
                             System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5.0))
 
 
@@ -297,6 +298,7 @@ module TestWaitForChildWorkflowExecution =
 
                         // Sleep a little to let all the history make it to the parent workflow
                         if TestConfiguration.IsConnected then
+                            System.Diagnostics.Debug.WriteLine("Sleep a little to let all the history make it to the parent workflow.")
                             System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5.0))
 
                     | _ -> ()
@@ -444,6 +446,7 @@ module TestWaitForChildWorkflowExecution =
 
                         // Sleep a little to let all the history make it to the parent workflow
                         if TestConfiguration.IsConnected then
+                            System.Diagnostics.Debug.WriteLine("Sleep a little to let all the history make it to the parent workflow.")
                             System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5.0))
 
                     | _ -> ()

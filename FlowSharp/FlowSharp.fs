@@ -63,13 +63,13 @@ type FlowSharp =
     /// <param name="scheduledList">Required. A list of results from previous StartActivityTask calls.</param>
     /// <returns>A list of ScheduleActivityTaskResult with atleast one of Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
     static member WaitForAnyActivityTask(scheduledList:ScheduleActivityTaskResult list) =
-        WaitForAnyActivityTasksAction.ScheduleResults(scheduledList)
+        WaitForAnyActivityTaskAction.ScheduleResults(scheduledList)
 
     /// <summary>Waits for a list of Activity Tasks and blocks further progress until all Activity Task have been Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="scheduledList">Required. A list of results from previous StartActivityTask calls.</param>
     /// <returns>A list of ScheduleActivityTaskResult with all of Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
     static member WaitForAllActivityTask(scheduledList:ScheduleActivityTaskResult list) =
-        WaitForAllActivityTasksAction.ScheduleResults(scheduledList)
+        WaitForAllActivityTaskAction.ScheduleResults(scheduledList)
 
     /// <summary>Schedules an Activity Task and blocks further progress until the Activity Task has Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
@@ -176,10 +176,22 @@ type FlowSharp =
         StartChildWorkflowExecutionAction.Attributes(attr)
 
     /// <summary>Waits for a previously started child workflow execution and blocks further progress until the child workflow execution has been Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</summary>
-    /// <param name="start">Required. The result of a previous StartTimer call.</param>
+    /// <param name="start">Required. The result of a previous StartChildWorkflowExecution call.</param>
     /// <returns>A WaitForChildWorkflowExecutionResult of Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</returns>
     static member WaitForChildWorkflowExecution(start:StartChildWorkflowExecutionResult) =
         WaitForChildWorkflowExecutionAction.StartResult(start)
+
+    /// <summary>Waits for a list of previously started child workflow execution and blocks further progress until atleast one child workflow execution has been Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</summary>
+    /// <param name="startList">Required. A list of results of a previous StartChildWorkflowExecution calls.</param>
+    /// <returns>A StartChildWorkflowExecutionResult of Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</returns>
+    static member WaitForAnyChildWorkflowExecution(startList:StartChildWorkflowExecutionResult list) =
+        WaitForAnyChildWorkflowExecutionAction.StartResults(startList)
+
+    /// <summary>Waits for a list of previously started child workflow execution and blocks further progress until atleast all child workflow executions have Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</summary>
+    /// <param name="startList">Required. A list of results of a previous StartChildWorkflowExecution calls.</param>
+    /// <returns>A StartChildWorkflowExecutionResult of Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</returns>
+    static member WaitForAllChildWorkflowExecution(startList:StartChildWorkflowExecutionResult list) =
+        WaitForAllChildWorkflowExecutionAction.StartResults(startList)
 
     /// <summary>Requests that a request be made to cancel the specified external workflow execution and records a RequestCancelExternalWorkflowExecutionInitiated event in the history.</summary>
     /// <param name="workflowId">Required. The workflowId of the external workflow execution to cancel.</param>

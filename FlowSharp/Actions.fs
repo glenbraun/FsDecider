@@ -55,10 +55,10 @@ type ScheduleActivityTaskResult =
 type WaitForActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
 
-type WaitForAnyActivityTasksAction =
+type WaitForAnyActivityTaskAction =
     | ScheduleResults of ScheduleActivityTaskResult list
 
-type WaitForAllActivityTasksAction =
+type WaitForAllActivityTaskAction =
     | ScheduleResults of ScheduleActivityTaskResult list
 
 type RequestCancelActivityTaskAction =
@@ -105,6 +105,12 @@ type StartChildWorkflowExecutionResult =
 
 type WaitForChildWorkflowExecutionAction =
     | StartResult of StartChildWorkflowExecutionResult
+
+type WaitForAnyChildWorkflowExecutionAction =
+    | StartResults of StartChildWorkflowExecutionResult list
+
+type WaitForAllChildWorkflowExecutionAction =
+    | StartResults of StartChildWorkflowExecutionResult list
 
 type RequestCancelExternalWorkflowExecutionAction =
     | Attributes of RequestCancelExternalWorkflowExecutionDecisionAttributes

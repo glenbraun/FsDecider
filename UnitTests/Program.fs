@@ -79,6 +79,18 @@ let tests =
                 testCase "StartFailed"          <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of StartFailed``
             ]
             
+            testList "WaitForAnyChildWorkflowExecution" [
+                testCase "AllCompleted"         <| TestWaitForAnyChildWorkflowExecution.``Wait For Any Child Workflow Execution with All Completed Child Workflow Execution``
+                testCase "OneCompleted"         <| TestWaitForAnyChildWorkflowExecution.``Wait For Any Child Workflow Execution with One Completed Child Workflow Execution``
+                testCase "NoneCompleted"        <| TestWaitForAnyChildWorkflowExecution.``Wait For Any Child Workflow Execution with No Completed Child Workflow Execution``
+            ]
+            
+            testList "WaitForAllChildWorkflowExecution" [
+                testCase "AllCompleted"         <| TestWaitForAllChildWorkflowExecution.``Wait For All Child Workflow Execution with All Completed Child Workflow Execution``
+                testCase "OneCompleted"         <| TestWaitForAllChildWorkflowExecution.``Wait For All Child Workflow Execution with One Completed Child Workflow Execution``
+                testCase "NoneCompleted"        <| TestWaitForAllChildWorkflowExecution.``Wait For All Child Workflow Execution with No Completed Child Workflow Execution``
+            ]
+            
             testList "RequestCancelExternalWorkflowExecution" [
                 testCase "Requesting"           <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Requesting``
                 testCase "Initiated"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Initiated``
@@ -204,7 +216,7 @@ let tests =
 [<EntryPoint>]
 let main argv = 
     TestConfiguration.GenerateOfflineHistory <- true
-    TestConfiguration.IsConnected <- false
+    TestConfiguration.IsConnected <- true
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

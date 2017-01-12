@@ -65,9 +65,6 @@ type Builder (DecisionTask:DecisionTask) =
     let FindChildWorkflowExecutionHistory (decisionTask:DecisionTask) (bindingId:int) (workflowType:WorkflowType) (workflowId:string) =
         let combinedHistory = new HistoryEvent()
         let bindingIdString = bindingId.ToString()
-        let mutable decisionTaskCompletedEventId = 0L
-        let mutable initiatedEventId = 0L
-        let mutable startedEventId = 0L
 
         let setCommonProperties (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
@@ -86,13 +83,10 @@ type Builder (DecisionTask:DecisionTask) =
                                  hev.StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowId = workflowId then
                 setCommonProperties(hev)
                 combinedHistory.StartChildWorkflowExecutionInitiatedEventAttributes <- hev.StartChildWorkflowExecutionInitiatedEventAttributes
-                decisionTaskCompletedEventId <- hev.StartChildWorkflowExecutionInitiatedEventAttributes.DecisionTaskCompletedEventId
-                initiatedEventId <- hev.EventId
 
             // StartChildWorkflowExecutionFailed
             elif hev.EventType = EventType.StartChildWorkflowExecutionFailed &&
                                  hev.StartChildWorkflowExecutionFailedEventAttributes.Control = bindingIdString &&
-                                 hev.StartChildWorkflowExecutionFailedEventAttributes.InitiatedEventId = initiatedEventId &&
                                  hev.StartChildWorkflowExecutionFailedEventAttributes.WorkflowType.Name = workflowType.Name &&
                                  hev.StartChildWorkflowExecutionFailedEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.StartChildWorkflowExecutionFailedEventAttributes.WorkflowId = workflowId then
@@ -101,18 +95,14 @@ type Builder (DecisionTask:DecisionTask) =
 
             // ChildWorkflowExecutionStarted
             elif hev.EventType = EventType.ChildWorkflowExecutionStarted &&
-                                 hev.ChildWorkflowExecutionStartedEventAttributes.InitiatedEventId = initiatedEventId &&
                                  hev.ChildWorkflowExecutionStartedEventAttributes.WorkflowType.Name = workflowType.Name &&
                                  hev.ChildWorkflowExecutionStartedEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.ChildWorkflowExecutionStartedEventAttributes.WorkflowExecution.WorkflowId = workflowId then
                 setCommonProperties(hev)
                 combinedHistory.ChildWorkflowExecutionStartedEventAttributes <- hev.ChildWorkflowExecutionStartedEventAttributes
-                startedEventId <- hev.EventId
 
             // ChildWorkflowExecutionCompleted
             elif hev.EventType = EventType.ChildWorkflowExecutionCompleted &&
-                                 hev.ChildWorkflowExecutionCompletedEventAttributes.InitiatedEventId = initiatedEventId &&
-                                 hev.ChildWorkflowExecutionCompletedEventAttributes.StartedEventId = startedEventId &&
                                  hev.ChildWorkflowExecutionCompletedEventAttributes.WorkflowType.Name = workflowType.Name &&
                                  hev.ChildWorkflowExecutionCompletedEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.ChildWorkflowExecutionCompletedEventAttributes.WorkflowExecution.WorkflowId = workflowId then
@@ -121,8 +111,6 @@ type Builder (DecisionTask:DecisionTask) =
 
             // ChildWorkflowExecutionFailed
             elif hev.EventType = EventType.ChildWorkflowExecutionFailed &&
-                                 hev.ChildWorkflowExecutionFailedEventAttributes.InitiatedEventId = initiatedEventId &&
-                                 hev.ChildWorkflowExecutionFailedEventAttributes.StartedEventId = startedEventId &&
                                  hev.ChildWorkflowExecutionFailedEventAttributes.WorkflowType.Name = workflowType.Name &&
                                  hev.ChildWorkflowExecutionFailedEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.ChildWorkflowExecutionFailedEventAttributes.WorkflowExecution.WorkflowId = workflowId then
@@ -131,8 +119,6 @@ type Builder (DecisionTask:DecisionTask) =
 
             // ChildWorkflowExecutionTimedOut
             elif hev.EventType = EventType.ChildWorkflowExecutionTimedOut &&
-                                 hev.ChildWorkflowExecutionTimedOutEventAttributes.InitiatedEventId = initiatedEventId &&
-                                 hev.ChildWorkflowExecutionTimedOutEventAttributes.StartedEventId = startedEventId &&
                                  hev.ChildWorkflowExecutionTimedOutEventAttributes.WorkflowType.Name = workflowType.Name &&
                                  hev.ChildWorkflowExecutionTimedOutEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.ChildWorkflowExecutionTimedOutEventAttributes.WorkflowExecution.WorkflowId = workflowId then
@@ -141,8 +127,6 @@ type Builder (DecisionTask:DecisionTask) =
 
             // ChildWorkflowExecutionCanceled
             elif hev.EventType = EventType.ChildWorkflowExecutionCanceled &&
-                                 hev.ChildWorkflowExecutionCanceledEventAttributes.InitiatedEventId = initiatedEventId &&
-                                 hev.ChildWorkflowExecutionCanceledEventAttributes.StartedEventId = startedEventId &&
                                  hev.ChildWorkflowExecutionCanceledEventAttributes.WorkflowType.Name = workflowType.Name &&
                                  hev.ChildWorkflowExecutionCanceledEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.ChildWorkflowExecutionCanceledEventAttributes.WorkflowExecution.WorkflowId = workflowId then
@@ -151,8 +135,6 @@ type Builder (DecisionTask:DecisionTask) =
 
             // ChildWorkflowExecutionTerminated
             elif hev.EventType = EventType.ChildWorkflowExecutionTerminated &&
-                                 hev.ChildWorkflowExecutionTerminatedEventAttributes.InitiatedEventId = initiatedEventId &&
-                                 hev.ChildWorkflowExecutionTerminatedEventAttributes.StartedEventId = startedEventId &&
                                  hev.ChildWorkflowExecutionTerminatedEventAttributes.WorkflowType.Name = workflowType.Name &&
                                  hev.ChildWorkflowExecutionTerminatedEventAttributes.WorkflowType.Version = workflowType.Version &&
                                  hev.ChildWorkflowExecutionTerminatedEventAttributes.WorkflowExecution.WorkflowId = workflowId then
@@ -630,7 +612,7 @@ type Builder (DecisionTask:DecisionTask) =
             response       
 
     // Wait For Any Activity Tasks
-    member this.Bind(WaitForAnyActivityTasksAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(WaitForAnyActivityTaskAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let anyFinished = 
             results
             |> List.exists (fun r -> r.IsFinished())
@@ -642,7 +624,7 @@ type Builder (DecisionTask:DecisionTask) =
             response       
 
     // Wait For All Activity Tasks
-    member this.Bind(WaitForAllActivityTasksAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(WaitForAllActivityTaskAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let allFinished = 
             results
             |> List.forall (fun r -> r.IsFinished())
@@ -752,6 +734,30 @@ type Builder (DecisionTask:DecisionTask) =
     // Wait For Child Workflow Execution
     member this.Bind(WaitForChildWorkflowExecutionAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         match (result.IsFinished()) with 
+        | true -> f()
+        | false -> 
+            blockFlag <- true
+            response 
+
+    // Wait For Any Child Workflow Execution
+    member this.Bind(WaitForAnyChildWorkflowExecutionAction.StartResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let anyFinished = 
+            results
+            |> List.exists (fun r -> r.IsFinished())
+
+        match anyFinished with
+        | true -> f()
+        | false -> 
+            blockFlag <- true
+            response       
+
+    // Wait For All Child Workflow Execution
+    member this.Bind(WaitForAllChildWorkflowExecutionAction.StartResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let allFinished = 
+            results
+            |> List.forall (fun r -> r.IsFinished())
+
+        match allFinished with
         | true -> f()
         | false -> 
             blockFlag <- true
