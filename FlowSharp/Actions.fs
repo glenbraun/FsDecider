@@ -36,7 +36,7 @@ type ScheduleActivityTaskAction =
 type ScheduleActivityTaskResult =
     | Scheduling of ScheduleActivityTaskDecisionAttributes
     | Scheduled of ActivityTaskScheduledEventAttributes
-    | Started of StartedEvent:ActivityTaskStartedEventAttributes  * ScheduledEvent:ActivityTaskScheduledEventAttributes
+    | Started of StartedEvent:ActivityTaskStartedEventAttributes * ScheduledEvent:ActivityTaskScheduledEventAttributes
     | Completed of ActivityTaskCompletedEventAttributes
     | Canceled of ActivityTaskCanceledEventAttributes
     | TimedOut of ActivityTaskTimedOutEventAttributes
@@ -83,27 +83,34 @@ type StartChildWorkflowExecutionAction =
     | Attributes of StartChildWorkflowExecutionDecisionAttributes
 
 type StartChildWorkflowExecutionResult =
-    | Scheduling 
-    | StartFailed of StartChildWorkflowExecutionFailedEventAttributes
+    | Starting of StartChildWorkflowExecutionDecisionAttributes
     | Initiated of StartChildWorkflowExecutionInitiatedEventAttributes
-    | Started of Attributes:ChildWorkflowExecutionStartedEventAttributes * Control:string
+    | Started of StartedEvent:ChildWorkflowExecutionStartedEventAttributes * InitiatedEvent:StartChildWorkflowExecutionInitiatedEventAttributes
+    | Completed of ChildWorkflowExecutionCompletedEventAttributes
+    | Canceled of ChildWorkflowExecutionCanceledEventAttributes
+    | Failed of ChildWorkflowExecutionFailedEventAttributes
+    | TimedOut of ChildWorkflowExecutionTimedOutEventAttributes
+    | Terminated of ChildWorkflowExecutionTerminatedEventAttributes
+    | StartFailed of StartChildWorkflowExecutionFailedEventAttributes
+
+    member this.IsFinished() =
+        match this with
+        | Completed(_) -> true
+        | Canceled(_) -> true
+        | Failed(_) -> true
+        | TimedOut(_) -> true
+        | Terminated(_) -> true
+        | StartFailed(_) -> true
+        | _ -> false
 
 type WaitForChildWorkflowExecutionAction =
     | StartResult of StartChildWorkflowExecutionResult
-
-type WaitForChildWorkflowExecutionResult =
-    | StartFailed of StartChildWorkflowExecutionFailedEventAttributes
-    | Completed of ChildWorkflowExecutionCompletedEventAttributes
-    | Canceled of ChildWorkflowExecutionCanceledEventAttributes
-    | TimedOut of ChildWorkflowExecutionTimedOutEventAttributes
-    | Failed of ChildWorkflowExecutionFailedEventAttributes
-    | Terminated of ChildWorkflowExecutionTerminatedEventAttributes
 
 type RequestCancelExternalWorkflowExecutionAction =
     | Attributes of RequestCancelExternalWorkflowExecutionDecisionAttributes
 
 type RequestCancelExternalWorkflowExecutionResult =
-    | Requesting
+    | Requesting of RequestCancelExternalWorkflowExecutionDecisionAttributes
     | Initiated of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
     | Delivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
     | Failed of RequestCancelExternalWorkflowExecutionFailedEventAttributes

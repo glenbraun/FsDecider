@@ -63,14 +63,16 @@ module TestRequestCancelExternalWorkflowExecution =
                           )
 
             match start with 
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(attr, c) ->
-                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(attr.WorkflowExecution.WorkflowId, attr.WorkflowExecution.RunId)
+            | StartChildWorkflowExecutionResult.Started(start, _) ->
+                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
-                | RequestCancelExternalWorkflowExecutionResult.Requesting -> return "TEST PASS"
+                | RequestCancelExternalWorkflowExecutionResult.Requesting(d) when 
+                        d.WorkflowId = start.WorkflowExecution.WorkflowId && 
+                        d.RunId = start.WorkflowExecution.RunId -> return "TEST PASS"
 
                 | _ -> return "TEST FAIL"
             
@@ -174,18 +176,19 @@ module TestRequestCancelExternalWorkflowExecution =
                           )
 
             match start with 
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(attr, c) ->
-                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(attr.WorkflowExecution.WorkflowId, attr.WorkflowExecution.RunId)
+            | StartChildWorkflowExecutionResult.Started(start, _) ->
+                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
-                | RequestCancelExternalWorkflowExecutionResult.Requesting -> 
+                | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
                     return ()
 
                 | RequestCancelExternalWorkflowExecutionResult.Initiated(ia) when
-                        ia.WorkflowId = childWorkflowId -> return "TEST PASS"
+                        ia.WorkflowId = start.WorkflowExecution.WorkflowId &&
+                        ia.RunId = start.WorkflowExecution.RunId -> return "TEST PASS"
 
                 | _ -> return "TEST FAIL"
             
@@ -301,18 +304,19 @@ module TestRequestCancelExternalWorkflowExecution =
                           )
 
             match start with 
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(attr, c) ->
-                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(attr.WorkflowExecution.WorkflowId, attr.WorkflowExecution.RunId)
+            | StartChildWorkflowExecutionResult.Started(start, _) ->
+                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
-                | RequestCancelExternalWorkflowExecutionResult.Requesting -> 
+                | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
                     return ()
 
                 | RequestCancelExternalWorkflowExecutionResult.Delivered(da) when
-                        da.WorkflowExecution.WorkflowId = childWorkflowId -> return "TEST PASS"
+                        da.WorkflowExecution.WorkflowId = da.WorkflowExecution.WorkflowId &&
+                        da.WorkflowExecution.RunId = da.WorkflowExecution.RunId -> return "TEST PASS"
 
                 | _ -> return "TEST FAIL"
             
@@ -416,7 +420,7 @@ module TestRequestCancelExternalWorkflowExecution =
             let! request = FlowSharp.RequestCancelExternalWorkflowExecution(childWorkflowId)
                 
             match request with
-            | RequestCancelExternalWorkflowExecutionResult.Requesting -> 
+            | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
                 return ()
 
             | RequestCancelExternalWorkflowExecutionResult.Failed(attr) when

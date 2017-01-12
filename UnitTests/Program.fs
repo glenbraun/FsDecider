@@ -58,6 +58,34 @@ let tests =
                 testCase "Finished "            <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Finished``
             ]
             
+            testList "StartChildWorkflowExecution" [
+                testCase "Starting"             <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Starting``
+                testCase "Initiated"            <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Initiated``
+                testCase "Started"              <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Started``
+                testCase "Completed"            <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Completed``
+                testCase "Canceled"             <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Canceled``
+                testCase "Failed"               <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Failed``
+                testCase "TimedOut"             <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of TimedOut``
+                testCase "Terminated"           <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Terminated``
+                testCase "StartFailed"          <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of StartFailed``
+            ]
+            
+            testList "WaitForChildWorkflowExecution" [
+                testCase "Completed"            <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Completed``
+                testCase "Canceled"             <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Canceled``
+                testCase "Failed"               <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Failed``
+                testCase "TimedOut"             <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of TimedOut``
+                testCase "Terminated"           <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Terminated``
+                testCase "StartFailed"          <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of StartFailed``
+            ]
+            
+            testList "RequestCancelExternalWorkflowExecution" [
+                testCase "Requesting"           <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Requesting``
+                testCase "Initiated"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Initiated``
+                testCase "Delivered"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Delivered``
+                testCase "Failed"               <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Failed``
+            ]
+            
             testList "ScheduleAndWaitForLambdaFunction" [
                 testCase "ScheduleFailed"       <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of ScheduleFailed``
                 testCase "StartFailed"          <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of StartFailed``
@@ -87,7 +115,6 @@ let tests =
                 testCase "StartTimerFailed"     <| TestCancelTimer.``Cancel Timer with result of StartTimerFailed``
                 testCase "CancelTimerFailed"    <| TestCancelTimer.``Cancel Timer with result of CancelTimerFailed``
             ]
-
             
             testList "MarkerRecorded" [
                 testCase "NotRecorded"          <| TestMarkerRecorded.``Marker Recorded with result of NotRecorded``
@@ -101,34 +128,11 @@ let tests =
                 testCase "MarkerRecorded"       <| TestRecordMarker.``Record Marker with result of MarkerRecorded``
             ]
 
-            testList "StartChildWorkflowExecution" [
-                testCase "Scheduling"           <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Scheduling``
-                testCase "StartFailed"          <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of StartFailed``
-                testCase "Initiated"            <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Initiated``
-                testCase "Started"              <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Started``
-            ]
-
-            testList "WaitForChildWorkflowExecution" [
-                testCase "StartFailed"          <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of StartFailed``
-                testCase "Completed"            <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Completed``
-                testCase "Canceled"             <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Canceled``
-                testCase "TimedOut"             <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of TimedOut``
-                testCase "Failed"               <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Failed``
-                testCase "Terminated"           <| TestWaitForChildWorkflowExecution.``Wait for Child Workflow Execution with result of Terminated``
-            ]
-
             testList "SignalExternalWorkflowExecution" [
                 testCase "Signaling"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Signaling``
                 testCase "Initiated"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Initiated``
                 testCase "Signaled"             <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Signaled``
                 testCase "Failed"               <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Failed``
-            ]
-
-            testList "RequestCancelExternalWorkflowExecution" [
-                testCase "Requesting"           <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Requesting``
-                testCase "Initiated"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Initiated``
-                testCase "Delivered"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Delivered``
-                testCase "Failed"               <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Failed``
             ]
 
             testList "WorkflowExecutionSignaled" [

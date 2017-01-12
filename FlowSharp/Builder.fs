@@ -693,6 +693,99 @@ type Builder (DecisionTask:DecisionTask) =
                     response.Decisions.Add(d)
                     response
 
+    // Start Child Workflow Execution
+    member this.Bind(StartChildWorkflowExecutionAction.Attributes(attr), f:(StartChildWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
+        let bindingId = NextBindingId()
+
+        let combinedHistory = FindChildWorkflowExecutionHistory DecisionTask bindingId (attr.WorkflowType) (attr.WorkflowId)
+
+        match (combinedHistory) with
+        // Completed
+        | h when h.ChildWorkflowExecutionCompletedEventAttributes <> null ->
+            f(StartChildWorkflowExecutionResult.Completed(h.ChildWorkflowExecutionCompletedEventAttributes))
+                 
+        // Canceled
+        | h when h.ChildWorkflowExecutionCanceledEventAttributes <> null ->
+            f(StartChildWorkflowExecutionResult.Canceled(h.ChildWorkflowExecutionCanceledEventAttributes))
+
+        // TimedOut
+        | h when h.ChildWorkflowExecutionTimedOutEventAttributes <> null ->
+            f(StartChildWorkflowExecutionResult.TimedOut(h.ChildWorkflowExecutionTimedOutEventAttributes))
+
+        // Failed
+        | h when h.ChildWorkflowExecutionFailedEventAttributes <> null ->
+            f(StartChildWorkflowExecutionResult.Failed(h.ChildWorkflowExecutionFailedEventAttributes))
+
+        // Terminated
+        | h when h.ChildWorkflowExecutionTerminatedEventAttributes <> null ->
+            f(StartChildWorkflowExecutionResult.Terminated(h.ChildWorkflowExecutionTerminatedEventAttributes))
+
+        // StartChildWorkflowExecutionFailed
+        | h when h.StartChildWorkflowExecutionFailedEventAttributes <> null && 
+                 h.StartChildWorkflowExecutionFailedEventAttributes.WorkflowType.Name = attr.WorkflowType.Name && 
+                 h.StartChildWorkflowExecutionFailedEventAttributes.WorkflowType.Version = attr.WorkflowType.Version ->
+            f(StartChildWorkflowExecutionResult.StartFailed(h.StartChildWorkflowExecutionFailedEventAttributes))
+
+        // Started
+        | h when h.ChildWorkflowExecutionStartedEventAttributes <> null ->
+            f(StartChildWorkflowExecutionResult.Started(h.ChildWorkflowExecutionStartedEventAttributes, h.StartChildWorkflowExecutionInitiatedEventAttributes))
+
+        // Initiated
+        | h when h.StartChildWorkflowExecutionInitiatedEventAttributes <> null &&
+                    h.StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowType.Name = attr.WorkflowType.Name && 
+                    h.StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowType.Version = attr.WorkflowType.Version ->
+            f(StartChildWorkflowExecutionResult.Initiated(h.StartChildWorkflowExecutionInitiatedEventAttributes))
+
+        // Not Started
+        | h when h.ActivityTaskScheduledEventAttributes = null ->
+            attr.Control <- bindingId.ToString()
+
+            let d = new Decision();
+            d.DecisionType <- DecisionType.StartChildWorkflowExecution
+            d.StartChildWorkflowExecutionDecisionAttributes <- attr
+            response.Decisions.Add(d)
+                
+            f(StartChildWorkflowExecutionResult.Starting(d.StartChildWorkflowExecutionDecisionAttributes))
+
+        | _ -> failwith "error"
+
+    // Wait For Child Workflow Execution
+    member this.Bind(WaitForChildWorkflowExecutionAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        match (result.IsFinished()) with 
+        | true -> f()
+        | false -> 
+            blockFlag <- true
+            response 
+
+    // Request Cancel External Workflow Execution
+    member this.Bind(RequestCancelExternalWorkflowExecutionAction.Attributes(attr), f:(RequestCancelExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
+        let bindingId = NextBindingId()
+
+        let combinedHistory = FindRequestCancelExternalWorkflowExecutionHistory DecisionTask bindingId attr.WorkflowId
+
+        match (combinedHistory) with
+        // Request Delivered
+        | h when h.ExternalWorkflowExecutionCancelRequestedEventAttributes <> null ->
+            f(RequestCancelExternalWorkflowExecutionResult.Delivered(h.ExternalWorkflowExecutionCancelRequestedEventAttributes))
+
+        // Request Failed
+        | h when h.RequestCancelExternalWorkflowExecutionFailedEventAttributes <> null ->
+            f(RequestCancelExternalWorkflowExecutionResult.Failed(h.RequestCancelExternalWorkflowExecutionFailedEventAttributes))
+ 
+        // Request Initiated
+        | h when h.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes <> null ->
+            f(RequestCancelExternalWorkflowExecutionResult.Initiated(h.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes))
+
+        // Request not initiated yet
+        | _ ->
+            attr.Control <- bindingId.ToString()
+
+            let d = new Decision();
+            d.DecisionType <- DecisionType.RequestCancelExternalWorkflowExecution
+            d.RequestCancelExternalWorkflowExecutionDecisionAttributes <- attr
+            response.Decisions.Add(d)
+                
+            f(RequestCancelExternalWorkflowExecutionResult.Requesting(attr))
 
     // Start and Wait for Lambda Function
     member this.Bind(ScheduleAndWaitForLambdaFunctionAction.Attributes(attr), f:(ScheduleAndWaitForLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
@@ -873,118 +966,6 @@ type Builder (DecisionTask:DecisionTask) =
             response.Decisions.Add(d)
 
             f(RecordMarkerResult.Recording)
-
-    // Start Child Workflow Execution
-    member this.Bind(StartChildWorkflowExecutionAction.Attributes(attr), f:(StartChildWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
-        let bindingId = NextBindingId()
-
-        let combinedHistory = FindChildWorkflowExecutionHistory DecisionTask bindingId (attr.WorkflowType) (attr.WorkflowId)
-
-        match (combinedHistory) with
-        // StartChildWorkflowExecutionFailed
-        | h when h.StartChildWorkflowExecutionFailedEventAttributes <> null && 
-                    h.StartChildWorkflowExecutionFailedEventAttributes.WorkflowType.Name = attr.WorkflowType.Name && 
-                    h.StartChildWorkflowExecutionFailedEventAttributes.WorkflowType.Version = attr.WorkflowType.Version ->
-            f(StartChildWorkflowExecutionResult.StartFailed(h.StartChildWorkflowExecutionFailedEventAttributes))
-
-        // Started
-        | h when h.ChildWorkflowExecutionStartedEventAttributes <> null ->
-            f(StartChildWorkflowExecutionResult.Started(h.ChildWorkflowExecutionStartedEventAttributes, (bindingId.ToString())))
-
-        // Initiated
-        | h when h.StartChildWorkflowExecutionInitiatedEventAttributes <> null &&
-                    h.StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowType.Name = attr.WorkflowType.Name && 
-                    h.StartChildWorkflowExecutionInitiatedEventAttributes.WorkflowType.Version = attr.WorkflowType.Version ->
-            f(StartChildWorkflowExecutionResult.Initiated(h.StartChildWorkflowExecutionInitiatedEventAttributes))
-
-        // Not Scheduled
-        | h when h.ActivityTaskScheduledEventAttributes = null ->
-            attr.Control <- bindingId.ToString()
-
-            let d = new Decision();
-            d.DecisionType <- DecisionType.StartChildWorkflowExecution
-            d.StartChildWorkflowExecutionDecisionAttributes <- attr
-            response.Decisions.Add(d)
-                
-            f(StartChildWorkflowExecutionResult.Scheduling)
-
-        | _ -> failwith "error"
-
-    // Wait For Child Workflow Execution
-    member this.Bind(WaitForChildWorkflowExecutionAction.StartResult(result), f:(WaitForChildWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
-
-        let bindWithHistory (workflowType:WorkflowType) (control:string) (workflowId:string) =
-            let combinedHistory = FindChildWorkflowExecutionHistory DecisionTask (Convert.ToInt32(control)) workflowType workflowId
-
-            match (combinedHistory) with
-            // Completed
-            | EventOfType EventType.ChildWorkflowExecutionCompleted h -> 
-                f(WaitForChildWorkflowExecutionResult.Completed(h.ChildWorkflowExecutionCompletedEventAttributes))
-
-            // TimedOut
-            | EventOfType EventType.ChildWorkflowExecutionTimedOut h -> 
-                f(WaitForChildWorkflowExecutionResult.TimedOut(h.ChildWorkflowExecutionTimedOutEventAttributes))
-
-            // Canceled
-            | EventOfType EventType.ChildWorkflowExecutionCanceled h -> 
-                f(WaitForChildWorkflowExecutionResult.Canceled(h.ChildWorkflowExecutionCanceledEventAttributes))
-
-            // Failed
-            | EventOfType EventType.ChildWorkflowExecutionFailed h -> 
-                f(WaitForChildWorkflowExecutionResult.Failed(h.ChildWorkflowExecutionFailedEventAttributes))
-
-            // Terminated
-            | EventOfType EventType.ChildWorkflowExecutionTerminated h -> 
-                f(WaitForChildWorkflowExecutionResult.Terminated(h.ChildWorkflowExecutionTerminatedEventAttributes))
-
-            | _ -> 
-                // This child workflow execution is still running, continue blocking
-                blockFlag <- true
-                response
-
-        match result with 
-        // If this child workflow execution is being started then block. Return the decision to start the child workflow and pick up here next decision task
-        | StartChildWorkflowExecutionResult.Scheduling -> 
-            blockFlag <- true
-            response
-
-        // The StartChildWorkflowExecutionResult checks for starting failure so no need to check history again.
-        | StartChildWorkflowExecutionResult.StartFailed(a) -> f(WaitForChildWorkflowExecutionResult.StartFailed(a))
-
-        | StartChildWorkflowExecutionResult.Initiated(a) ->
-            bindWithHistory (a.WorkflowType) (a.Control) (a.WorkflowId)
-        | StartChildWorkflowExecutionResult.Started(a, control) ->
-            bindWithHistory (a.WorkflowType) (control) (a.WorkflowExecution.WorkflowId)
-
-    // Request Cancel External Workflow Execution
-    member this.Bind(RequestCancelExternalWorkflowExecutionAction.Attributes(attr), f:(RequestCancelExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
-        let bindingId = NextBindingId()
-
-        let combinedHistory = FindRequestCancelExternalWorkflowExecutionHistory DecisionTask bindingId attr.WorkflowId
-
-        match (combinedHistory) with
-        // Request Delivered
-        | h when h.ExternalWorkflowExecutionCancelRequestedEventAttributes <> null ->
-            f(RequestCancelExternalWorkflowExecutionResult.Delivered(h.ExternalWorkflowExecutionCancelRequestedEventAttributes))
-
-        // Request Failed
-        | h when h.RequestCancelExternalWorkflowExecutionFailedEventAttributes <> null ->
-            f(RequestCancelExternalWorkflowExecutionResult.Failed(h.RequestCancelExternalWorkflowExecutionFailedEventAttributes))
- 
-        // Request Initiated
-        | h when h.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes <> null ->
-            f(RequestCancelExternalWorkflowExecutionResult.Initiated(h.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes))
-
-        // Request not initiated yet
-        | _ ->
-            attr.Control <- bindingId.ToString()
-
-            let d = new Decision();
-            d.DecisionType <- DecisionType.RequestCancelExternalWorkflowExecution
-            d.RequestCancelExternalWorkflowExecutionDecisionAttributes <- attr
-            response.Decisions.Add(d)
-                
-            f(RequestCancelExternalWorkflowExecutionResult.Requesting)
 
     // Signal External Workflow Execution
     member this.Bind(SignalExternalWorkflowExecutionAction.Attributes(attr), f:(SignalExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =

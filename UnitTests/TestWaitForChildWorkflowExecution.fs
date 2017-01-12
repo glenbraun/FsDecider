@@ -53,10 +53,10 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            let! wait = FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharp.WaitForChildWorkflowExecution(start)
 
-            match wait with
-            | WaitForChildWorkflowExecutionResult.Completed(attr) when
+            match start with
+            | StartChildWorkflowExecutionResult.Completed(attr) when
                     attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                     attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
                     attr.WorkflowExecution.WorkflowId = childWorkflowId -> 
@@ -196,10 +196,10 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            let! wait = FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharp.WaitForChildWorkflowExecution(start)
 
-            match wait with
-            | WaitForChildWorkflowExecutionResult.Canceled(attr) when
+            match start with
+            | StartChildWorkflowExecutionResult.Canceled(attr) when
                     attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                     attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
                     attr.WorkflowExecution.WorkflowId = childWorkflowId &&
@@ -340,10 +340,10 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            let! wait = FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharp.WaitForChildWorkflowExecution(start)
 
-            match wait with
-            | WaitForChildWorkflowExecutionResult.Failed(attr) when
+            match start with
+            | StartChildWorkflowExecutionResult.Failed(attr) when
                     attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                     attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
                     attr.WorkflowExecution.WorkflowId = childWorkflowId &&
@@ -487,10 +487,10 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            let! wait = FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharp.WaitForChildWorkflowExecution(start)
 
-            match wait with
-            | WaitForChildWorkflowExecutionResult.TimedOut(attr) when
+            match start with
+            | StartChildWorkflowExecutionResult.TimedOut(attr) when
                     attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                     attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
                     attr.WorkflowExecution.WorkflowId = childWorkflowId &&
@@ -571,9 +571,9 @@ module TestWaitForChildWorkflowExecution =
 
                 TestHelper.RespondDecisionTaskCompleted resp
 
-                // Sleep longer than this workflow start to close timeout
                 if TestConfiguration.IsConnected then
-                    System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10.0))
+                    System.Diagnostics.Debug.WriteLine("Sleeping for 6 seconds for child workflow to timeout.")
+                    System.Threading.Thread.Sleep(TimeSpan.FromSeconds(6.0))
 
             | 2 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -615,17 +615,17 @@ module TestWaitForChildWorkflowExecution =
                           )
 
             match start with
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(attr, c) ->
-                childRunId := attr.WorkflowExecution.RunId
+            | StartChildWorkflowExecutionResult.Started(start, _) ->
+                childRunId := start.WorkflowExecution.RunId
             | _ -> ()
 
-            let! wait = FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharp.WaitForChildWorkflowExecution(start)
 
-            match wait with
-            | WaitForChildWorkflowExecutionResult.Terminated(attr) when
+            match start with
+            | StartChildWorkflowExecutionResult.Terminated(attr) when
                     attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                     attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
                     attr.WorkflowExecution.WorkflowId = childWorkflowId -> 
@@ -755,7 +755,7 @@ module TestWaitForChildWorkflowExecution =
                           )
 
             match start with
-            | StartChildWorkflowExecutionResult.Scheduling -> 
+            | StartChildWorkflowExecutionResult.Starting(_) -> 
                 return ()
 
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
@@ -764,23 +764,12 @@ module TestWaitForChildWorkflowExecution =
                     attr.WorkflowType.Version = childWorkflowType.Version &&
                     attr.Cause = cause -> 
                     
-                let! wait = FlowSharp.WaitForChildWorkflowExecution(start)
-
-                match wait with 
-                | WaitForChildWorkflowExecutionResult.StartFailed(attr) when
-                    attr.Cause = cause &&
-                    attr.WorkflowId = childWorkflowId &&
-                    attr.WorkflowType.Name = childWorkflowType.Name &&
-                    attr.WorkflowType.Version = childWorkflowType.Version ->
-
-                    return "TEST PASS"                    
-                    
-                | _ -> return "TEST FAIL"                        
-                    
+                do! FlowSharp.WaitForChildWorkflowExecution(start)
+                return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
-                // OfflineDecisionTask
+        // OfflineDecisionTask
         let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
                               WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))

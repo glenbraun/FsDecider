@@ -63,7 +63,7 @@ module TestSignalExternalWorkflowExecution =
                           )
 
             match start with 
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
@@ -178,7 +178,7 @@ module TestSignalExternalWorkflowExecution =
                           )
 
             match start with 
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->
@@ -314,7 +314,7 @@ module TestSignalExternalWorkflowExecution =
                           )
 
             match start with 
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
             | StartChildWorkflowExecutionResult.Started(attr, c) ->

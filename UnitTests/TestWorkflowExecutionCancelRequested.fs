@@ -56,7 +56,7 @@ module TestWorkflowExecutionCancelRequested =
                           )
 
             match start with
-            | StartChildWorkflowExecutionResult.Scheduling ->
+            | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()

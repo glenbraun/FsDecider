@@ -73,8 +73,8 @@
     <Compile Include="TestRecordMarker.fs" />
     <Compile Include="TestStartChildWorkflowExecution.fs" />
     <Compile Include="TestWaitForChildWorkflowExecution.fs" />
-    <Compile Include="TestSignalExternalWorkflowExecution.fs" />
     <Compile Include="TestRequestCancelExternalWorkflowExecution.fs" />
+    <Compile Include="TestSignalExternalWorkflowExecution.fs" />
     <Compile Include="TestWorkflowExecutionSignaled.fs" />
     <Compile Include="TestWaitForWorkflowExecutionSignaled.fs" />
     <Compile Include="TestWorkflowExecutionCancelRequested.fs" />
