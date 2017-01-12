@@ -37,20 +37,20 @@ module TestCancelTimer =
             let! timer1 = FlowSharp.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
-            | StartTimerResult.Starting ->
+            | StartTimerResult.Starting(_) ->
                 return ()
 
-            | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 
-                let! cancel = FlowSharp.CancelTimer(timer1)
+            | StartTimerResult.Started(attr) when attr.TimerId = timerId -> 
+                let! wait = FlowSharp.CancelTimer(timer1)
 
-                match cancel with
-                | CancelTimerResult.Canceling -> 
+                match wait with
+                | CancelTimerResult.Canceling(_) ->
                     return ()
 
-                | CancelTimerResult.Canceled(a) when a.TimerId = timerId -> return "TEST PASS"
+                | _ -> return "TEST FAIL" 
 
-                | _ -> return "TEST FAIL"
-
+            | StartTimerResult.Canceled(attr) when attr.TimerId = timerId -> return "TEST PASS" 
+                
             | _ -> return "TEST FAIL"
         }
 
@@ -67,7 +67,7 @@ module TestCancelTimer =
                           |> OfflineHistoryEvent (        // EventId = 5
                               TimerStartedEventAttributes(Control="1", DecisionTaskCompletedEventId=4L, StartToFireTimeout="8640000", TimerId=timerId))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              WorkflowExecutionSignaledEventAttributes(Input="", SignalName=signalName))
+                              WorkflowExecutionSignaledEventAttributes(Input="", SignalName="Test Signal"))
                           |> OfflineHistoryEvent (        // EventId = 7
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 8
@@ -77,7 +77,7 @@ module TestCancelTimer =
                           |> OfflineHistoryEvent (        // EventId = 10
                               TimerCanceledEventAttributes(DecisionTaskCompletedEventId=9L, StartedEventId=5L, TimerId=timerId))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              WorkflowExecutionSignaledEventAttributes(Input="", SignalName=signalName+"2"))
+                              WorkflowExecutionSignaledEventAttributes(Input="", SignalName="Test Signal"))
                           |> OfflineHistoryEvent (        // EventId = 12
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 13
@@ -103,17 +103,19 @@ module TestCancelTimer =
 
                 TestHelper.RespondDecisionTaskCompleted resp
 
-                TestHelper.SignalWorkflow runId workflowId signalName ""
-                
+                // Send a signal to trigger a decision task
+                TestHelper.SignalWorkflow runId workflowId "Test Signal" ""
+
             | 2 -> 
                 resp.Decisions.Count                    |> should equal 1
                 resp.Decisions.[0].DecisionType         |> should equal DecisionType.CancelTimer
-                resp.Decisions.[0].CancelTimerDecisionAttributes.TimerId 
+                resp.Decisions.[0].CancelTimerDecisionAttributes.TimerId
                                                         |> should equal timerId
-
+                
                 TestHelper.RespondDecisionTaskCompleted resp
 
-                TestHelper.SignalWorkflow runId workflowId (signalName + "2") ""
+                // Send a signal to trigger a decision task
+                TestHelper.SignalWorkflow runId workflowId "Test Signal" ""
 
             | 3 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -140,7 +142,7 @@ module TestCancelTimer =
             let! timer1 = FlowSharp.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
-            | StartTimerResult.Starting ->
+            | StartTimerResult.Starting(_) ->
                 return ()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 
@@ -286,8 +288,8 @@ module TestCancelTimer =
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
 
-    let ``Cancel Timer with result of NotStarted``() =
-        let workflowId = "Cancel Timer with result of NotStarted"
+    let ``Cancel Timer with result of StartTimerFailed``() =
+        let workflowId = "Cancel Timer with result of StartTimerFailed"
         let signalName = "Test Signal"
         let timerId = "timer1"
         let cause = StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE
@@ -301,7 +303,7 @@ module TestCancelTimer =
 
             // Note: Requres intential changes to decision for testing purpose (below)
             match timer1 with
-            | StartTimerResult.Starting ->
+            | StartTimerResult.Starting(_) ->
                 return ()
 
             | StartTimerResult.Started(attr) ->
@@ -312,7 +314,7 @@ module TestCancelTimer =
                 let! cancel = FlowSharp.CancelTimer(timer1)
                 
                 match cancel with
-                | CancelTimerResult.NotStarted -> return "TEST PASS"
+                | CancelTimerResult.StartTimerFailed(_) -> return "TEST PASS"
                 | _ -> return "TEST FAIL"
             | _ -> return "TEST FAIL"                        
         }
@@ -406,7 +408,7 @@ module TestCancelTimer =
             let! timer1 = FlowSharp.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
-            | StartTimerResult.Starting ->
+            | StartTimerResult.Starting(_) ->
                 return ()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 

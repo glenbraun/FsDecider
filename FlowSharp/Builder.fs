@@ -383,9 +383,8 @@ type Builder (DecisionTask:DecisionTask) =
         // Return the combined history
         combinedHistory
 
-    let FindTimerHistory (decisionTask:DecisionTask) (bindingId:int) =
+    let FindTimerHistory (decisionTask:DecisionTask) (control:string) =
         let combinedHistory = new HistoryEvent()
-        let bindingIdString = bindingId.ToString()
         let mutable startedEventId = -1L
         let mutable timerId : string = null
             
@@ -407,7 +406,7 @@ type Builder (DecisionTask:DecisionTask) =
                 combinedHistory.StartTimerFailedEventAttributes <- hev.StartTimerFailedEventAttributes
 
             // TimerStarted
-            elif hev.EventType = EventType.TimerStarted && hev.TimerStartedEventAttributes.Control = bindingIdString then
+            elif hev.EventType = EventType.TimerStarted && hev.TimerStartedEventAttributes.Control = control then
                 setCommonProperties(hev)
                 combinedHistory.TimerStartedEventAttributes <- hev.TimerStartedEventAttributes
                 startedEventId <- hev.EventId
@@ -741,12 +740,22 @@ type Builder (DecisionTask:DecisionTask) =
     member this.Bind(StartTimerAction.Attributes(attr), f:(StartTimerResult -> RespondDecisionTaskCompletedRequest)) = 
         let bindingId = NextBindingId()
 
-        let combinedHistory = FindTimerHistory DecisionTask bindingId
+        let combinedHistory = FindTimerHistory DecisionTask (bindingId.ToString())
 
         match (combinedHistory) with
+        // Fired
+        | h when h.TimerFiredEventAttributes <> null &&
+                 h.TimerFiredEventAttributes.TimerId = attr.TimerId ->
+            f(StartTimerResult.Fired(h.TimerFiredEventAttributes))
+
+        // Fired
+        | h when h.TimerCanceledEventAttributes <> null &&
+                 h.TimerCanceledEventAttributes.TimerId = attr.TimerId ->
+            f(StartTimerResult.Canceled(h.TimerCanceledEventAttributes))
+
         // StartTimerFailed
         | h when h.StartTimerFailedEventAttributes <> null && 
-                    h.StartTimerFailedEventAttributes.TimerId = attr.TimerId ->
+                 h.StartTimerFailedEventAttributes.TimerId = attr.TimerId ->
             f(StartTimerResult.StartTimerFailed(h.StartTimerFailedEventAttributes))
 
         // TimerStarted
@@ -762,85 +771,68 @@ type Builder (DecisionTask:DecisionTask) =
             d.StartTimerDecisionAttributes <- attr
             response.Decisions.Add(d)
                 
-            f(StartTimerResult.Starting)
+            f(StartTimerResult.Starting(d.StartTimerDecisionAttributes))
 
         | _ -> failwith "error"
+
+    // Wait For Timer
+    member this.Bind(WaitForTimerAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        match result with 
+        // Canceled
+        | StartTimerResult.Canceled(_) -> f()
+
+        // Fired
+        | StartTimerResult.Fired(_) -> f()
+
+        // StartTimerFailed
+        | StartTimerResult.StartTimerFailed(_) -> f()
+
+        // Starting
+        | StartTimerResult.Starting(_) -> 
+            blockFlag <- true
+            response
+
+        // Started
+        | StartTimerResult.Started(attr) ->
+            blockFlag <- true
+            response
 
     // Cancel Timer
     member this.Bind(CancelTimerAction.StartResult(result), f:(CancelTimerResult -> RespondDecisionTaskCompletedRequest)) =
 
-        let bindWithHistory (timerId:string) (control:string) =
-            let combinedHistory = FindTimerHistory DecisionTask (Convert.ToInt32(control))
+        match result with 
+        // Starting
+        | StartTimerResult.Starting(_) -> 
+            blockFlag <- true
+            response
+
+        // Canceled
+        | StartTimerResult.Canceled(attr) -> f(CancelTimerResult.Canceled(attr))
+
+        // Fired
+        | StartTimerResult.Fired(attr) -> f(CancelTimerResult.Fired(attr))
+
+        // StartTimerFailed
+        | StartTimerResult.StartTimerFailed(attr) -> f(CancelTimerResult.StartTimerFailed(attr))
+
+        // Started
+        | StartTimerResult.Started(attr) -> 
+            let combinedHistory = FindTimerHistory DecisionTask (attr.Control)
 
             match (combinedHistory) with
-            // TimerCanceled
-            | EventOfType EventType.TimerCanceled h -> 
-                f(CancelTimerResult.Canceled(h.TimerCanceledEventAttributes))
-
-            // TimerFired, could have fired before canceled
-            | EventOfType EventType.TimerFired h -> 
-                f(CancelTimerResult.Fired(h.TimerFiredEventAttributes))
-
             // CancelTimerFailed
             | h when h.CancelTimerFailedEventAttributes <> null && 
-                        h.CancelTimerFailedEventAttributes.TimerId = timerId ->
+                     h.CancelTimerFailedEventAttributes.TimerId = attr.TimerId ->
                 f(CancelTimerResult.CancelTimerFailed(h.CancelTimerFailedEventAttributes))
 
             | _ -> 
                 // This timer has not been canceled yet, make cancel decision
                 let d = new Decision();
                 d.DecisionType <- DecisionType.CancelTimer
-                d.CancelTimerDecisionAttributes <- new CancelTimerDecisionAttributes(TimerId=timerId)
+                d.CancelTimerDecisionAttributes <- new CancelTimerDecisionAttributes(TimerId=attr.TimerId)
                 response.Decisions.Add(d)
 
                 f(CancelTimerResult.Canceling)
-
-        match result with 
-        // If this timer is being started then block. Return the current decisions.
-        | StartTimerResult.Starting -> 
-            blockFlag <- true
-            response
-
-        // The StartTimerResult checks for starting failure so no need to check history again.
-        | StartTimerResult.StartTimerFailed(_) -> f(CancelTimerResult.NotStarted)
-
-        | StartTimerResult.Started(a) -> bindWithHistory (a.TimerId) (a.Control)
-
-    // Wait For Timer
-    member this.Bind(WaitForTimerAction.StartResult(result), f:(WaitForTimerResult -> RespondDecisionTaskCompletedRequest)) =
-
-        let bindWithHistory (timerId:string) (control:string) =
-            let combinedHistory = FindTimerHistory DecisionTask (Convert.ToInt32(control))
-
-            match (combinedHistory) with
-            // TimerFired
-            | EventOfType EventType.TimerFired h -> 
-                f(WaitForTimerResult.Fired(h.TimerFiredEventAttributes))
-
-            // TimerCanceled
-            | EventOfType EventType.TimerCanceled h -> 
-                f(WaitForTimerResult.Canceled(h.TimerCanceledEventAttributes))
-
-            // StartTimerFailed
-            | h when h.StartTimerFailedEventAttributes <> null && 
-                        h.StartTimerFailedEventAttributes.TimerId = timerId ->
-                f(WaitForTimerResult.StartTimerFailed(h.StartTimerFailedEventAttributes))
-
-            | _ -> 
-                // This timer is still running, continue blocking
-                blockFlag <- true
-                response
-
-        match result with 
-        // If this timer is being started then block. Return the decision to start the timer and pick up here next decistion task
-        | StartTimerResult.Starting -> 
-            blockFlag <- true
-            response
-
-        // The StartTimerResult checks for starting failure so no need to check history again.
-        | StartTimerResult.StartTimerFailed(a) -> f(WaitForTimerResult.StartTimerFailed(a))
-
-        | StartTimerResult.Started(a) -> bindWithHistory (a.TimerId) (a.Control)
 
     // Marker Recorded
     member this.Bind(MarkerRecordedAction.Attributes(markerName), f:(MarkerRecordedResult -> RespondDecisionTaskCompletedRequest)) =

@@ -200,22 +200,22 @@ type FlowSharp =
     /// <returns>A StartTimerResult of Starting, Started, or StartTimerFailed.</returns>
     static member StartTimer(timerId:string, startToFireTimeout:string) =
         let attr = new StartTimerDecisionAttributes()
-        attr.TimerId <- timerId
+        attr.TimerId <- timerId        
         attr.StartToFireTimeout <- startToFireTimeout
 
         StartTimerAction.Attributes(attr)
-
-    /// <summary>Cancels a previously started timer and records a TimerCanceled event in the history.</summary>
-    /// <param name="start">Required. The result of a previous StartTimer call.</param>
-    /// <returns>A CancelTimerResult of Canceling, Fired, Canceled, Fired, NotStarted, or CancelTimerFailed.</returns>
-    static member CancelTimer(start:StartTimerResult) =
-        CancelTimerAction.StartResult(start)
 
     /// <summary>Waits for a previously started timer and blocks further progress until the timer has been Canceled, Fired, or StartTimerFailed.</summary>
     /// <param name="start">Required. The result of a previous StartTimer call.</param>
     /// <returns>A WaitForTimerResult of Canceled, Fired, or StartTimerFailed.</returns>
     static member WaitForTimer(start:StartTimerResult) =
         WaitForTimerAction.StartResult(start)
+
+    /// <summary>Cancels a previously started timer and records a TimerCanceled event in the history.</summary>
+    /// <param name="start">Required. The result of a previous StartTimer call.</param>
+    /// <returns>A CancelTimerResult of Canceling, Fired, Canceled, Fired, NotStarted, or CancelTimerFailed.</returns>
+    static member CancelTimer(start:StartTimerResult) =
+        CancelTimerAction.StartResult(start)
 
     /// <summary>Determines if an external signal was received for the workflow execution.</summary>
     /// <param name="signalName">The name of the signal received. The decider can use the signal name and inputs to determine how to the process the signal.</param>

@@ -35,12 +35,11 @@ module TestWaitForTimer =
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
-            let! wait = FlowSharp.WaitForTimer(timer1)
+            do! FlowSharp.WaitForTimer(timer1)
 
-            match wait with
-            | WaitForTimerResult.Fired(attr) when attr.TimerId = timerId -> return "TEST PASS"
+            match timer1 with
+            | StartTimerResult.Fired(attr) when attr.TimerId = timerId -> return "TEST PASS"
             | _ -> return "TEST FAIL"
-
         }
 
         // OfflineDecisionTask
@@ -110,16 +109,15 @@ module TestWaitForTimer =
             let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
-            | StartTimerResult.Starting -> 
-                let! wait = FlowSharp.WaitForTimer(timer1)
-                ()
+            | StartTimerResult.Starting(_) -> 
+                do! FlowSharp.WaitForTimer(timer1)
+
             | StartTimerResult.Started(_) ->
                 let! cancel = FlowSharp.CancelTimer(timer1)
+                return ()
+                
+            | StartTimerResult.Canceled(attr) when attr.TimerId = timerId -> return "TEST PASS"
 
-                let! wait = FlowSharp.WaitForTimer(timer1)
-                match wait with
-                | WaitForTimerResult.Canceled(attr) when attr.TimerId = timerId -> return "TEST PASS"
-                | _ -> return "TEST FAIL"
             | _ -> return "TEST FAIL"
         }
 
@@ -200,8 +198,8 @@ module TestWaitForTimer =
 
     let ``Wait for Timer with result of StartTimerFailed``() =
         let workflowId = "Wait for Timer with result of StartTimerFailed"
+        let signalName = "Test Signal"
         let timerId = "timer1"
-        let inUseTimerId = "Value Will Be Swapped Intentionally"
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
         let cause = StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE
 
@@ -211,24 +209,20 @@ module TestWaitForTimer =
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
+            // Note: Requres intential changes to decision for testing purpose (below)
             match timer1 with
-            | StartTimerResult.Starting -> 
-                let! wait = FlowSharp.WaitForTimer(timer1)
-                ()
-            | StartTimerResult.Started(_) ->
-                // Start another timer, but swap the id in the decisions to force the StartTimerFailed condition
-                let! timerInUse = FlowSharp.StartTimer(timerId=inUseTimerId, startToFireTimeout = startToFireTimeout)
+            | StartTimerResult.Starting(_) ->
+                return ()
 
-                let! wait = FlowSharp.WaitForTimer(timer1)
-                ()
+            | StartTimerResult.Started(attr) ->
+                let! timer2 = FlowSharp.StartTimer(timerId="timer2", startToFireTimeout = startToFireTimeout)
+                return ()
 
-            | StartTimerResult.StartTimerFailed(_) ->
-                let! wait = FlowSharp.WaitForTimer(timer1)
+            | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
+                do! FlowSharp.WaitForTimer(timer1)
+                return "TEST PASS"
 
-                match wait with
-                | WaitForTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> return "TEST PASS"
-                | _ -> return "TEST FAIL"
-
+            | _ -> return "TEST FAIL"                        
         }
 
         // OfflineDecisionTask
@@ -244,7 +238,7 @@ module TestWaitForTimer =
                           |> OfflineHistoryEvent (        // EventId = 5
                               TimerStartedEventAttributes(Control="1", DecisionTaskCompletedEventId=4L, StartToFireTimeout="8640000", TimerId=timerId))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              WorkflowExecutionSignaledEventAttributes(Input="", SignalName="Test Signal"))
+                              WorkflowExecutionSignaledEventAttributes(Input="", SignalName=signalName))
                           |> OfflineHistoryEvent (        // EventId = 7
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 8
@@ -278,16 +272,17 @@ module TestWaitForTimer =
 
                 TestHelper.RespondDecisionTaskCompleted resp
 
-                // Signal workflow to force a decision task
-                TestHelper.SignalWorkflow runId workflowId "Test Signal" ""
-                
+                TestHelper.SignalWorkflow runId workflowId signalName ""
+
             | 2 -> 
                 resp.Decisions.Count                    |> should equal 1
                 resp.Decisions.[0].DecisionType         |> should equal DecisionType.StartTimer
-                resp.Decisions.[0].StartTimerDecisionAttributes.TimerId 
-                                                        |> should equal inUseTimerId
+                resp.Decisions.[0].StartTimerDecisionAttributes.TimerId
+                                                        |> should equal "timer2"
+                resp.Decisions.[0].StartTimerDecisionAttributes.StartToFireTimeout
+                                                        |> should equal (startToFireTimeout.ToString())
 
-                // Intentionally swap the StartTimer TimerId
+                // Change timer id to force error
                 resp.Decisions.[0].StartTimerDecisionAttributes.TimerId <- timerId
 
                 TestHelper.RespondDecisionTaskCompleted resp
@@ -302,5 +297,5 @@ module TestWaitForTimer =
             | _ -> ()
 
         // Generate Offline History
-        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
+        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Add("SignalName", "signalName"))
 

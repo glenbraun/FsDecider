@@ -112,27 +112,24 @@ type StartTimerAction =
     | Attributes of StartTimerDecisionAttributes
 
 type StartTimerResult =
-    | StartTimerFailed of StartTimerFailedEventAttributes
-    | Starting
+    | Starting of StartTimerDecisionAttributes
     | Started of TimerStartedEventAttributes
+    | Fired of TimerFiredEventAttributes
+    | Canceled of TimerCanceledEventAttributes
+    | StartTimerFailed of StartTimerFailedEventAttributes
 
 type WaitForTimerAction =
     | StartResult of StartTimerResult
-
-type WaitForTimerResult =
-    | StartTimerFailed of StartTimerFailedEventAttributes
-    | Canceled of TimerCanceledEventAttributes
-    | Fired of TimerFiredEventAttributes
 
 type CancelTimerAction =
     | StartResult of StartTimerResult
 
 type CancelTimerResult =
-    | NotStarted
-    | CancelTimerFailed of CancelTimerFailedEventAttributes
     | Canceling
     | Canceled of TimerCanceledEventAttributes
     | Fired of TimerFiredEventAttributes
+    | StartTimerFailed of StartTimerFailedEventAttributes
+    | CancelTimerFailed of CancelTimerFailedEventAttributes
 
 type WorkflowExecutionSignaledAction =
     | Attributes of SignalName:string

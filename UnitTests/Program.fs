@@ -8,34 +8,6 @@ open Amazon.SimpleWorkflow.Model
 
 open Fuchu
 
-      
-// ScheduleAndWaitForActivityTask (done)
-// ScheduleActivityTask (done)
-// WaitForActivityTask (done)
-// WaitForAnyActivityTasks (done)
-// WaitForAllActivityTasks (done)
-// RequestCancelActivityTask (done)
-// ScheduleAndWaitForLambdaFunction (done)
-// StartTimer (done)
-// CancelTimer (done)
-// WaitForTimer (done)
-// MarkerRecorded 
-// RecordMarker (done)
-// StartChildWorkflowExecution (done)
-// WaitForChildWorkflowExecution (done)
-// SignalExternalWorkflowExecution (done)
-// RequestCancelExternalWorkflowExecution (done)
-// WorkflowExecutionSignaled (done)
-// WaitForWorkflowExecutionSignaled (done)
-// WorkflowExecutionCancelRequested (done)
-// GetWorkflowExecutionInput (done)
-// ReturnResult (done)
-// Zero (done)
-// For Loop (done)
-// While Loop (done)
-// Try Catch (done)
-// Try Finally (done)
-
 let tests = 
     testList "Primary Unit Tests" [
         
@@ -95,24 +67,27 @@ let tests =
             ]
             
             testList "StartTimer" [
-                testCase "StartTimerFailed"     <| TestStartTimer.``Start Timer with result of StartTimerFailed``
                 testCase "Starting"             <| TestStartTimer.``Start Timer with result of Starting``
                 testCase "Started"              <| TestStartTimer.``Start Timer with result of Started``
+                testCase "Fired"                <| TestStartTimer.``Start Timer with result of Fired``
+                testCase "Canceled"             <| TestStartTimer.``Start Timer with result of Canceled``
+                testCase "StartTimerFailed"     <| TestStartTimer.``Start Timer with result of StartTimerFailed``
             ]
             
+            testList "WaitForTimer" [
+                testCase "Fired"                <| TestWaitForTimer.``Wait for Timer with result of Fired``
+                testCase "Canceled"             <| TestWaitForTimer.``Wait for Timer with result of Canceled``
+                testCase "StartTimerFailed"     <| TestWaitForTimer.``Wait for Timer with result of StartTimerFailed``
+            ]            
+
             testList "CancelTimer" [
-                testCase "NotStarted"           <| TestCancelTimer.``Cancel Timer with result of NotStarted``
-                testCase "CancelTimerFailed"    <| TestCancelTimer.``Cancel Timer with result of CancelTimerFailed``
                 testCase "Canceling"            <| TestCancelTimer.``Cancel Timer with result of Canceling``
                 testCase "Canceled"             <| TestCancelTimer.``Cancel Timer with result of Canceled``
                 testCase "Fired"                <| TestCancelTimer.``Cancel Timer with result of Fired``
+                testCase "StartTimerFailed"     <| TestCancelTimer.``Cancel Timer with result of StartTimerFailed``
+                testCase "CancelTimerFailed"    <| TestCancelTimer.``Cancel Timer with result of CancelTimerFailed``
             ]
 
-            testList "WaitForTimer" [
-                testCase "StartTimerFailed"     <| TestWaitForTimer.``Wait for Timer with result of StartTimerFailed``
-                testCase "Canceled"             <| TestWaitForTimer.``Wait for Timer with result of Canceled``
-                testCase "Fired"                <| TestWaitForTimer.``Wait for Timer with result of Fired``
-            ]
             
             testList "MarkerRecorded" [
                 testCase "NotRecorded"          <| TestMarkerRecorded.``Marker Recorded with result of NotRecorded``
@@ -187,8 +162,7 @@ let tests =
                 testCase "ContinueAsNewWorkflowExecutionFailed" <| TestReturnResult.``Return Result of ContinueAsNewWorkflowExecutionFailed``
             ]
             
-        ]
-        
+        ]        
         
         testList "Primary Builder Tests" [
             
@@ -219,7 +193,8 @@ let tests =
                 testCase "TryFinallyWithActivity"                 <| TestTryFinally.``A Try Finally expression with a Start and Wait for Activity Task``
                 testCase "TryFinallyContinueAsNew"                <| TestTryFinally.``A Try Finally expression with an excpetion from a ContinueAsNew``
             ]            
-        ]        
+        ]
+        
     ]
 
 [<EntryPoint>]
