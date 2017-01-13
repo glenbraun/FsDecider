@@ -87,7 +87,7 @@ module TestWhileLoop =
                     // Schedule and Wait for an Activity Task
                     let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                                     TestConfiguration.TestActivityType, 
-                                    activityId, 
+                                    activityId+((!tries).ToString()), 
                                     input=(!tries).ToString(),
                                     taskList=TestConfiguration.TestTaskList, 
                                     heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -97,8 +97,8 @@ module TestWhileLoop =
                                 )
 
                     match result with
-                    | ScheduleActivityTaskResult.Completed(attr) -> return "TEST PASS"
-                    | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = failReason && attr.Details = failDetails -> ()
+                    | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) -> return "TEST PASS"
+                    | ScheduleActivityTaskResult.Failed(ActivityTaskFailed=attr) when attr.Reason = failReason && attr.Details = failDetails -> ()
                     | _ -> ()
                         
                 return "TEST FAIL"
@@ -115,7 +115,7 @@ module TestWhileLoop =
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 1", ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input="1", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 11", ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input="1", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 6
                               ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 7
@@ -127,7 +127,7 @@ module TestWhileLoop =
                           |> OfflineHistoryEvent (        // EventId = 10
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=9L))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 1", ActivityType=TestConfiguration.TestActivityType, Control="2", DecisionTaskCompletedEventId=10L, HeartbeatTimeout="1200", Input="2", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 12", ActivityType=TestConfiguration.TestActivityType, Control="2", DecisionTaskCompletedEventId=10L, HeartbeatTimeout="1200", Input="2", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 12
                               ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=11L))
                           |> OfflineHistoryEvent (        // EventId = 13
@@ -139,7 +139,7 @@ module TestWhileLoop =
                           |> OfflineHistoryEvent (        // EventId = 16
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=14L, StartedEventId=15L))
                           |> OfflineHistoryEvent (        // EventId = 17
-                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 1", ActivityType=TestConfiguration.TestActivityType, Control="3", DecisionTaskCompletedEventId=16L, HeartbeatTimeout="1200", Input="3", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 13", ActivityType=TestConfiguration.TestActivityType, Control="3", DecisionTaskCompletedEventId=16L, HeartbeatTimeout="1200", Input="3", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 18
                               ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=17L))
                           |> OfflineHistoryEvent (        // EventId = 19
@@ -163,7 +163,7 @@ module TestWhileLoop =
                 resp.Decisions.Count                    |> should equal 1
                 resp.Decisions.[0].DecisionType         |> should equal DecisionType.ScheduleActivityTask
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
-                                                        |> should equal activityId
+                                                        |> should equal (activityId+(i.ToString()))
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
                                                         |> should equal TestConfiguration.TestActivityType.Name
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 

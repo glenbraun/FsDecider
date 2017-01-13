@@ -54,7 +54,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -141,7 +141,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Canceled(ActivityTaskCanceled=attr) when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -229,7 +229,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Failed(ActivityTaskFailed=attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -315,7 +315,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.TimedOut(attr) 
+            | ScheduleActivityTaskResult.TimedOut(ActivityTaskTimedOut=attr) 
                 when attr.TimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START &&
                      attr.Details = null -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -404,7 +404,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.ScheduleFailed(attr) 
+            | ScheduleActivityTaskResult.ScheduleFailed(ScheduleActivityTaskFailed=attr) 
                 when attr.Cause = activityCause &&
                      attr.ActivityId = activityId &&
                      attr.ActivityType.Name = activityType.Name &&

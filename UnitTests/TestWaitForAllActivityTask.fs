@@ -68,7 +68,7 @@ module TestWaitForAllActivityTask =
                 |> List.choose (fun r -> if r.IsFinished() then Some(r) else None)
 
             match finishedList with
-            | [ ScheduleActivityTaskResult.Completed(attr1);  ScheduleActivityTaskResult.Completed(attr2)] when attr1.Result = activityResult && attr2.Result = activityResult -> return "TEST PASS"
+            | [ ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr1);  ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr2)] when attr1.Result = activityResult && attr2.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
 
@@ -188,7 +188,7 @@ module TestWaitForAllActivityTask =
                 |> List.choose (fun r -> if r.IsFinished() then Some(r) else None)
 
             match finishedList with
-            | [ ScheduleActivityTaskResult.Completed(attr1);  ScheduleActivityTaskResult.Completed(attr2)] when attr1.Result = activityResult && attr2.Result = activityResult -> return "TEST PASS"
+            | [ ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr1);  ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr2)] when attr1.Result = activityResult && attr2.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
 
@@ -322,7 +322,7 @@ module TestWaitForAllActivityTask =
                 |> List.choose (fun r -> if r.IsFinished() then Some(r) else None)
 
             match finishedList with
-            | [ ScheduleActivityTaskResult.Completed(attr1);  ScheduleActivityTaskResult.Completed(attr2)] when attr1.Result = activityResult && attr2.Result = activityResult -> return "TEST PASS"
+            | [ ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr1);  ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr2)] when attr1.Result = activityResult && attr2.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
 

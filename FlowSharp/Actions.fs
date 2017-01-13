@@ -34,14 +34,30 @@ type ScheduleActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes
 
 type ScheduleActivityTaskResult =
-    | Scheduling of ScheduleActivityTaskDecisionAttributes
-    | Scheduled of ActivityTaskScheduledEventAttributes
-    | Started of StartedEvent:ActivityTaskStartedEventAttributes * ScheduledEvent:ActivityTaskScheduledEventAttributes
-    | Completed of ActivityTaskCompletedEventAttributes
-    | Canceled of ActivityTaskCanceledEventAttributes
-    | TimedOut of ActivityTaskTimedOutEventAttributes
-    | Failed of ActivityTaskFailedEventAttributes
-    | ScheduleFailed of ScheduleActivityTaskFailedEventAttributes
+    | Scheduling        of ScheduleActivityTaskDecisionAttributes
+    | Scheduled         of ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
+                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | Started           of ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
+                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
+                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | Completed         of ActivityTaskCompleted:ActivityTaskCompletedEventAttributes * 
+                           ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
+                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
+                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | Canceled          of ActivityTaskCanceled:ActivityTaskCanceledEventAttributes * 
+                           ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
+                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
+                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | Failed            of ActivityTaskFailed:ActivityTaskFailedEventAttributes * 
+                           ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
+                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
+                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | TimedOut          of ActivityTaskTimedOut:ActivityTaskTimedOutEventAttributes * 
+                           ActivityTaskStarted:ActivityTaskStartedEventAttributes option * 
+                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
+                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | ScheduleFailed    of ScheduleActivityTaskFailed:ScheduleActivityTaskFailedEventAttributes * 
+                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
 
     member this.IsFinished() =
         match this with
@@ -65,9 +81,12 @@ type RequestCancelActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
 
 type RequestCancelActivityTaskResult =
-    | CancelRequested of ActivityTaskCancelRequestedEventAttributes
-    | RequestCancelFailed of RequestCancelActivityTaskFailedEventAttributes
-    | Finished
+    | CancelRequested       of ActivityTaskCancelRequested:ActivityTaskCancelRequestedEventAttributes * 
+                               DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | RequestCancelFailed   of RequestCancelActivityTaskFailed:RequestCancelActivityTaskFailedEventAttributes * 
+                               DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | ActivityFinished
+    | ActivityScheduleFailed
 
 type ScheduleAndWaitForLambdaFunctionAction =
     | Attributes of ScheduleLambdaFunctionDecisionAttributes

@@ -31,7 +31,7 @@ let tests =
                 testCase "TimedOut"             <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Timed Out Activity Task``
                 testCase "ScheduleFailed"       <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with Activity Task Schedule Failure``
             ]
-
+            
             testList "WaitForActivityTask" [
                 testCase "Completed"            <| TestWaitForActivityTask.``Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestWaitForActivityTask.``Wait For Activity Task with One Canceled Activity Task``
@@ -53,9 +53,10 @@ let tests =
             ]
             
             testList "RequestCancelActivityTask" [
-                testCase "CancelRequested"      <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of CancelRequested``
-                testCase "RequestCancelFailed"  <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of RequestCancelFailed``
-                testCase "Finished "            <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of Finished``
+                testCase "CancelRequested"          <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of CancelRequested``
+                testCase "RequestCancelFailed"      <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of RequestCancelFailed``
+                testCase "ActivityFinished"         <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityFinished``
+                testCase "ActivityScheduleFailed"   <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityScheduleFailed``
             ]
             
             testList "StartChildWorkflowExecution" [
@@ -216,10 +217,13 @@ let tests =
 [<EntryPoint>]
 let main argv = 
     TestConfiguration.GenerateOfflineHistory <- true
-    TestConfiguration.IsConnected <- true
+    TestConfiguration.IsConnected <- false
+
+    //let tests = testCase "One Off"  <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityScheduleFailed``
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
+     
     0
 
 

@@ -135,8 +135,8 @@ module TestForLoop =
                     // Schedule and Wait for an Activity Task
                     let! result = FlowSharp.ScheduleAndWaitForActivityTask (
                                     TestConfiguration.TestActivityType, 
-                                    activityId, 
-                                    input=activityInput,
+                                    activityId+(i.ToString()), 
+                                    input=i.ToString(),
                                     taskList=TestConfiguration.TestTaskList, 
                                     heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                     scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -145,7 +145,7 @@ module TestForLoop =
                                 )
 
                     match result with
-                    | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> ()
+                    | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) when attr.Result = activityResult + (i.ToString()) -> ()
                     | _ -> return "TEST FAIL"
 
                 return "TEST PASS"
@@ -162,7 +162,7 @@ module TestForLoop =
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 1", ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input="Test Activity 1 Input", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 11", ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input="Test Activity 1 Input", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 6
                               ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 7
@@ -174,7 +174,7 @@ module TestForLoop =
                           |> OfflineHistoryEvent (        // EventId = 10
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=9L))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 1", ActivityType=TestConfiguration.TestActivityType, Control="2", DecisionTaskCompletedEventId=10L, HeartbeatTimeout="1200", Input="Test Activity 1 Input", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 12", ActivityType=TestConfiguration.TestActivityType, Control="2", DecisionTaskCompletedEventId=10L, HeartbeatTimeout="1200", Input="Test Activity 1 Input", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 12
                               ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=11L))
                           |> OfflineHistoryEvent (        // EventId = 13
@@ -198,31 +198,31 @@ module TestForLoop =
                 resp.Decisions.Count                    |> should equal 1
                 resp.Decisions.[0].DecisionType         |> should equal DecisionType.ScheduleActivityTask
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
-                                                        |> should equal activityId
+                                                        |> should equal (activityId+"1")
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
                                                         |> should equal TestConfiguration.TestActivityType.Name
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
                                                         |> should equal TestConfiguration.TestActivityType.Version
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
-                                                        |> should equal activityInput
+                                                        |> should equal "1"
 
                 TestHelper.RespondDecisionTaskCompleted resp
-                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(fun _ -> activityResult + "1"))
+                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(fun (at:ActivityTask) -> activityResult + at.Input))
 
             | 2 -> 
                 resp.Decisions.Count                    |> should equal 1
                 resp.Decisions.[0].DecisionType         |> should equal DecisionType.ScheduleActivityTask
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
-                                                        |> should equal activityId
+                                                        |> should equal (activityId+"2")
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
                                                         |> should equal TestConfiguration.TestActivityType.Name
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
                                                         |> should equal TestConfiguration.TestActivityType.Version
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
-                                                        |> should equal activityInput
+                                                        |> should equal "2"
 
                 TestHelper.RespondDecisionTaskCompleted resp
-                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(fun _ -> activityResult + "2"))
+                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(fun (at:ActivityTask) -> activityResult + at.Input))
 
             | 3 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -271,7 +271,7 @@ module TestForLoop =
                     |> List.map (
                         fun (input, result) -> 
                             match result with
-                            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + input -> true
+                            | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) when attr.Result = activityResult + input -> true
                             | _ -> false
                         )
                     |> List.forall ((=) true)

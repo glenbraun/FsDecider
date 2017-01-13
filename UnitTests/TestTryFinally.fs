@@ -104,7 +104,7 @@ module TestTryFinally =
                                 )
 
                     match result with
-                    | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> 
+                    | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) when attr.Result = activityResult -> 
                         failwith "ERROR"
                     | _ -> return "TEST FAIL"
                 finally
