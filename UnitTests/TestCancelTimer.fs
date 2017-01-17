@@ -31,7 +31,7 @@ module TestCancelTimer =
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
@@ -136,7 +136,7 @@ module TestCancelTimer =
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
@@ -222,7 +222,7 @@ module TestCancelTimer =
         let startToFireTimeout = "2"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
@@ -296,7 +296,7 @@ module TestCancelTimer =
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
@@ -373,7 +373,7 @@ module TestCancelTimer =
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)

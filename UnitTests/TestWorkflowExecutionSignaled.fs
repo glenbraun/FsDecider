@@ -31,7 +31,7 @@ module TestWorkflowExecutionSignaled =
         let signalInput = "Test Signal Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
             let! signal = FlowSharp.WorkflowExecutionSignaled(signalName)
                 
@@ -99,7 +99,7 @@ module TestWorkflowExecutionSignaled =
         let signalInput = "Test Signal Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
             let! signal = FlowSharp.WorkflowExecutionSignaled(signalName)
                 

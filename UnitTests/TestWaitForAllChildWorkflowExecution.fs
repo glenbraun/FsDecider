@@ -38,7 +38,7 @@ module TestWaitForAllChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start1 = FlowSharp.StartChildWorkflowExecution
@@ -83,7 +83,7 @@ module TestWaitForAllChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 
@@ -222,7 +222,7 @@ module TestWaitForAllChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start1 = FlowSharp.StartChildWorkflowExecution
@@ -267,7 +267,7 @@ module TestWaitForAllChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 
@@ -428,7 +428,7 @@ module TestWaitForAllChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start1 = FlowSharp.StartChildWorkflowExecution
@@ -473,7 +473,7 @@ module TestWaitForAllChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 

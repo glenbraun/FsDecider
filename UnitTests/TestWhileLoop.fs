@@ -30,7 +30,7 @@ module TestWhileLoop =
         let deciderFunc(dt:DecisionTask) =
             let keepgoing = ref true
 
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 while !keepgoing do
                     keepgoing := false
                    
@@ -80,7 +80,7 @@ module TestWhileLoop =
         let deciderFunc(dt:DecisionTask) =
             let tries = ref 0
 
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 while !tries < 3 do
                     tries := !tries + 1
 

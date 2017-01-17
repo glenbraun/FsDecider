@@ -47,7 +47,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharp.StartChildWorkflowExecution
@@ -160,7 +160,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharp.StartChildWorkflowExecution
@@ -288,7 +288,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharp.StartChildWorkflowExecution
@@ -415,7 +415,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let cause = RequestCancelExternalWorkflowExecutionFailedCause.UNKNOWN_EXTERNAL_WORKFLOW_EXECUTION
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             let! request = FlowSharp.RequestCancelExternalWorkflowExecution(childWorkflowId)
                 

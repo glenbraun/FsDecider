@@ -34,7 +34,7 @@ module TestScheduleAndWaitForLambdaFunction =
 
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for a Lambda Function
             let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
@@ -119,7 +119,7 @@ module TestScheduleAndWaitForLambdaFunction =
         let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for a Lambda Function
             let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
@@ -203,7 +203,7 @@ module TestScheduleAndWaitForLambdaFunction =
         let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for a Lambda Function
             let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
@@ -287,7 +287,7 @@ module TestScheduleAndWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for a Lambda Function
             let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (
@@ -371,7 +371,7 @@ module TestScheduleAndWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for a Lambda Function
             let! result = FlowSharp.ScheduleAndWaitForLambdaFunction (

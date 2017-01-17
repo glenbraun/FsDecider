@@ -34,7 +34,7 @@ module TestReturnResult =
         let workflowId = "Return Result of RespondDecisionTaskCompleted"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 return ()
         }
 
@@ -73,7 +73,7 @@ module TestReturnResult =
         let workflowId = "Return Result of CompleteWorkflowExecution"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 return "TEST PASS"
         }
 
@@ -113,7 +113,7 @@ module TestReturnResult =
         let cancelDetails = "Cancel Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 return ReturnResult.CancelWorkflowExecution(cancelDetails)
         }
 
@@ -154,7 +154,7 @@ module TestReturnResult =
         let failDetails = "FailDetails"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 return ReturnResult.FailWorkflowExecution(Reason=failReason, Details=failDetails)
         }
 
@@ -196,7 +196,7 @@ module TestReturnResult =
         let continueInput = "Contintue As New Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 let attr = ContinueAsNewWorkflowExecutionDecisionAttributes(
                             ChildPolicy=ChildPolicy.TERMINATE,
                             ExecutionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout.ToString(),
@@ -249,7 +249,7 @@ module TestReturnResult =
         let cause = CompleteWorkflowExecutionFailedCause.UNHANDLED_DECISION
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 try 
                     return ReturnResult.CompleteWorkflowExecution("WORKFLOW RESULT")
                 with 
@@ -310,7 +310,7 @@ module TestReturnResult =
         let cause = CancelWorkflowExecutionFailedCause.UNHANDLED_DECISION
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 try 
                     return ReturnResult.CancelWorkflowExecution("CANCEL DETAILS")
                 with 
@@ -371,7 +371,7 @@ module TestReturnResult =
         let cause = FailWorkflowExecutionFailedCause.UNHANDLED_DECISION
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 try 
                     return ReturnResult.FailWorkflowExecution(Reason="FAIL REASON", Details="FAIL DETAILS")
                 with 
@@ -437,7 +437,7 @@ module TestReturnResult =
         let cause = ContinueAsNewWorkflowExecutionFailedCause.WORKFLOW_TYPE_DOES_NOT_EXIST
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 try 
                     let attr = ContinueAsNewWorkflowExecutionDecisionAttributes(
                                 ChildPolicy=ChildPolicy.TERMINATE,

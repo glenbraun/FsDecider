@@ -8,9 +8,9 @@ open Amazon.SimpleWorkflow.Model
 open FlowSharp.Actions
 open FlowSharp.HistoryWalker
 
-type Builder (DecisionTask:DecisionTask) =
+type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
     let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
-    let walker = HistoryWalker(DecisionTask.Events, false)
+    let walker = HistoryWalker(DecisionTask.Events, ReverseOrder)
     let mutable blockFlag = false
     let mutable exceptionEvents = List.empty<int64>
 

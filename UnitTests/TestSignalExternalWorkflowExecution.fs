@@ -47,7 +47,7 @@ module TestSignalExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharp.StartChildWorkflowExecution
@@ -161,7 +161,7 @@ module TestSignalExternalWorkflowExecution =
         let signalInput = "Test Signal Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharp.StartChildWorkflowExecution
@@ -297,7 +297,7 @@ module TestSignalExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharp.StartChildWorkflowExecution
@@ -427,7 +427,7 @@ module TestSignalExternalWorkflowExecution =
         let cause = SignalExternalWorkflowExecutionFailedCause.UNKNOWN_EXTERNAL_WORKFLOW_EXECUTION
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, childWorkflowId, signalInput)
                 

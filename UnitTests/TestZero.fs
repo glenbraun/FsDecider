@@ -27,7 +27,7 @@ module TestZero =
         let workflowId = "An Empty Computation Expression which results in Unit"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 ()
             }
 

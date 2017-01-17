@@ -31,7 +31,7 @@ module TestMarkerRecorded =
         let markerDetails = "Test Marker Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // See if Marker was Recorded
             let! recorded = FlowSharp.MarkerRecorded(markerName)
@@ -79,7 +79,7 @@ module TestMarkerRecorded =
         let markerDetails = "Test Marker Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
             let! marker = FlowSharp.RecordMarker(markerName, markerDetails)
@@ -158,7 +158,7 @@ module TestMarkerRecorded =
         let cause = RecordMarkerFailedCause.OPERATION_NOT_PERMITTED
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // See if Marker was recorded.
             let! recorded = FlowSharp.MarkerRecorded(markerName)

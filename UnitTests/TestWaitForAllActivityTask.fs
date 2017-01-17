@@ -33,7 +33,7 @@ module TestWaitForAllActivityTask =
         let activityResult = "Test Activity Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! activity1 = FlowSharp.ScheduleActivityTask (
@@ -153,7 +153,7 @@ module TestWaitForAllActivityTask =
         let activityResult = "Test Activity Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! activity1 = FlowSharp.ScheduleActivityTask (
@@ -287,7 +287,7 @@ module TestWaitForAllActivityTask =
         let activityResult = "Test Activity Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! activity1 = FlowSharp.ScheduleActivityTask (

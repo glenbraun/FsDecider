@@ -40,7 +40,7 @@ module TestWorkflowExecutionCancelRequested =
         let cause = WorkflowExecutionCancelRequestedCause.CHILD_POLICY_APPLIED
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
             // Start a Child Workflow Execution
             let! start = FlowSharp.StartChildWorkflowExecution
@@ -72,7 +72,7 @@ module TestWorkflowExecutionCancelRequested =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             let! cancel = FlowSharp.WorkflowExecutionCancelRequested()
                 
             match cancel with
@@ -210,7 +210,7 @@ module TestWorkflowExecutionCancelRequested =
         let workflowId = "Workflow Execution Cancel Requested with result of NotRequested"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
             let! cancel = FlowSharp.WorkflowExecutionCancelRequested()
                 

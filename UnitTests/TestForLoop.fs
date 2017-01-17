@@ -30,7 +30,7 @@ module TestForLoop =
         let deciderFunc(dt:DecisionTask) =
             let sum = ref 0
 
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 for i = 1 to 2 do
                     sum := !sum + i
                     ()
@@ -79,7 +79,7 @@ module TestForLoop =
         let deciderFunc(dt:DecisionTask) =
             let sum = ref 0
 
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 for i in [1 .. 2] do
                     sum := !sum + i
                     ()
@@ -130,7 +130,7 @@ module TestForLoop =
 
         let deciderFunc(dt:DecisionTask) =
 
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 for i = 1 to 2 do
                     // Schedule and Wait for an Activity Task
                     let! result = FlowSharp.ScheduleAndWaitForActivityTask (
@@ -244,7 +244,7 @@ module TestForLoop =
 
         let deciderFunc(dt:DecisionTask) =
 
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 let results = ref List.empty<string * ScheduleActivityTaskResult>
 
                 for i in [ 1 .. 2 ] do

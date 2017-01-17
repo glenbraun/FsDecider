@@ -36,7 +36,7 @@ module TestScheduleAndWaitForActivityTask =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for an Activity Task
             let! result = FlowSharp.ScheduleAndWaitForActivityTask (
@@ -120,7 +120,7 @@ module TestScheduleAndWaitForActivityTask =
         let activityDetails = "Test Activity 1 Canceled Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for an Activity Task
             let! result = FlowSharp.ScheduleAndWaitForActivityTask (
@@ -205,7 +205,7 @@ module TestScheduleAndWaitForActivityTask =
         let activityDetails = "Test Activity 1 Failed Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for an Activity Task
             let! result = FlowSharp.ScheduleAndWaitForActivityTask (
@@ -289,7 +289,7 @@ module TestScheduleAndWaitForActivityTask =
         let activityTimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for an Activity Task
             let! result = FlowSharp.ScheduleAndWaitForActivityTask (
@@ -376,7 +376,7 @@ module TestScheduleAndWaitForActivityTask =
         let activityCause = ScheduleActivityTaskFailedCause.ACTIVITY_TYPE_DOES_NOT_EXIST
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule and Wait for an Activity Task
             let! result = FlowSharp.ScheduleAndWaitForActivityTask (
