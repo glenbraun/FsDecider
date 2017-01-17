@@ -7,6 +7,7 @@ open Amazon.SimpleWorkflow.Model
 
 type TestConfiguration() =
     static member val public IsConnected = false with get, set
+    static member val public ReverseOrder = false with get, set
     static member val public GenerateOfflineHistory = false with get, set
     static member val public GetSwfClient = fun () -> new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2) with get, set
     static member val public TestDomain = "wo_admin" with get, set
@@ -19,4 +20,3 @@ type TestConfiguration() =
     static member val public TestLambdaResult = "\"Hello from Lambda\""
     static member val public TestActivityType = new ActivityType(Name = "Activity1", Version = "2") with get, set
     static member val public TwentyMinuteTimeout = (TimeSpan.FromMinutes(20.0)).TotalSeconds.ToString()
-    static member val public ReverseOrder = false

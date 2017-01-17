@@ -218,6 +218,7 @@ let tests =
 let main argv = 
     TestConfiguration.GenerateOfflineHistory <- false
     TestConfiguration.IsConnected <- false
+    TestConfiguration.ReverseOrder <- true
 
     //let tests = testCase "One Off"  <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityScheduleFailed``
 

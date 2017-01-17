@@ -29,7 +29,8 @@ module TestHelper =
                             (
                                 Domain = TestConfiguration.TestDomain,
                                 Identity = TestConfiguration.TestIdentity,
-                                TaskList = taskList
+                                TaskList = taskList,
+                                ReverseOrder = TestConfiguration.ReverseOrder
                             )
             let response = swf.PollForDecisionTask(request)
             (response.DecisionTask)
@@ -40,7 +41,10 @@ module TestHelper =
                     if TestConfiguration.IsConnected then
                         PollOnline()
                     else
-                        PollOffline trip
+                        let odt = PollOffline trip
+                        if TestConfiguration.ReverseOrder then
+                            odt.Events <- ResizeArray<HistoryEvent>(odt.Events |> Seq.rev)
+                        odt
 
                 let resp = deciderFunc(dt)
                 yield (trip, resp)

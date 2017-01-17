@@ -312,15 +312,14 @@ module OfflineHistory =
             let StartedEventId = ref 0L
 
             seq {
-                for i = 1 to dt.Events.Count do
-                    let event = dt.Events.[i-1]
+                for i = 0 to (dt.Events.Count-1) do
+                    let event = dt.Events.[i]
                     events.Add event
 
                     if event.EventType = EventType.DecisionTaskStarted then
                         StartedEventId := event.EventId
                         yield (!PreviousStartedEventId, !StartedEventId, (new ResizeArray<HistoryEvent>(events)))
                         PreviousStartedEventId := !StartedEventId
-                    
             }
 
         seq {

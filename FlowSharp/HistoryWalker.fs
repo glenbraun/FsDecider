@@ -181,6 +181,12 @@ module HistoryWalker =
             combinedHistory.EventTimestamp <- h.EventTimestamp
 
         let InBounds (index:int) = events.Count > index && index >= 0
+
+        let Start () = 
+            if ReverseOrder then
+                events.Count - 1
+            else
+                0
             
         let rec WalkToActivityTaskFinished (activityTaskStarted:HistoryEvent) (activityTaskScheduled:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) = 
             if InBounds(index) then
@@ -688,40 +694,40 @@ module HistoryWalker =
             | WalkerResult.NotFound -> None
             
         member this.FindActivityTask (attr:ScheduleActivityTaskDecisionAttributes) : HistoryEvent option = 
-            HistoryOrNone (WalkToActivityTaskScheduledOrScheduleFailed attr 0)
+            HistoryOrNone (WalkToActivityTaskScheduledOrScheduleFailed attr (Start()))
             
         member this.FindRequestCancelActivityTask (activityId:string) : HistoryEvent option =
-            HistoryOrNone (WalkToActivityTaskCancelRequestedOrRequestFailed activityId 0)
+            HistoryOrNone (WalkToActivityTaskCancelRequestedOrRequestFailed activityId (Start()))
 
         member this.FindLambdaFunction (attr:ScheduleLambdaFunctionDecisionAttributes) : HistoryEvent option =
-            HistoryOrNone (WalkToLambdaFunctionScheduledOrScheduleFailed attr 0)
+            HistoryOrNone (WalkToLambdaFunctionScheduledOrScheduleFailed attr (Start()))
 
         member this.FindTimer (attr:StartTimerDecisionAttributes) : HistoryEvent option =
-            HistoryOrNone (WalkToTimerStartedOrFailed attr 0)
+            HistoryOrNone (WalkToTimerStartedOrFailed attr (Start()))
 
         member this.FindCancelTimer (timerId:string) : HistoryEvent option =
-            HistoryOrNone (WalkToCancelTimerOrFailed timerId 0)
+            HistoryOrNone (WalkToCancelTimerOrFailed timerId (Start()))
 
         member this.FindWorkflowException (eventType:EventType, exceptionEvents:int64 list) : (HistoryEvent option) =
-            WalkToWorkflowExecutionException eventType exceptionEvents 0
+            WalkToWorkflowExecutionException eventType exceptionEvents (Start())
 
         member this.FindSignaled (signalName:string) : (HistoryEvent option) =
-           HistoryOrNone (WalkToWorkflowExecutionSignaled signalName 0)
+           HistoryOrNone (WalkToWorkflowExecutionSignaled signalName (Start()))
 
         member this.FindMarker (markerName:string) : (HistoryEvent option) =
-           HistoryOrNone (WalkToMarkerRecordedOrFailed markerName 0)
+           HistoryOrNone (WalkToMarkerRecordedOrFailed markerName (Start()))
 
         member this.FindChildWorkflowExecution (attr:StartChildWorkflowExecutionDecisionAttributes) : (HistoryEvent option) =
-           HistoryOrNone (WalkToStartChildWorkflowExecutionOrFailed attr 0)
+           HistoryOrNone (WalkToStartChildWorkflowExecutionOrFailed attr (Start()))
 
         member this.FindRequestCancelExternalWorkflowExecution (attr:RequestCancelExternalWorkflowExecutionDecisionAttributes) : (HistoryEvent option) =
-           HistoryOrNone (WalkToRequestCancelExternalWorkflowExecutionInitiated attr 0)
+           HistoryOrNone (WalkToRequestCancelExternalWorkflowExecutionInitiated attr (Start()))
 
         member this.FindSignalExternalWorkflow (attr:SignalExternalWorkflowExecutionDecisionAttributes) : (HistoryEvent option) =
-           HistoryOrNone (WalkToSignalExternalWorkflowExecutionInitiated attr 0)
+           HistoryOrNone (WalkToSignalExternalWorkflowExecutionInitiated attr (Start()))
 
         member this.FindWorkflowExecutionCancelRequested () =
-            HistoryOrNone (WalkToWorkflowExecutionCancelRequested 0)
+            HistoryOrNone (WalkToWorkflowExecutionCancelRequested (Start()))
 
         member this.FindWorkflowExecutionStarted () =
-            HistoryOrNone (WalkToWorkflowExecutionStarted 0)
+            HistoryOrNone (WalkToWorkflowExecutionStarted (Start()))
