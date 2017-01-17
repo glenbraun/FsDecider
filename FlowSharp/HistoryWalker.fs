@@ -171,17 +171,19 @@ module HistoryWalker =
         | Found
         | NotFound
 
-    type HistoryWalker(events:ResizeArray<HistoryEvent>) =
+    type HistoryWalker(HistoryEvents:System.Collections.Generic.IEnumerable<HistoryEvent>, ReverseOrder:bool) =
+        let events = ResizeArray<HistoryEvent>(HistoryEvents)
+        let step = if ReverseOrder then -1 else 1
 
         let SetCommonProperties (combinedHistory:HistoryEvent) (h:HistoryEvent) =
             combinedHistory.EventType <- h.EventType
             combinedHistory.EventId <- h.EventId
             combinedHistory.EventTimestamp <- h.EventTimestamp
 
+        let InBounds (index:int) = events.Count > index && index >= 0
+            
         let rec WalkToActivityTaskFinished (activityTaskStarted:HistoryEvent) (activityTaskScheduled:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) = 
-            if index >= events.Count || index < 0 then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 // Completed
                 | EventOfType EventType.ActivityTaskCompleted hev when 
@@ -220,13 +222,13 @@ module HistoryWalker =
                         WalkerResult.Found
 
                 | _ ->
-                    WalkToActivityTaskFinished activityTaskStarted activityTaskScheduled (index+1) combinedHistory
+                    WalkToActivityTaskFinished activityTaskStarted activityTaskScheduled (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
 
         let rec WalkToActivityTaskStartedOrTimedOut (activityTaskScheduled:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =  
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 // Started
                 | EventOfType EventType.ActivityTaskStarted hev when 
@@ -235,7 +237,7 @@ module HistoryWalker =
                     combinedHistory.ActivityTaskStartedEventAttributes <- hev.ActivityTaskStartedEventAttributes
                     SetCommonProperties combinedHistory hev
                                     
-                    WalkToActivityTaskFinished hev activityTaskScheduled (index+1) combinedHistory |> ignore
+                    WalkToActivityTaskFinished hev activityTaskScheduled (index+step) combinedHistory |> ignore
                     WalkerResult.Found
 
                 // TimedOut
@@ -248,19 +250,19 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToActivityTaskStartedOrTimedOut activityTaskScheduled (index+1) combinedHistory
+                    WalkToActivityTaskStartedOrTimedOut activityTaskScheduled (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
     
         let rec WalkToActivityTaskScheduledOrScheduleFailed (attr:ScheduleActivityTaskDecisionAttributes) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | ActivityTaskScheduled(attr) hev ->
 
                     combinedHistory.ActivityTaskScheduledEventAttributes <- hev.ActivityTaskScheduledEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToActivityTaskStartedOrTimedOut hev (index+1) combinedHistory |> ignore
+                    WalkToActivityTaskStartedOrTimedOut hev (index+step) combinedHistory |> ignore
                     WalkerResult.Found
                 
                 | ScheduleActivityTaskFailed(attr) hev ->
@@ -270,12 +272,13 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToActivityTaskScheduledOrScheduleFailed attr (index+1) combinedHistory
+                    WalkToActivityTaskScheduledOrScheduleFailed attr (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
+
 
         let rec WalkToActivityTaskCancelRequestedOrRequestFailed (activityId:string) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =  
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | ActivityTaskCancelRequested(activityId) hev ->
 
@@ -291,12 +294,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToActivityTaskCancelRequestedOrRequestFailed activityId (index+1) combinedHistory
+                    WalkToActivityTaskCancelRequestedOrRequestFailed activityId (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToLambdaFunctionFinished (lambdaFunctionStarted:HistoryEvent) (lambdaFunctionScheduled:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 // Completed
                 | EventOfType EventType.LambdaFunctionCompleted hev when 
@@ -326,12 +329,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToLambdaFunctionFinished lambdaFunctionStarted lambdaFunctionScheduled (index+1) combinedHistory
+                    WalkToLambdaFunctionFinished lambdaFunctionStarted lambdaFunctionScheduled (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToLambdaFunctionStartedOrStartFailed (lambdaFunctionScheduled:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 // LambdaFunctionStarted
                 | EventOfType EventType.LambdaFunctionStarted hev when 
@@ -340,7 +343,7 @@ module HistoryWalker =
                     combinedHistory.LambdaFunctionStartedEventAttributes <- hev.LambdaFunctionStartedEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToLambdaFunctionFinished hev lambdaFunctionScheduled (index+1) combinedHistory |> ignore
+                    WalkToLambdaFunctionFinished hev lambdaFunctionScheduled (index+step) combinedHistory |> ignore
 
                     WalkerResult.Found
 
@@ -353,19 +356,19 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToLambdaFunctionStartedOrStartFailed lambdaFunctionScheduled (index+1) combinedHistory
+                    WalkToLambdaFunctionStartedOrStartFailed lambdaFunctionScheduled (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
             
         let rec WalkToLambdaFunctionScheduledOrScheduleFailed (attr:ScheduleLambdaFunctionDecisionAttributes) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | LambdaFunctionScheduled(attr) hev ->
 
                     combinedHistory.LambdaFunctionScheduledEventAttributes <- hev.LambdaFunctionScheduledEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToLambdaFunctionStartedOrStartFailed (hev) (index+1) combinedHistory |> ignore
+                    WalkToLambdaFunctionStartedOrStartFailed (hev) (index+step) combinedHistory |> ignore
 
                     WalkerResult.Found
 
@@ -377,12 +380,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToLambdaFunctionScheduledOrScheduleFailed attr (index+1) combinedHistory
+                    WalkToLambdaFunctionScheduledOrScheduleFailed attr (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToTimerFinished (timerStarted:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | EventOfType EventType.TimerFired hev when
                     hev.TimerFiredEventAttributes.StartedEventId = timerStarted.EventId ->
@@ -399,19 +402,19 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToTimerFinished (timerStarted) (index+1) combinedHistory
+                    WalkToTimerFinished (timerStarted) (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToTimerStartedOrFailed (attr:StartTimerDecisionAttributes) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | TimerStarted(attr) hev ->
 
                     combinedHistory.TimerStartedEventAttributes <- hev.TimerStartedEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToTimerFinished hev (index+1) combinedHistory |> ignore
+                    WalkToTimerFinished hev (index+step) combinedHistory |> ignore
 
                     WalkerResult.Found
 
@@ -422,12 +425,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToTimerStartedOrFailed attr (index+1) combinedHistory
+                    WalkToTimerStartedOrFailed attr (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToCancelTimerOrFailed (timerId:string) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | CancelTimerFailed(timerId) hev -> 
 
@@ -436,23 +439,23 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToCancelTimerOrFailed timerId (index+1) combinedHistory
+                    WalkToCancelTimerOrFailed timerId (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToWorkflowExecutionException (eventType:EventType) (exceptionEvents:int64 list) (index:int) : HistoryEvent option =
-            if index >= events.Count then
-                None
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | WorkflowExecutionException eventType exceptionEvents hev ->
                     Some(hev)
 
                 | _ ->
-                    WalkToWorkflowExecutionException eventType exceptionEvents (index+1) 
+                    WalkToWorkflowExecutionException eventType exceptionEvents (index+step)
+            else
+                None
 
         let rec WalkToWorkflowExecutionSignaled (signalName:string) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | WorkflowExecutionSignaled(signalName) hev->
 
@@ -461,12 +464,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToWorkflowExecutionSignaled signalName (index+1) combinedHistory
+                    WalkToWorkflowExecutionSignaled signalName (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToMarkerRecordedOrFailed (markerName:string) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | MarkerRecorded(markerName) hev ->
 
@@ -481,12 +484,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToMarkerRecordedOrFailed markerName (index+1) combinedHistory
+                    WalkToMarkerRecordedOrFailed markerName (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToChildWorkflowExecutionFinished (childWorkflowExecutionStarted:HistoryEvent) (startChildWorkflowExecutionInitiated:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | EventOfType EventType.ChildWorkflowExecutionCompleted hev when
                     hev.ChildWorkflowExecutionCompletedEventAttributes.StartedEventId = childWorkflowExecutionStarted.EventId &&
@@ -529,12 +532,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToChildWorkflowExecutionFinished childWorkflowExecutionStarted startChildWorkflowExecutionInitiated (index+1) combinedHistory
+                    WalkToChildWorkflowExecutionFinished childWorkflowExecutionStarted startChildWorkflowExecutionInitiated (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToChildWorkflowExecutionStarted (startChildWorkflowExecutionInitiated:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | EventOfType EventType.ChildWorkflowExecutionStarted hev when
                     hev.ChildWorkflowExecutionStartedEventAttributes.InitiatedEventId = startChildWorkflowExecutionInitiated.EventId ->
@@ -542,24 +545,24 @@ module HistoryWalker =
                     combinedHistory.ChildWorkflowExecutionStartedEventAttributes <- hev.ChildWorkflowExecutionStartedEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToChildWorkflowExecutionFinished hev startChildWorkflowExecutionInitiated (index+1) combinedHistory |> ignore
+                    WalkToChildWorkflowExecutionFinished hev startChildWorkflowExecutionInitiated (index+step) combinedHistory |> ignore
 
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToChildWorkflowExecutionStarted startChildWorkflowExecutionInitiated (index+1) combinedHistory
+                    WalkToChildWorkflowExecutionStarted startChildWorkflowExecutionInitiated (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToStartChildWorkflowExecutionOrFailed (attr:StartChildWorkflowExecutionDecisionAttributes) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | StartChildWorkflowExecutionInitiated(attr) hev ->
 
                     combinedHistory.StartChildWorkflowExecutionInitiatedEventAttributes <- hev.StartChildWorkflowExecutionInitiatedEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToChildWorkflowExecutionStarted hev (index+1) combinedHistory |> ignore
+                    WalkToChildWorkflowExecutionStarted hev (index+step) combinedHistory |> ignore
 
                     WalkerResult.Found
 
@@ -570,12 +573,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToStartChildWorkflowExecutionOrFailed attr (index+1) combinedHistory
+                    WalkToStartChildWorkflowExecutionOrFailed attr (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToExternalWorkflowExecutionCancelRequestedOrFailed (requestCancelExternalWorkflowExecutionInitiated:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult = 
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | EventOfType EventType.ExternalWorkflowExecutionCancelRequested hev when
                     hev.ExternalWorkflowExecutionCancelRequestedEventAttributes.InitiatedEventId = requestCancelExternalWorkflowExecutionInitiated.EventId ->
@@ -592,29 +595,29 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToExternalWorkflowExecutionCancelRequestedOrFailed requestCancelExternalWorkflowExecutionInitiated (index+1) combinedHistory
+                    WalkToExternalWorkflowExecutionCancelRequestedOrFailed requestCancelExternalWorkflowExecutionInitiated (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToRequestCancelExternalWorkflowExecutionInitiated (attr:RequestCancelExternalWorkflowExecutionDecisionAttributes) (index:int) (combinedHistory:HistoryEvent) : WalkerResult = 
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | RequestCancelExternalWorkflowExecutionInitiated(attr) hev ->
 
                     combinedHistory.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes <- hev.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToExternalWorkflowExecutionCancelRequestedOrFailed hev (index+1) combinedHistory |> ignore
+                    WalkToExternalWorkflowExecutionCancelRequestedOrFailed hev (index+step) combinedHistory |> ignore
 
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToRequestCancelExternalWorkflowExecutionInitiated attr (index+1) combinedHistory
+                    WalkToRequestCancelExternalWorkflowExecutionInitiated attr (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToExternalWorkflowExecutionSignaledOrFailed (signalExternalWorkflowExecutionInitiated:HistoryEvent) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | EventOfType EventType.ExternalWorkflowExecutionSignaled hev when
                     hev.ExternalWorkflowExecutionSignaledEventAttributes.InitiatedEventId = signalExternalWorkflowExecutionInitiated.EventId ->
@@ -631,28 +634,28 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToExternalWorkflowExecutionSignaledOrFailed signalExternalWorkflowExecutionInitiated (index+1) combinedHistory
+                    WalkToExternalWorkflowExecutionSignaledOrFailed signalExternalWorkflowExecutionInitiated (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToSignalExternalWorkflowExecutionInitiated (attr:SignalExternalWorkflowExecutionDecisionAttributes) (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | SignalExternalWorkflowExecutionInitiated(attr) hev ->
                     combinedHistory.SignalExternalWorkflowExecutionInitiatedEventAttributes <- hev.SignalExternalWorkflowExecutionInitiatedEventAttributes
                     SetCommonProperties combinedHistory hev
 
-                    WalkToExternalWorkflowExecutionSignaledOrFailed hev (index+1) combinedHistory |> ignore
+                    WalkToExternalWorkflowExecutionSignaledOrFailed hev (index+step) combinedHistory |> ignore
 
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToSignalExternalWorkflowExecutionInitiated attr (index+1) combinedHistory
+                    WalkToSignalExternalWorkflowExecutionInitiated attr (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let rec WalkToWorkflowExecutionCancelRequested (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | EventOfType(EventType.WorkflowExecutionCancelRequested) hev ->
                     combinedHistory.WorkflowExecutionCancelRequestedEventAttributes <- hev.WorkflowExecutionCancelRequestedEventAttributes
@@ -660,12 +663,12 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToWorkflowExecutionCancelRequested (index+1) combinedHistory
+                    WalkToWorkflowExecutionCancelRequested (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
             
         let rec WalkToWorkflowExecutionStarted (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
-            if index >= events.Count then
-                WalkerResult.NotFound
-            else
+            if InBounds(index) then
                 match events.[index] with
                 | EventOfType(EventType.WorkflowExecutionStarted) hev ->
                     combinedHistory.WorkflowExecutionStartedEventAttributes <- hev.WorkflowExecutionStartedEventAttributes
@@ -673,7 +676,9 @@ module HistoryWalker =
                     WalkerResult.Found
 
                 | _ ->
-                    WalkToWorkflowExecutionStarted (index+1) combinedHistory
+                    WalkToWorkflowExecutionStarted (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
 
         let HistoryOrNone (walker:(HistoryEvent -> WalkerResult)) : HistoryEvent option =
             let combinedHistory = new HistoryEvent()

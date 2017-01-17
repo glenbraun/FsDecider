@@ -10,7 +10,7 @@ open FlowSharp.HistoryWalker
 
 type Builder (DecisionTask:DecisionTask) =
     let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
-    let walker = HistoryWalker(ResizeArray<HistoryEvent>(DecisionTask.Events))
+    let walker = HistoryWalker(DecisionTask.Events, false)
     let mutable blockFlag = false
     let mutable exceptionEvents = List.empty<int64>
 
