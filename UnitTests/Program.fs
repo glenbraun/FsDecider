@@ -167,6 +167,10 @@ let tests =
                 testCase "GetNullInput"         <| TestGetWorkflowExecutionInput.``Get Workflow Execution Input with null input``
             ]
 
+            testList "GetExecutionContext" [
+                testCase "GetExecutionContext"  <| TestGetExecutionContext.``Get Execution Context``
+            ]
+
             testList "ReturnResult" [
                 testCase "RespondDecisionTaskCompleted"         <| TestReturnResult.``Return Result of RespondDecisionTaskCompleted``
                 testCase "CompleteWorkflowExecution"            <| TestReturnResult.``Return Result of CompleteWorkflowExecution``
@@ -216,11 +220,11 @@ let tests =
 
 [<EntryPoint>]
 let main argv = 
-    TestConfiguration.GenerateOfflineHistory <- false
-    TestConfiguration.IsConnected <- false
-    TestConfiguration.ReverseOrder <- true
+    TestConfiguration.ReverseOrder <- false
+    TestConfiguration.GenerateOfflineHistory <- true
+    TestConfiguration.IsConnected <- true
 
-    //let tests = testCase "One Off"  <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityScheduleFailed``
+    let tests = testCase "GetExecutionContext"  <| TestGetExecutionContext.``Get Execution Context``
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

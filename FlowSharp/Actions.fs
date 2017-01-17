@@ -15,6 +15,9 @@ type WorkflowExecutionCancelRequestedResult =
 type GetWorkflowExecutionInputAction =
     | Attributes of unit
 
+type GetExecutionContextAction =
+    | Attributes of unit
+
 type ReturnResult = 
     | RespondDecisionTaskCompleted
     | CompleteWorkflowExecution         of Result:string

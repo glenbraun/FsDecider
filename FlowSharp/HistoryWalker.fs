@@ -686,6 +686,19 @@ module HistoryWalker =
             else
                 WalkerResult.NotFound
 
+        let rec WalkToDecisionTaskCompleted (index:int) (combinedHistory:HistoryEvent) : WalkerResult =
+            if InBounds(index) then
+                match events.[index] with
+                | EventOfType(EventType.DecisionTaskCompleted) hev ->
+                    combinedHistory.DecisionTaskCompletedEventAttributes <- hev.DecisionTaskCompletedEventAttributes
+                    SetCommonProperties combinedHistory hev
+                    WalkerResult.Found
+
+                | _ ->
+                    WalkToDecisionTaskCompleted (index+step) combinedHistory
+            else
+                WalkerResult.NotFound
+
         let HistoryOrNone (walker:(HistoryEvent -> WalkerResult)) : HistoryEvent option =
             let combinedHistory = new HistoryEvent()
             let result = walker combinedHistory
@@ -731,3 +744,6 @@ module HistoryWalker =
 
         member this.FindWorkflowExecutionStarted () =
             HistoryOrNone (WalkToWorkflowExecutionStarted (Start()))
+
+        member this.FindDecisionTaskCompleted () =
+            HistoryOrNone (WalkToDecisionTaskCompleted (Start()))

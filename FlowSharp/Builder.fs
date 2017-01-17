@@ -634,6 +634,20 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
 
         | _ -> failwith "error"
 
+    // Get Execution Context
+    member this.Bind(GetExecutionContextAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
+
+        let completedEvent = walker.FindDecisionTaskCompleted()
+
+        match (completedEvent) with
+        | None ->
+            f(null)
+
+        | SomeEventOfType(EventType.DecisionTaskCompleted) hev ->
+            f(hev.DecisionTaskCompletedEventAttributes.ExecutionContext)
+
+        | _ -> failwith "error"
+
     member this.For(enumeration:seq<'T>, f:(_ -> RespondDecisionTaskCompletedRequest)) =
 
         let processForBlock x = 

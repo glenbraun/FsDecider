@@ -8,15 +8,20 @@ open Amazon.SimpleWorkflow.Model
 open FlowSharp.Actions
 
 type FlowSharp = 
+    /// <summary>Determines if a request to cancel this workflow execution was made.</summary>
+    /// <returns>A WorkflowExecutionCancelRequestedResult of CancelRequested or NotRequested.</returns>
+    static member WorkflowExecutionCancelRequested() =
+        WorkflowExecutionCancelRequestedAction.Attributes()
+
     /// <summary>Determines the input provided to the workflow execution (if any).</summary>
     /// <returns>The workflow execution input or null.</returns>
     static member GetWorkflowExecutionInput() =
         GetWorkflowExecutionInputAction.Attributes()
 
-    /// <summary>Determines if a request to cancel this workflow execution was made.</summary>
-    /// <returns>A WorkflowExecutionCancelRequestedResult of CancelRequested or NotRequested.</returns>
-    static member WorkflowExecutionCancelRequested() =
-        WorkflowExecutionCancelRequestedAction.Attributes()
+    /// <summary>Returns the ExecutionContext from the most recent DecisionTaskCompleted event.</summary>
+    /// <returns>The Execution Context or null.</returns>
+    static member GetExecutionContext() =
+        GetExecutionContextAction.Attributes()
 
     /// <summary>Schedules an Activity Task but does not block further progress.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>

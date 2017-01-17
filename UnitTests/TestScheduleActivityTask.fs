@@ -309,6 +309,7 @@ module TestScheduleActivityTask =
                             startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                         )
 
+            let result = ScheduleActivityTaskResult.Completed(ActivityTaskCompletedEventAttributes (Result=activityResult))
 
             match result with
             | ScheduleActivityTaskResult.Scheduling(_) -> return ()

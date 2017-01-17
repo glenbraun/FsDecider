@@ -81,6 +81,7 @@
     <Compile Include="TestWaitForWorkflowExecutionSignaled.fs" />
     <Compile Include="TestWorkflowExecutionCancelRequested.fs" />
     <Compile Include="TestGetWorkflowExecutionInput.fs" />
+    <Compile Include="TestGetExecutionContext.fs" />
     <Compile Include="TestReturnResult.fs" />
     <Compile Include="TestZero.fs" />
     <Compile Include="TestForLoop.fs" />
