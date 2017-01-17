@@ -23,6 +23,10 @@ type FlowSharp =
     static member GetExecutionContext() =
         GetExecutionContextAction.Attributes()
 
+    /// <summary>Sets the ExecutionContext for the next RespondDecisionTaskCompletedReqest.</summary>
+    static member SetExecutionContext(executionContext:string) =
+        SetExecutionContextAction.Attributes(executionContext)
+
     /// <summary>Schedules an Activity Task but does not block further progress.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
     /// <param name="activityId">Required. The activityId of the activity task.

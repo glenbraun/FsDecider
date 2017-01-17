@@ -168,7 +168,8 @@ let tests =
             ]
 
             testList "GetExecutionContext" [
-                testCase "GetExecutionContext"  <| TestGetExecutionContext.``Get Execution Context``
+                testCase "GetExecutionContext"          <| TestGetExecutionContext.``Get Execution Context``
+                testCase "SetAndGetExecutionContext"    <| TestGetExecutionContext.``Set and Get Execution Context``
             ]
 
             testList "ReturnResult" [
@@ -222,9 +223,9 @@ let tests =
 let main argv = 
     TestConfiguration.ReverseOrder <- false
     TestConfiguration.GenerateOfflineHistory <- true
-    TestConfiguration.IsConnected <- true
+    TestConfiguration.IsConnected <- false
 
-    let tests = testCase "GetExecutionContext"  <| TestGetExecutionContext.``Get Execution Context``
+    // let tests = testCase "SetAndGetExecutionContext"  <| TestGetExecutionContext.``Set and Get Execution Context``
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

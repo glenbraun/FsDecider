@@ -648,6 +648,11 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
 
         | _ -> failwith "error"
 
+    // Set Execution Context
+    member this.Bind(SetExecutionContextAction.Attributes(context), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        response.ExecutionContext <- context
+        f()
+
     member this.For(enumeration:seq<'T>, f:(_ -> RespondDecisionTaskCompletedRequest)) =
 
         let processForBlock x = 

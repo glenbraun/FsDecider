@@ -18,6 +18,9 @@ type GetWorkflowExecutionInputAction =
 type GetExecutionContextAction =
     | Attributes of unit
 
+type SetExecutionContextAction =
+    | Attributes of ExecutionContext:string
+
 type ReturnResult = 
     | RespondDecisionTaskCompleted
     | CompleteWorkflowExecution         of Result:string
