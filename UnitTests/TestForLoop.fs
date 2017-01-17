@@ -145,7 +145,7 @@ module TestForLoop =
                                 )
 
                     match result with
-                    | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) when attr.Result = activityResult + (i.ToString()) -> ()
+                    | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> ()
                     | _ -> return "TEST FAIL"
 
                 return "TEST PASS"
@@ -271,7 +271,7 @@ module TestForLoop =
                     |> List.map (
                         fun (input, result) -> 
                             match result with
-                            | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) when attr.Result = activityResult + input -> true
+                            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + input -> true
                             | _ -> false
                         )
                     |> List.forall ((=) true)

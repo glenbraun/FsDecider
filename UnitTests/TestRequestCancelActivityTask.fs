@@ -55,7 +55,7 @@ module TestRequestCancelActivityTask =
             let! cancel = FlowSharp.RequestCancelActivityTask(activity)
 
             match cancel with
-            | RequestCancelActivityTaskResult.CancelRequested(ActivityTaskCancelRequested=attr) when attr.ActivityId = activityId -> return "TEST PASS"
+            | RequestCancelActivityTaskResult.CancelRequested(attr) when attr.ActivityId = activityId -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
 
@@ -169,7 +169,7 @@ module TestRequestCancelActivityTask =
             // Improper usage here but requried to force RequestCancelFailed 
             let fakeStart = 
                 match activity with
-                | ScheduleActivityTaskResult.Started(started, scheduled, dtc) -> 
+                | ScheduleActivityTaskResult.Started(started, scheduled) -> 
                     // Make a copy of the scheduled event attributes.
                     // Everything is the same except the ActivityId
                     let fakeScheduled = ActivityTaskScheduledEventAttributes()
@@ -185,13 +185,13 @@ module TestRequestCancelActivityTask =
                     fakeScheduled.TaskList <- scheduled.TaskList
                     fakeScheduled.TaskPriority <- scheduled.TaskPriority
 
-                    ScheduleActivityTaskResult.Started(started, fakeScheduled, dtc)
+                    ScheduleActivityTaskResult.Started(started, fakeScheduled)
                 | s -> s
 
             let! cancel = FlowSharp.RequestCancelActivityTask(fakeStart)
 
             match cancel with
-            | RequestCancelActivityTaskResult.RequestCancelFailed(RequestCancelActivityTaskFailed=attr) 
+            | RequestCancelActivityTaskResult.RequestCancelFailed(attr) 
                 when attr.ActivityId = fakeActivityId &&
                      attr.Cause = cancelCause -> return "TEST PASS"
             | _ -> return "TEST FAIL"

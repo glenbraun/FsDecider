@@ -97,8 +97,8 @@ module TestWhileLoop =
                                 )
 
                     match result with
-                    | ScheduleActivityTaskResult.Completed(ActivityTaskCompleted=attr) -> return "TEST PASS"
-                    | ScheduleActivityTaskResult.Failed(ActivityTaskFailed=attr) when attr.Reason = failReason && attr.Details = failDetails -> ()
+                    | ScheduleActivityTaskResult.Completed(attr) -> return "TEST PASS"
+                    | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = failReason && attr.Details = failDetails -> ()
                     | _ -> ()
                         
                 return "TEST FAIL"

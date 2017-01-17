@@ -301,13 +301,8 @@ module TestCancelTimer =
             // Start a Timer
             let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
-            // Note: Requres intential changes to decision for testing purpose (below)
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                return ()
-
-            | StartTimerResult.Started(attr) ->
-                let! timer2 = FlowSharp.StartTimer(timerId="timer2", startToFireTimeout = startToFireTimeout)
                 return ()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
@@ -330,68 +325,44 @@ module TestCancelTimer =
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              TimerStartedEventAttributes(Control="1", DecisionTaskCompletedEventId=4L, StartToFireTimeout="8640000", TimerId=timerId))
-                          |> OfflineHistoryEvent (        // EventId = 6
-                              WorkflowExecutionSignaledEventAttributes(Input="", SignalName=signalName))
-                          |> OfflineHistoryEvent (        // EventId = 7
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
-                          |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=7L))
-                          |> OfflineHistoryEvent (        // EventId = 9
-                              DecisionTaskCompletedEventAttributes(ScheduledEventId=7L, StartedEventId=8L))
-                          |> OfflineHistoryEvent (        // EventId = 10
                               StartTimerFailedEventAttributes(Cause=StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE, DecisionTaskCompletedEventId=9L, TimerId=timerId))
-                          |> OfflineHistoryEvent (        // EventId = 11
+                          |> OfflineHistoryEvent (        // EventId = 6
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
-                          |> OfflineHistoryEvent (        // EventId = 12
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=11L))
-                          |> OfflineHistoryEvent (        // EventId = 13
-                              DecisionTaskCompletedEventAttributes(ScheduledEventId=11L, StartedEventId=12L))
-                          |> OfflineHistoryEvent (        // EventId = 14
-                              WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=13L, Result="TEST PASS"))
+                          |> OfflineHistoryEvent (        // EventId = 7
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=6L))
+                          |> OfflineHistoryEvent (        // EventId = 8
+                              DecisionTaskCompletedEventAttributes(ScheduledEventId=6L, StartedEventId=7L))
+                          |> OfflineHistoryEvent (        // EventId = 9
+                              WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=8L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        if TestConfiguration.IsConnected then
+            // Only offline supported for this test
+            ()
+        else
+            let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
-        // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 3 do
-            match i with
-            | 1 -> 
-                resp.Decisions.Count                    |> should equal 1
-                resp.Decisions.[0].DecisionType         |> should equal DecisionType.StartTimer
-                resp.Decisions.[0].StartTimerDecisionAttributes.TimerId
-                                                        |> should equal timerId
-                resp.Decisions.[0].StartTimerDecisionAttributes.StartToFireTimeout
-                                                        |> should equal (startToFireTimeout.ToString())
+            // Poll and make decisions
+            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
+                match i with
+                | 1 -> 
+                    resp.Decisions.Count                    |> should equal 1
+                    resp.Decisions.[0].DecisionType         |> should equal DecisionType.StartTimer
+                    resp.Decisions.[0].StartTimerDecisionAttributes.TimerId
+                                                            |> should equal timerId
+                    resp.Decisions.[0].StartTimerDecisionAttributes.StartToFireTimeout
+                                                            |> should equal (startToFireTimeout.ToString())
 
-                TestHelper.RespondDecisionTaskCompleted resp
+                    TestHelper.RespondDecisionTaskCompleted resp
 
-                TestHelper.SignalWorkflow runId workflowId signalName ""
+                | 2 -> 
+                    resp.Decisions.Count                    |> should equal 1
+                    resp.Decisions.[0].DecisionType         |> should equal DecisionType.CompleteWorkflowExecution
+                    resp.Decisions.[0].CompleteWorkflowExecutionDecisionAttributes.Result 
+                                                            |> should equal "TEST PASS"
 
-            | 2 -> 
-                resp.Decisions.Count                    |> should equal 1
-                resp.Decisions.[0].DecisionType         |> should equal DecisionType.StartTimer
-                resp.Decisions.[0].StartTimerDecisionAttributes.TimerId
-                                                        |> should equal "timer2"
-                resp.Decisions.[0].StartTimerDecisionAttributes.StartToFireTimeout
-                                                        |> should equal (startToFireTimeout.ToString())
-
-                // Change timer id to force error
-                resp.Decisions.[0].StartTimerDecisionAttributes.TimerId <- timerId
-
-                TestHelper.RespondDecisionTaskCompleted resp
-
-            | 3 -> 
-                resp.Decisions.Count                    |> should equal 1
-                resp.Decisions.[0].DecisionType         |> should equal DecisionType.CompleteWorkflowExecution
-                resp.Decisions.[0].CompleteWorkflowExecutionDecisionAttributes.Result 
-                                                        |> should equal "TEST PASS"
-
-                TestHelper.RespondDecisionTaskCompleted resp
-            | _ -> ()
-
-        // Generate Offline History
-        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Add("SignalName", "signalName"))
+                    TestHelper.RespondDecisionTaskCompleted resp
+                | _ -> ()
 
     let ``Cancel Timer with result of CancelTimerFailed``() =
         let workflowId = "Cancel Timer with result of CancelTimerFailed"

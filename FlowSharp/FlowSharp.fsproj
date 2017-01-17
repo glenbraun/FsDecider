@@ -57,6 +57,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Actions.fs" />
     <Compile Include="FlowSharp.fs" />
+    <Compile Include="HistoryWalker.fs" />
     <Compile Include="Builder.fs" />
     <Content Include="packages.config" />
   </ItemGroup>

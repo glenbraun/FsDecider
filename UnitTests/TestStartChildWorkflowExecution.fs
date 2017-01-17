@@ -240,13 +240,10 @@ module TestStartChildWorkflowExecution =
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()
-            | StartChildWorkflowExecutionResult.Started(start, initiate) when 
+            | StartChildWorkflowExecutionResult.Started(start) when 
                 start.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 start.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
-                start.WorkflowExecution.WorkflowId = childWorkflowId &&
-                initiate.WorkflowId = childWorkflowId &&
-                initiate.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name && 
-                initiate.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version -> 
+                start.WorkflowExecution.WorkflowId = childWorkflowId -> 
                 
                 childRunId := start.WorkflowExecution.RunId
 
@@ -362,7 +359,7 @@ module TestStartChildWorkflowExecution =
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()
-            | StartChildWorkflowExecutionResult.Started(_, _) ->
+            | StartChildWorkflowExecutionResult.Started(_) ->
                 return ()
             | StartChildWorkflowExecutionResult.Completed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
@@ -507,7 +504,7 @@ module TestStartChildWorkflowExecution =
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()
-            | StartChildWorkflowExecutionResult.Started(_, _) ->
+            | StartChildWorkflowExecutionResult.Started(_) ->
                 return ()
             | StartChildWorkflowExecutionResult.Canceled(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
@@ -653,7 +650,7 @@ module TestStartChildWorkflowExecution =
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()
-            | StartChildWorkflowExecutionResult.Started(_, _) ->
+            | StartChildWorkflowExecutionResult.Started(_) ->
                 return ()
             | StartChildWorkflowExecutionResult.Failed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
@@ -803,7 +800,7 @@ module TestStartChildWorkflowExecution =
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()
-            | StartChildWorkflowExecutionResult.Started(_, _) ->
+            | StartChildWorkflowExecutionResult.Started(_) ->
                 return ()
             | StartChildWorkflowExecutionResult.TimedOut(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
@@ -931,7 +928,7 @@ module TestStartChildWorkflowExecution =
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()
-            | StartChildWorkflowExecutionResult.Started(start, _) ->
+            | StartChildWorkflowExecutionResult.Started(start) ->
                 childRunId := start.WorkflowExecution.RunId
                 return ()
             | StartChildWorkflowExecutionResult.Terminated(attr) when 

@@ -120,7 +120,7 @@ let tests =
                 testCase "Canceled"             <| TestWaitForTimer.``Wait for Timer with result of Canceled``
                 testCase "StartTimerFailed"     <| TestWaitForTimer.``Wait for Timer with result of StartTimerFailed``
             ]            
-
+            
             testList "CancelTimer" [
                 testCase "Canceling"            <| TestCancelTimer.``Cancel Timer with result of Canceling``
                 testCase "Canceled"             <| TestCancelTimer.``Cancel Timer with result of Canceled``
@@ -140,7 +140,7 @@ let tests =
                 testCase "RecordMarkerFailed"   <| TestRecordMarker.``Record Marker with result of RecordMarkerFailed``
                 testCase "MarkerRecorded"       <| TestRecordMarker.``Record Marker with result of MarkerRecorded``
             ]
-
+            
             testList "SignalExternalWorkflowExecution" [
                 testCase "Signaling"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Signaling``
                 testCase "Initiated"            <| TestSignalExternalWorkflowExecution.``Signal External Workflow Execution with result of Initiated``
@@ -216,7 +216,7 @@ let tests =
 
 [<EntryPoint>]
 let main argv = 
-    TestConfiguration.GenerateOfflineHistory <- true
+    TestConfiguration.GenerateOfflineHistory <- false
     TestConfiguration.IsConnected <- false
 
     //let tests = testCase "One Off"  <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityScheduleFailed``

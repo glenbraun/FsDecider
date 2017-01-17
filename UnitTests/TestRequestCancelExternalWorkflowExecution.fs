@@ -66,7 +66,7 @@ module TestRequestCancelExternalWorkflowExecution =
             | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(start, _) ->
+            | StartChildWorkflowExecutionResult.Started(start) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
@@ -179,7 +179,7 @@ module TestRequestCancelExternalWorkflowExecution =
             | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(start, _) ->
+            | StartChildWorkflowExecutionResult.Started(start) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
@@ -307,7 +307,7 @@ module TestRequestCancelExternalWorkflowExecution =
             | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(start, _) ->
+            | StartChildWorkflowExecutionResult.Started(start) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with

@@ -17,14 +17,14 @@ type GetWorkflowExecutionInputAction =
 
 type ReturnResult = 
     | RespondDecisionTaskCompleted
-    | CompleteWorkflowExecution of Result:string
-    | CancelWorkflowExecution of Details:string
-    | FailWorkflowExecution of Reason:string * Details:string
-    | ContinueAsNewWorkflowExecution of ContinueAsNewWorkflowExecutionDecisionAttributes
+    | CompleteWorkflowExecution         of Result:string
+    | CancelWorkflowExecution           of Details:string
+    | FailWorkflowExecution             of Reason:string * Details:string
+    | ContinueAsNewWorkflowExecution    of ContinueAsNewWorkflowExecutionDecisionAttributes
 
-exception CompleteWorkflowExecutionFailedException of CompleteWorkflowExecutionFailedEventAttributes
-exception CancelWorkflowExecutionFailedException of CancelWorkflowExecutionFailedEventAttributes
-exception FailWorkflowExecutionFailedException of FailWorkflowExecutionFailedEventAttributes
+exception CompleteWorkflowExecutionFailedException      of CompleteWorkflowExecutionFailedEventAttributes
+exception CancelWorkflowExecutionFailedException        of CancelWorkflowExecutionFailedEventAttributes
+exception FailWorkflowExecutionFailedException          of FailWorkflowExecutionFailedEventAttributes
 exception ContinueAsNewWorkflowExecutionFailedException of ContinueAsNewWorkflowExecutionFailedEventAttributes
 
 type ScheduleAndWaitForActivityTaskAction =
@@ -35,29 +35,14 @@ type ScheduleActivityTaskAction =
 
 type ScheduleActivityTaskResult =
     | Scheduling        of ScheduleActivityTaskDecisionAttributes
-    | Scheduled         of ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
-                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
-    | Started           of ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
-                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
-                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
-    | Completed         of ActivityTaskCompleted:ActivityTaskCompletedEventAttributes * 
-                           ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
-                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
-                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
-    | Canceled          of ActivityTaskCanceled:ActivityTaskCanceledEventAttributes * 
-                           ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
-                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
-                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
-    | Failed            of ActivityTaskFailed:ActivityTaskFailedEventAttributes * 
-                           ActivityTaskStarted:ActivityTaskStartedEventAttributes * 
-                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
-                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
-    | TimedOut          of ActivityTaskTimedOut:ActivityTaskTimedOutEventAttributes * 
-                           ActivityTaskStarted:ActivityTaskStartedEventAttributes option * 
-                           ActivityTaskScheduled:ActivityTaskScheduledEventAttributes * 
-                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
-    | ScheduleFailed    of ScheduleActivityTaskFailed:ScheduleActivityTaskFailedEventAttributes * 
-                           DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | Scheduled         of Scheduled:       ActivityTaskScheduledEventAttributes
+    | Started           of Started:         ActivityTaskStartedEventAttributes *
+                           Scheduled:       ActivityTaskScheduledEventAttributes
+    | Completed         of Completed:       ActivityTaskCompletedEventAttributes
+    | Canceled          of Canceled:        ActivityTaskCanceledEventAttributes
+    | Failed            of Failed:          ActivityTaskFailedEventAttributes
+    | TimedOut          of TimedOut:        ActivityTaskTimedOutEventAttributes
+    | ScheduleFailed    of ScheduleFailed:  ScheduleActivityTaskFailedEventAttributes
 
     member this.IsFinished() =
         match this with
@@ -81,10 +66,8 @@ type RequestCancelActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
 
 type RequestCancelActivityTaskResult =
-    | CancelRequested       of ActivityTaskCancelRequested:ActivityTaskCancelRequestedEventAttributes * 
-                               DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
-    | RequestCancelFailed   of RequestCancelActivityTaskFailed:RequestCancelActivityTaskFailedEventAttributes * 
-                               DecisionTaskCompleted:DecisionTaskCompletedEventAttributes
+    | CancelRequested       of ActivityTaskCancelRequestedEventAttributes
+    | RequestCancelFailed   of RequestCancelActivityTaskFailedEventAttributes
     | ActivityFinished
     | ActivityScheduleFailed
 
@@ -92,25 +75,25 @@ type ScheduleAndWaitForLambdaFunctionAction =
     | Attributes of ScheduleLambdaFunctionDecisionAttributes
 
 type ScheduleAndWaitForLambdaFunctionResult =
-    | ScheduleFailed of ScheduleLambdaFunctionFailedEventAttributes
-    | StartFailed of StartLambdaFunctionFailedEventAttributes
-    | Completed of LambdaFunctionCompletedEventAttributes
-    | Failed of LambdaFunctionFailedEventAttributes
-    | TimedOut of LambdaFunctionTimedOutEventAttributes
+    | Completed         of LambdaFunctionCompletedEventAttributes
+    | Failed            of LambdaFunctionFailedEventAttributes
+    | TimedOut          of LambdaFunctionTimedOutEventAttributes
+    | StartFailed       of StartLambdaFunctionFailedEventAttributes
+    | ScheduleFailed    of ScheduleLambdaFunctionFailedEventAttributes
 
 type StartChildWorkflowExecutionAction =
     | Attributes of StartChildWorkflowExecutionDecisionAttributes
 
 type StartChildWorkflowExecutionResult =
-    | Starting of StartChildWorkflowExecutionDecisionAttributes
-    | Initiated of StartChildWorkflowExecutionInitiatedEventAttributes
-    | Started of StartedEvent:ChildWorkflowExecutionStartedEventAttributes * InitiatedEvent:StartChildWorkflowExecutionInitiatedEventAttributes
-    | Completed of ChildWorkflowExecutionCompletedEventAttributes
-    | Canceled of ChildWorkflowExecutionCanceledEventAttributes
-    | Failed of ChildWorkflowExecutionFailedEventAttributes
-    | TimedOut of ChildWorkflowExecutionTimedOutEventAttributes
-    | Terminated of ChildWorkflowExecutionTerminatedEventAttributes
-    | StartFailed of StartChildWorkflowExecutionFailedEventAttributes
+    | Starting          of StartChildWorkflowExecutionDecisionAttributes
+    | Initiated         of StartChildWorkflowExecutionInitiatedEventAttributes
+    | Started           of ChildWorkflowExecutionStartedEventAttributes
+    | Completed         of ChildWorkflowExecutionCompletedEventAttributes
+    | Canceled          of ChildWorkflowExecutionCanceledEventAttributes
+    | Failed            of ChildWorkflowExecutionFailedEventAttributes
+    | TimedOut          of ChildWorkflowExecutionTimedOutEventAttributes
+    | Terminated        of ChildWorkflowExecutionTerminatedEventAttributes
+    | StartFailed       of StartChildWorkflowExecutionFailedEventAttributes
 
     member this.IsFinished() =
         match this with
@@ -135,20 +118,20 @@ type RequestCancelExternalWorkflowExecutionAction =
     | Attributes of RequestCancelExternalWorkflowExecutionDecisionAttributes
 
 type RequestCancelExternalWorkflowExecutionResult =
-    | Requesting of RequestCancelExternalWorkflowExecutionDecisionAttributes
-    | Initiated of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
-    | Delivered of ExternalWorkflowExecutionCancelRequestedEventAttributes
-    | Failed of RequestCancelExternalWorkflowExecutionFailedEventAttributes
+    | Requesting    of RequestCancelExternalWorkflowExecutionDecisionAttributes
+    | Initiated     of RequestCancelExternalWorkflowExecutionInitiatedEventAttributes
+    | Delivered     of ExternalWorkflowExecutionCancelRequestedEventAttributes
+    | Failed        of RequestCancelExternalWorkflowExecutionFailedEventAttributes
 
 type StartTimerAction =
     | Attributes of StartTimerDecisionAttributes
 
 type StartTimerResult =
-    | Starting of StartTimerDecisionAttributes
-    | Started of TimerStartedEventAttributes
-    | Fired of TimerFiredEventAttributes
-    | Canceled of TimerCanceledEventAttributes
-    | StartTimerFailed of StartTimerFailedEventAttributes
+    | Starting          of StartTimerDecisionAttributes
+    | Started           of TimerStartedEventAttributes
+    | Fired             of Fired:               TimerFiredEventAttributes
+    | Canceled          of Canceled:            TimerCanceledEventAttributes
+    | StartTimerFailed  of StartTimerFailed:    StartTimerFailedEventAttributes
 
 type WaitForTimerAction =
     | StartResult of StartTimerResult
@@ -158,9 +141,9 @@ type CancelTimerAction =
 
 type CancelTimerResult =
     | Canceling
-    | Canceled of TimerCanceledEventAttributes
-    | Fired of TimerFiredEventAttributes
-    | StartTimerFailed of StartTimerFailedEventAttributes
+    | Canceled          of TimerCanceledEventAttributes
+    | Fired             of TimerFiredEventAttributes
+    | StartTimerFailed  of StartTimerFailedEventAttributes
     | CancelTimerFailed of CancelTimerFailedEventAttributes
 
 type WorkflowExecutionSignaledAction =
@@ -182,22 +165,23 @@ type SignalExternalWorkflowExecutionAction =
 type SignalExternalWorkflowExecutionResult = 
     | Signaling
     | Initiated of SignalExternalWorkflowExecutionInitiatedEventAttributes
-    | Signaled of ExternalWorkflowExecutionSignaledEventAttributes
-    | Failed of SignalExternalWorkflowExecutionFailedEventAttributes
-
-type MarkerRecordedAction = 
-    | Attributes of MarkerName:string
-
-type MarkerRecordedResult = 
-    | NotRecorded
-    | RecordMarkerFailed of RecordMarkerFailedEventAttributes
-    | MarkerRecorded of MarkerRecordedEventAttributes
+    | Signaled  of ExternalWorkflowExecutionSignaledEventAttributes
+    | Failed    of SignalExternalWorkflowExecutionFailedEventAttributes
 
 type RecordMarkerAction = 
     | Attributes of RecordMarkerDecisionAttributes
 
 type RecordMarkerResult = 
     | Recording
-    | RecordMarkerFailed of RecordMarkerFailedEventAttributes
-    | MarkerRecorded of MarkerRecordedEventAttributes
+    | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
+    | MarkerRecorded        of MarkerRecordedEventAttributes
+
+type MarkerRecordedAction = 
+    | Attributes of MarkerName:string
+
+type MarkerRecordedResult = 
+    | NotRecorded
+    | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
+    | MarkerRecorded        of MarkerRecordedEventAttributes
+
 

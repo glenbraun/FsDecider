@@ -66,7 +66,7 @@ module TestSignalExternalWorkflowExecution =
             | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(attr, c) ->
+            | StartChildWorkflowExecutionResult.Started(attr) ->
                 let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
@@ -99,7 +99,7 @@ module TestSignalExternalWorkflowExecution =
                           |> OfflineHistoryEvent (        // EventId = 9
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=7L, StartedEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              SignalExternalWorkflowExecutionInitiatedEventAttributes(Control="2", DecisionTaskCompletedEventId=9L, Input=signalInput, RunId="Offline RunId", SignalName=signalName, WorkflowId=childWorkflowId))
+                              SignalExternalWorkflowExecutionInitiatedEventAttributes(Control="2", DecisionTaskCompletedEventId=9L, Input=signalInput, RunId="Child RunId", SignalName=signalName, WorkflowId=childWorkflowId))
                           |> OfflineHistoryEvent (        // EventId = 11
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=9L, Result="TEST PASS"))
 
@@ -159,7 +159,6 @@ module TestSignalExternalWorkflowExecution =
         let childTaskList = TaskList(Name="Child")
         let signalName = "Test Signal"
         let signalInput = "Test Signal Input"
-        let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt) {
@@ -181,7 +180,7 @@ module TestSignalExternalWorkflowExecution =
             | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(attr, c) ->
+            | StartChildWorkflowExecutionResult.Started(attr) ->
                 let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
@@ -220,7 +219,7 @@ module TestSignalExternalWorkflowExecution =
                           |> OfflineHistoryEvent (        // EventId = 9
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=7L, StartedEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              SignalExternalWorkflowExecutionInitiatedEventAttributes(Control="2", DecisionTaskCompletedEventId=9L, Input=signalInput, RunId="Offline RunId", SignalName=signalName, WorkflowId=childWorkflowId))
+                              SignalExternalWorkflowExecutionInitiatedEventAttributes(Control="2", DecisionTaskCompletedEventId=9L, Input=signalInput, RunId="Child RunId", SignalName=signalName, WorkflowId=childWorkflowId))
                           |> OfflineHistoryEvent (        // EventId = 11
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 12
@@ -317,7 +316,7 @@ module TestSignalExternalWorkflowExecution =
             | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(attr, c) ->
+            | StartChildWorkflowExecutionResult.Started(attr) ->
                 let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
@@ -354,9 +353,9 @@ module TestSignalExternalWorkflowExecution =
                           |> OfflineHistoryEvent (        // EventId = 9
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=7L, StartedEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              SignalExternalWorkflowExecutionInitiatedEventAttributes(Control="2", DecisionTaskCompletedEventId=9L, Input=signalInput, RunId="Offline RunId", SignalName=signalName, WorkflowId=childWorkflowId))
+                              SignalExternalWorkflowExecutionInitiatedEventAttributes(Control="2", DecisionTaskCompletedEventId=9L, Input=signalInput, RunId="Child RunId", SignalName=signalName, WorkflowId=childWorkflowId))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              ExternalWorkflowExecutionSignaledEventAttributes(InitiatedEventId=10L, WorkflowExecution=WorkflowExecution(RunId="23XwZ2zaYjDLO9v7MPsT10G1nGF5f0nfToBqC3J8EIEII=", WorkflowId="Child of Signal External Workflow Execution with result of Signaled")))
+                              ExternalWorkflowExecutionSignaledEventAttributes(InitiatedEventId=10L, WorkflowExecution=WorkflowExecution(RunId="Child RunId", WorkflowId=childWorkflowId)))
                           |> OfflineHistoryEvent (        // EventId = 12
                               DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 13

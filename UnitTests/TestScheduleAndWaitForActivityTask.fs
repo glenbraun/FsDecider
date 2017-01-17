@@ -51,7 +51,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | ScheduleActivityTaskResult.Completed(attr, _, _, _) when attr.Result = activityResult -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -135,7 +135,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | ScheduleActivityTaskResult.Canceled(attr, _, _, _) when attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -220,7 +220,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | ScheduleActivityTaskResult.Failed(attr, _, _, _) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -304,7 +304,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | ScheduleActivityTaskResult.TimedOut(attr, _, _, _) 
+            | ScheduleActivityTaskResult.TimedOut(attr) 
                 when attr.TimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START &&
                      attr.Details = null -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -391,7 +391,7 @@ module TestScheduleAndWaitForActivityTask =
                         )
 
             match result with
-            | ScheduleActivityTaskResult.ScheduleFailed(ScheduleActivityTaskFailed=attr) 
+            | ScheduleActivityTaskResult.ScheduleFailed(attr) 
                 when attr.Cause = activityCause &&
                      attr.ActivityId = activityId &&
                      attr.ActivityType.Name = activityType.Name &&

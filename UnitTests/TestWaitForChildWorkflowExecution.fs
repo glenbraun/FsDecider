@@ -621,7 +621,7 @@ module TestWaitForChildWorkflowExecution =
             | StartChildWorkflowExecutionResult.Starting(_) ->
                 return ()
 
-            | StartChildWorkflowExecutionResult.Started(start, _) ->
+            | StartChildWorkflowExecutionResult.Started(start) ->
                 childRunId := start.WorkflowExecution.RunId
             | _ -> ()
 

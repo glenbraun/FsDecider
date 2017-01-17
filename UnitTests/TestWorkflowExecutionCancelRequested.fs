@@ -60,7 +60,7 @@ module TestWorkflowExecutionCancelRequested =
                 return ()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
                 return ()
-            | StartChildWorkflowExecutionResult.Started(attr, c) when 
+            | StartChildWorkflowExecutionResult.Started(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
                 attr.WorkflowExecution.WorkflowId = childWorkflowId -> 

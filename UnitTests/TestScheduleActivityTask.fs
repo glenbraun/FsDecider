@@ -122,7 +122,7 @@ module TestScheduleActivityTask =
             let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             match result with
-            | ScheduleActivityTaskResult.Scheduled(attr, _) 
+            | ScheduleActivityTaskResult.Scheduled(attr) 
                 when attr.ActivityId = activityId &&
                      attr.ActivityType.Name = TestConfiguration.TestActivityType.Name &&
                      attr.ActivityType.Version = TestConfiguration.TestActivityType.Version &&
@@ -215,7 +215,7 @@ module TestScheduleActivityTask =
             let! wait = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
             match result with
-            | ScheduleActivityTaskResult.Started(started, scheduled, _) 
+            | ScheduleActivityTaskResult.Started(started, scheduled) 
                 when started.Identity = TestConfiguration.TestIdentity &&
                      scheduled.ActivityType.Name = TestConfiguration.TestActivityType.Name &&
                      scheduled.ActivityType.Version = TestConfiguration.TestActivityType.Version &&
@@ -312,7 +312,7 @@ module TestScheduleActivityTask =
 
             match result with
             | ScheduleActivityTaskResult.Scheduling(_) -> return ()
-            | ScheduleActivityTaskResult.Completed(attr, _, _, _) 
+            | ScheduleActivityTaskResult.Completed(attr) 
                 when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"
 
@@ -402,7 +402,7 @@ module TestScheduleActivityTask =
 
             match result with
             | ScheduleActivityTaskResult.Scheduling(_) -> return ()
-            | ScheduleActivityTaskResult.Canceled(attr, _, _, _) 
+            | ScheduleActivityTaskResult.Canceled(attr) 
                 when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"
 
@@ -492,7 +492,7 @@ module TestScheduleActivityTask =
 
             match result with
             | ScheduleActivityTaskResult.Scheduling(_) -> return ()
-            | ScheduleActivityTaskResult.TimedOut(attr, _, _, _) 
+            | ScheduleActivityTaskResult.TimedOut(attr) 
                 when attr.TimeoutType = activityTimeoutType -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -581,7 +581,7 @@ module TestScheduleActivityTask =
 
             match result with
             | ScheduleActivityTaskResult.Scheduling(_) -> return ()
-            | ScheduleActivityTaskResult.Failed(attr, _, _, _) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Failed(Failed=attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"
 
         }
@@ -672,7 +672,7 @@ module TestScheduleActivityTask =
             | ScheduleActivityTaskResult.Scheduling(_) ->
                 return ()
 
-            | ScheduleActivityTaskResult.ScheduleFailed(attr, _) 
+            | ScheduleActivityTaskResult.ScheduleFailed(attr) 
                 when attr.Cause = activityCause &&
                      attr.ActivityId = activityId &&
                      attr.ActivityType.Name = activityType.Name &&
