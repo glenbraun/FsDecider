@@ -48,7 +48,7 @@ type FlowSharp =
     ///                        The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
     /// <param name="taskPriority">Optional. If set, specifies the priority with which the activity task is to be assigned to a worker. This overrides the defaultTaskPriority specified when registering the activity type using RegisterActivityType. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority.</param>
     /// <returns>A ScheduleActivityTaskResult of Scheduling, Scheduled, Started, Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
-    static member ScheduleActivityTask(activity:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string) =
+    static member ScheduleActivityTask(activity:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string, ?pushToContext:bool) =
         let attr = new ScheduleActivityTaskDecisionAttributes()
         attr.ActivityType <- activity
         attr.ActivityId <- activityId
@@ -60,7 +60,7 @@ type FlowSharp =
         attr.TaskList <- if taskList.IsSome then taskList.Value else null
         attr.TaskPriority <- if taskPriority.IsSome then taskPriority.Value else null
 
-        ScheduleActivityTaskAction.Attributes(attr)
+        ScheduleActivityTaskAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Waits for an Activity Task and blocks further progress until the Activity Task has been Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="schedule">Required. The result of a previous StartActivityTask call.</param>
@@ -101,7 +101,7 @@ type FlowSharp =
     ///                        The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
     /// <param name="taskPriority">Optional. If set, specifies the priority with which the activity task is to be assigned to a worker. This overrides the defaultTaskPriority specified when registering the activity type using RegisterActivityType. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority.</param>
     /// <returns>A ScheduleActivityTaskResult of Completed, Canceled, TimedOut, Failed, or ScheduleFailed.</returns>
-    static member ScheduleAndWaitForActivityTask(activityType:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string) =
+    static member ScheduleAndWaitForActivityTask(activityType:ActivityType, activityId:string, ?input:string, ?heartbeatTimeout:string, ?scheduleToCloseTimeout:string, ?scheduleToStartTimeout:string, ?startToCloseTimeout:string, ?taskList:TaskList, ?taskPriority:string, ?pushToContext:bool) =
         let attr = new ScheduleActivityTaskDecisionAttributes()
         attr.ActivityType <- activityType
         attr.ActivityId <- activityId
@@ -113,7 +113,7 @@ type FlowSharp =
         attr.TaskList <- if taskList.IsSome then taskList.Value else null
         attr.TaskPriority <- if taskPriority.IsSome then taskPriority.Value else null
 
-        ScheduleAndWaitForActivityTaskAction.Attributes(attr)
+        ScheduleAndWaitForActivityTaskAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Attempts to cancel a previously scheduled activity task. If the activity task was scheduled but has not been assigned to a worker, then it will be canceled. If the activity task was already assigned to a worker, then the worker will be informed that cancellation has been requested in the response to RecordActivityTaskHeartbeat.</summary>
     /// <param name="schedule">Required. The result of a previous StartActivityTask call.</param>
@@ -128,14 +128,14 @@ type FlowSharp =
     /// <param name="input">The input provided to the AWS Lambda function.</param>
     /// <param name="startToCloseTimeout">If set, specifies the maximum duration the function may take to execute.</param>
     /// <returns>A ScheduleAndWaitForLambdaFunctionResult of Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
-    static member ScheduleAndWaitForLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:string) =
+    static member ScheduleAndWaitForLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:string, ?pushToContext:bool) =
         let attr = new ScheduleLambdaFunctionDecisionAttributes()
         attr.Id <- id
         attr.Input <- if input.IsSome then input.Value else null
         attr.StartToCloseTimeout <- if startToCloseTimeout.IsSome then startToCloseTimeout.Value else null
         attr.Name <- name
 
-        ScheduleAndWaitForLambdaFunctionAction.Attributes(attr)
+        ScheduleAndWaitForLambdaFunctionAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Requests that a child workflow execution be started and records a StartChildWorkflowExecutionInitiated event in the history. The child workflow execution is a separate workflow execution with its own history.</summary>
     /// <param name="workflowType">Required. The type of the workflow execution to be started.</param>
@@ -168,7 +168,8 @@ type FlowSharp =
         ?taskList:TaskList,
         ?taskPriority:int,
         ?executionStartToCloseTimeout:string,
-        ?taskStartToCloseTimeout:string
+        ?taskStartToCloseTimeout:string,
+        ?pushToContext:bool
         ) =
         let attr = new StartChildWorkflowExecutionDecisionAttributes();
         attr.ChildPolicy <- if childPolicy.IsSome then childPolicy.Value else null
@@ -182,7 +183,7 @@ type FlowSharp =
         attr.WorkflowId <- workflowId
         attr.WorkflowType <- workflowType
 
-        StartChildWorkflowExecutionAction.Attributes(attr)
+        StartChildWorkflowExecutionAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Waits for a previously started child workflow execution and blocks further progress until the child workflow execution has been Completed, Canceled, TimedOut, Failed, Terminated, or StartFailed.</summary>
     /// <param name="start">Required. The result of a previous StartChildWorkflowExecution call.</param>
@@ -219,12 +220,12 @@ type FlowSharp =
     /// <param name="startToFireTimeout">Required. The duration to wait before firing the timer.
     ///                                  The duration is specified in seconds; an integer greater than or equal to 0.</param>
     /// <returns>A StartTimerResult of Starting, Started, or StartTimerFailed.</returns>
-    static member StartTimer(timerId:string, startToFireTimeout:string) =
+    static member StartTimer(timerId:string, startToFireTimeout:string, ?pushToContext:bool) =
         let attr = new StartTimerDecisionAttributes()
         attr.TimerId <- timerId        
         attr.StartToFireTimeout <- startToFireTimeout
 
-        StartTimerAction.Attributes(attr)
+        StartTimerAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Waits for a previously started timer and blocks further progress until the timer has been Canceled, Fired, or StartTimerFailed.</summary>
     /// <param name="start">Required. The result of a previous StartTimer call.</param>
@@ -241,14 +242,14 @@ type FlowSharp =
     /// <summary>Determines if an external signal was received for the workflow execution.</summary>
     /// <param name="signalName">The name of the signal received. The decider can use the signal name and inputs to determine how to the process the signal.</param>
     /// <returns>A WorkflowExecutionSignaledResult of Signaled, or NotSignaled.</returns>
-    static member WorkflowExecutionSignaled(signalName:string) =
-        WorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
+    static member WorkflowExecutionSignaled(signalName:string, ?pushToContext:bool) =
+        WorkflowExecutionSignaledAction.Attributes(signalName, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Blocks further processing until an external signal was received for the workflow execution.</summary>
     /// <param name="signalName">The name of the signal received. The decider can use the signal name and inputs to determine how to the process the signal.</param>
     /// <returns>A WaitForWorkflowExecutionSignaledResult of Signaled.</returns>
-    static member WaitForWorkflowExecutionSignaled(signalName:string) =
-        WaitForWorkflowExecutionSignaledAction.Attributes(SignalName=signalName)
+    static member WaitForWorkflowExecutionSignaled(signalName:string, ?pushToContext:bool) =
+        WaitForWorkflowExecutionSignaledAction.Attributes(signalName, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Requests a signal to be delivered to the specified external workflow execution and records a SignalExternalWorkflowExecutionInitiated event in the history.</summary>
     /// <param name="signalName">Required. The name of the signal.The target workflow execution will use the signal name and input to process the signal.</param>
@@ -256,26 +257,26 @@ type FlowSharp =
     /// <param name="input">Optional. Input data to be provided with the signal. The target workflow execution will use the signal name and input data to process the signal.</param>
     /// <param name="runId">Optional. The runId of the workflow execution to be signaled.</param>
     /// <returns>A WorkflowExecutionSignaledResult of Signaled or NotSignaled.</returns>
-    static member SignalExternalWorkflowExecution(signalName:string, workflowId:string, ?input:string, ?runId:string) =
+    static member SignalExternalWorkflowExecution(signalName:string, workflowId:string, ?input:string, ?runId:string, ?pushToContext:bool) =
         let attr = new SignalExternalWorkflowExecutionDecisionAttributes(SignalName=signalName, WorkflowId=workflowId);
         attr.Input <- if input.IsSome then input.Value else null
         attr.RunId <- if runId.IsSome then runId.Value else null
 
-        SignalExternalWorkflowExecutionAction.Attributes(attr)
+        SignalExternalWorkflowExecutionAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Determines if a marker was recorded in the workflow history as the result of a RecordMarker decision.</summary>
     /// <param name="markerName">Required. The name of the marker.</param>
     /// <returns>A MarkerRecordedResult of MarkerRecorded, NotRecorded, or RecordMarkerFailed.</returns>
-    static member MarkerRecorded(markerName:string) =
-        MarkerRecordedAction.Attributes(MarkerName=markerName)
+    static member MarkerRecorded(markerName:string, ?pushToContext:bool) =
+        MarkerRecordedAction.Attributes(markerName, (pushToContext.IsSome && pushToContext.Value))
 
     /// <summary>Records a MarkerRecorded event in the history. Markers can be used for adding custom information in the history for instance to let deciders know that they do not need to look at the history beyond the marker event.</summary>
     /// <param name="markerName">Required. The name of the marker.</param>
     /// <param name="details">Optional. details of the marker.</param>
     /// <returns>A RecordMarkerResult of Recording, MarkerRecorded, or RecordMarkerFailed.</returns>
-    static member RecordMarker(markerName:string, ?details:string) =
+    static member RecordMarker(markerName:string, ?details:string, ?pushToContext:bool) =
         let attr = new RecordMarkerDecisionAttributes(MarkerName=markerName);
         attr.Details <- if details.IsSome then details.Value else null
 
-        RecordMarkerAction.Attributes(attr)
+        RecordMarkerAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
 

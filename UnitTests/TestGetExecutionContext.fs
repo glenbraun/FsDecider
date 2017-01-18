@@ -2,7 +2,7 @@
 
 open FlowSharp
 open FlowSharp.Actions
-open FlowSharp.SimpleExecutionContext
+open FlowSharp.ExecutionContext
 open FlowSharp.UnitTests.TestHelper
 open FlowSharp.UnitTests.OfflineHistory
 
@@ -142,37 +142,9 @@ module TestGetExecutionContext =
         let signalInput = "Test Signal Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(DefaultContextManager() :> IContextManager)) {
 
-            let! context = FlowSharp.GetExecutionContext()
-            let sec = SimpleExecutionContext(context)
-
-            let! signal = FlowSharp.WorkflowExecutionSignaled(signalName)
-                          |> sec.ReadFromContext
-                
-            let! signal2 = sec.ReadFromContext <| FlowSharp.WorkflowExecutionSignaled("From Context")
-            
-            try     
-                let! signal3 = FlowSharp.WorkflowExecutionSignaled("Exception")
-                              |> sec.ReadFromContext
-                ()
-            with 
-            | ex -> ()
-
-            match signal with
-            | WorkflowExecutionSignaledResult.NotSignaled ->
-                return ()
-                
-            | WorkflowExecutionSignaledResult.Signaled(attr) when
-                attr.SignalName = signalName &&
-                attr.Input = signalInput -> 
-
-                sec.WriteToContext(signal)
-              
-                return "TEST PASS"
-
-            | _ -> return "TEST FAIL"
-
+            return "OK"
         }
 
         // OfflineDecisionTask

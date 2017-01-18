@@ -36,7 +36,7 @@ module TestWaitForWorkflowExecutionSignaled =
             let! signal = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
                 
             match signal with
-            | WaitForWorkflowExecutionSignaledResult.Signaled(attr) when
+            | WorkflowExecutionSignaledResult.Signaled(attr) when
                 attr.SignalName = signalName &&
                 attr.Input = signalInput -> return "TEST PASS"
 

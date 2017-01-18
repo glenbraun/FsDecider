@@ -33,12 +33,6 @@ exception CancelWorkflowExecutionFailedException        of CancelWorkflowExecuti
 exception FailWorkflowExecutionFailedException          of FailWorkflowExecutionFailedEventAttributes
 exception ContinueAsNewWorkflowExecutionFailedException of ContinueAsNewWorkflowExecutionFailedEventAttributes
 
-type ScheduleAndWaitForActivityTaskAction =
-    | Attributes of ScheduleActivityTaskDecisionAttributes
-
-type ScheduleActivityTaskAction =
-    | Attributes of ScheduleActivityTaskDecisionAttributes
-
 type ScheduleActivityTaskResult =
     | Scheduling        of ScheduleActivityTaskDecisionAttributes
     | Scheduled         of Scheduled:       ActivityTaskScheduledEventAttributes
@@ -59,6 +53,14 @@ type ScheduleActivityTaskResult =
         | ScheduleFailed(_) -> true
         | _ -> false
 
+type ScheduleActivityTaskAction =
+    | Attributes        of ScheduleActivityTaskDecisionAttributes * bool
+    | ResultFromContext of ScheduleActivityTaskResult
+
+type ScheduleAndWaitForActivityTaskAction =
+    | Attributes of ScheduleActivityTaskDecisionAttributes * bool
+    | ResultFromContext of ScheduleActivityTaskResult
+
 type WaitForActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
 
@@ -77,9 +79,6 @@ type RequestCancelActivityTaskResult =
     | ActivityFinished
     | ActivityScheduleFailed
 
-type ScheduleAndWaitForLambdaFunctionAction =
-    | Attributes of ScheduleLambdaFunctionDecisionAttributes
-
 type ScheduleAndWaitForLambdaFunctionResult =
     | Completed         of LambdaFunctionCompletedEventAttributes
     | Failed            of LambdaFunctionFailedEventAttributes
@@ -87,8 +86,9 @@ type ScheduleAndWaitForLambdaFunctionResult =
     | StartFailed       of StartLambdaFunctionFailedEventAttributes
     | ScheduleFailed    of ScheduleLambdaFunctionFailedEventAttributes
 
-type StartChildWorkflowExecutionAction =
-    | Attributes of StartChildWorkflowExecutionDecisionAttributes
+type ScheduleAndWaitForLambdaFunctionAction =
+    | Attributes        of ScheduleLambdaFunctionDecisionAttributes * bool
+    | ResultFromContext of ScheduleAndWaitForLambdaFunctionResult
 
 type StartChildWorkflowExecutionResult =
     | Starting          of StartChildWorkflowExecutionDecisionAttributes
@@ -111,6 +111,10 @@ type StartChildWorkflowExecutionResult =
         | StartFailed(_) -> true
         | _ -> false
 
+type StartChildWorkflowExecutionAction =
+    | Attributes        of StartChildWorkflowExecutionDecisionAttributes * bool
+    | ResultFromContext of StartChildWorkflowExecutionResult
+
 type WaitForChildWorkflowExecutionAction =
     | StartResult of StartChildWorkflowExecutionResult
 
@@ -129,15 +133,16 @@ type RequestCancelExternalWorkflowExecutionResult =
     | Delivered     of ExternalWorkflowExecutionCancelRequestedEventAttributes
     | Failed        of RequestCancelExternalWorkflowExecutionFailedEventAttributes
 
-type StartTimerAction =
-    | Attributes of StartTimerDecisionAttributes
-
 type StartTimerResult =
     | Starting          of StartTimerDecisionAttributes
     | Started           of TimerStartedEventAttributes
     | Fired             of Fired:               TimerFiredEventAttributes
     | Canceled          of Canceled:            TimerCanceledEventAttributes
     | StartTimerFailed  of StartTimerFailed:    StartTimerFailedEventAttributes
+
+type StartTimerAction =
+    | Attributes        of StartTimerDecisionAttributes * bool
+    | ResultFromContext of StartTimerResult
 
 type WaitForTimerAction =
     | StartResult of StartTimerResult
@@ -152,26 +157,17 @@ type CancelTimerResult =
     | StartTimerFailed  of StartTimerFailedEventAttributes
     | CancelTimerFailed of CancelTimerFailedEventAttributes
 
-type WorkflowExecutionSignaledAction =
-    | Attributes of SignalName:string
-
 type WorkflowExecutionSignaledResult =
     | NotSignaled
     | Signaled of WorkflowExecutionSignaledEventAttributes
 
-type WorkflowExecutionSignaledFromContextAction = 
-    | NotInContext of WorkflowExecutionSignaledAction
+type WorkflowExecutionSignaledAction =
+    | Attributes        of string * bool
     | ResultFromContext of WorkflowExecutionSignaledResult
-    | ExpectedButNotFound of Exception
 
 type WaitForWorkflowExecutionSignaledAction =
-    | Attributes of SignalName:string
-
-type WaitForWorkflowExecutionSignaledResult =
-    | Signaled of WorkflowExecutionSignaledEventAttributes
-
-type SignalExternalWorkflowExecutionAction = 
-    | Attributes of SignalExternalWorkflowExecutionDecisionAttributes
+    | Attributes of SignalName:string * bool
+    | ResultFromContext of WorkflowExecutionSignaledResult
 
 type SignalExternalWorkflowExecutionResult = 
     | Signaling
@@ -179,23 +175,24 @@ type SignalExternalWorkflowExecutionResult =
     | Signaled  of ExternalWorkflowExecutionSignaledEventAttributes
     | Failed    of SignalExternalWorkflowExecutionFailedEventAttributes
 
-type RecordMarkerAction = 
-    | Attributes of RecordMarkerDecisionAttributes
+type SignalExternalWorkflowExecutionAction = 
+    | Attributes        of SignalExternalWorkflowExecutionDecisionAttributes * bool
+    | ResultFromContext of SignalExternalWorkflowExecutionResult
 
 type RecordMarkerResult = 
     | Recording
     | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
     | MarkerRecorded        of MarkerRecordedEventAttributes
 
-type MarkerRecordedAction = 
-    | Attributes of MarkerName:string
+type RecordMarkerAction = 
+    | Attributes        of RecordMarkerDecisionAttributes * bool
+    | ResultFromContext of RecordMarkerResult
 
 type MarkerRecordedResult = 
     | NotRecorded
     | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
     | MarkerRecorded        of MarkerRecordedEventAttributes
     
-type MarkerRecordedFromContextAction = 
-    | NotInContext of MarkerRecordedAction
-    | Result of MarkerRecordedResult
-    | ExpectedButNotFound of Exception
+type MarkerRecordedAction = 
+    | Attributes        of string * bool
+    | ResultFromContext of MarkerRecordedResult

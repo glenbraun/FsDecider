@@ -7,8 +7,9 @@ open Amazon.SimpleWorkflow.Model
 
 open FlowSharp.Actions
 open FlowSharp.HistoryWalker
+open FlowSharp.ExecutionContext
 
-type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
+type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
     let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
     let walker = HistoryWalker(DecisionTask.Events, ReverseOrder)
     let mutable blockFlag = false
@@ -21,13 +22,37 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
         blockFlag <- true
         response
 
+    let ReadContext () = 
+        match ContextManager with
+        | Some(cm) ->
+            let completed = walker.FindDecisionTaskCompleted()
+            match completed with
+            | Some(c) -> 
+                cm.Read(c.DecisionTaskCompletedEventAttributes.ExecutionContext)
+            | None -> cm.Read("")
+        | None -> ()
+    
+    let WriteContext () =
+        match ContextManager with
+        | Some(cm) ->
+            response.ExecutionContext <- cm.Write()
+        | None -> ()
+
+    new (decisionTask:DecisionTask) = Builder(decisionTask, false, None)
+    new (decisionTask:DecisionTask, reverseOrder:bool) = Builder(decisionTask, reverseOrder, None)
+    new (decisionTask:DecisionTask, contextManager:IContextManager option) = Builder(decisionTask, false, contextManager)
+
     member this.Delay(f) =
         if DecisionTask.TaskToken = null then 
             // When PollForDecisionTask times out, the TaskToken is null. There's nothing to decide in this case so null is returned.
             (fun () -> null)
         else
             // There are decisions to be made, so call the decider.
-            (fun () -> f())
+            
+            (fun () -> 
+                ReadContext()
+                f()
+            )
 
     member this.Run(f) : RespondDecisionTaskCompletedRequest = 
         // Run is used to call the Delay function, making execution immediate which is what we want.
@@ -123,98 +148,130 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
 
             | _ -> failwith "error"
 
+        WriteContext()
         response
 
     member this.Return(result:string) = this.Return(ReturnResult.CompleteWorkflowExecution(result))
     member this.Return(result:unit) = this.Return(ReturnResult.RespondDecisionTaskCompleted)
             
     // Schedule Activity Task
-    member this.Bind(ScheduleActivityTaskAction.Attributes(attr), f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
-        let combinedHistory = walker.FindActivityTask(attr)
+    member this.Bind(action:ScheduleActivityTaskAction, f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with 
+        | ScheduleActivityTaskAction.Attributes(attr, pushToContext) ->
+            let combinedHistory = walker.FindActivityTask(attr)
 
-        match (combinedHistory) with
-        // Scheduling
-        | None ->
-            let d = new Decision();
-            d.DecisionType <- DecisionType.ScheduleActivityTask
-            d.ScheduleActivityTaskDecisionAttributes <- attr
-            response.Decisions.Add(d)
+            match (combinedHistory) with
+            // Scheduling
+            | None ->
+                let d = new Decision();
+                d.DecisionType <- DecisionType.ScheduleActivityTask
+                d.ScheduleActivityTaskDecisionAttributes <- attr
+                response.Decisions.Add(d)
 
-            f(ScheduleActivityTaskResult.Scheduling(attr))
+                f(ScheduleActivityTaskResult.Scheduling(attr))
             
-        // Completed
-        | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
-            f(ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes))
+            // Completed
+            | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
+                let result = ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Canceled
-        | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
-            f(ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes))
+            // Canceled
+            | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
+                let result = ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Failed
-        | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
-            f(ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes))
+            // Failed
+            | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
+                let result = ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
         
-        // TimedOut
-        | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
-            f(ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes))
+            // TimedOut
+            | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
+                let result = ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // ScheduleFailed
-        | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
-            f(ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes))
+            // ScheduleFailed
+            | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
+                let result = ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Started
-        | SomeEventOfType(EventType.ActivityTaskStarted) hev ->
-            f(ScheduleActivityTaskResult.Started(hev.ActivityTaskStartedEventAttributes, hev.ActivityTaskScheduledEventAttributes))
+            // Started
+            | SomeEventOfType(EventType.ActivityTaskStarted) hev ->
+                f(ScheduleActivityTaskResult.Started(hev.ActivityTaskStartedEventAttributes, hev.ActivityTaskScheduledEventAttributes))
 
-        // Scheduled
-        | SomeEventOfType(EventType.ActivityTaskScheduled) hev ->
-            f(ScheduleActivityTaskResult.Scheduled(hev.ActivityTaskScheduledEventAttributes))
+            // Scheduled
+            | SomeEventOfType(EventType.ActivityTaskScheduled) hev ->
+                f(ScheduleActivityTaskResult.Scheduled(hev.ActivityTaskScheduledEventAttributes))
 
-        | _ -> failwith "error"
+            | _ -> failwith "error"
+
+        | ScheduleActivityTaskAction.ResultFromContext(result) ->
+            f(result)
 
     // Schedule and Wait for Activity Task
-    member this.Bind(ScheduleAndWaitForActivityTaskAction.Attributes(attr), f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
-        let combinedHistory = walker.FindActivityTask(attr)
+    member this.Bind(action:ScheduleAndWaitForActivityTaskAction, f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with 
+        | ScheduleAndWaitForActivityTaskAction.Attributes(attr, pushToContext) ->
+            let combinedHistory = walker.FindActivityTask(attr)
 
-        match (combinedHistory) with
-        // Not scheduled yet
-        | None ->
-            let d = new Decision();
-            d.DecisionType <- DecisionType.ScheduleActivityTask
-            d.ScheduleActivityTaskDecisionAttributes <- attr
-            response.Decisions.Add(d)
-            Wait()
+            match (combinedHistory) with
+            // Not scheduled yet
+            | None ->
+                let d = new Decision();
+                d.DecisionType <- DecisionType.ScheduleActivityTask
+                d.ScheduleActivityTaskDecisionAttributes <- attr
+                response.Decisions.Add(d)
+                Wait()
             
-        // Completed
-        | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
-            f(ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes))
+            // Completed
+            | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
+                let result = ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Canceled
-        | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
-            f(ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes))
+            // Canceled
+            | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
+                let result = ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Failed
-        | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
-            f(ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes))
+            // Failed
+            | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
+                let result = ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
         
-        // TimedOut
-        | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
-            f(ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes))
+            // TimedOut
+            | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
+                let result = ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // ScheduleFailed
-        | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
-            f(ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes))
+            // ScheduleFailed
+            | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
+                let result = ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Started
-        // Scheduled
-        | SomeEventOfType(EventType.ActivityTaskScheduled) hev ->
-            Wait()
+            // Started
+            // Scheduled
+            | SomeEventOfType(EventType.ActivityTaskScheduled) hev ->
+                Wait()
 
-        | _ -> failwith "error"
+            | _ -> failwith "error"
+
+        | ScheduleAndWaitForActivityTaskAction.ResultFromContext(result) ->
+            f(result)
 
     // Wait For Activity Task
     member this.Bind(WaitForActivityTaskAction.ScheduleResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
-
         match (result.IsFinished()) with 
         | true  -> f()
         | false -> Wait()
@@ -241,7 +298,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
 
     // Request Cancel Activity Task 
     member this.Bind(RequestCancelActivityTaskAction.ScheduleResult(schedule), f:(RequestCancelActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
-
         match schedule with 
         // Scheduling
         | ScheduleActivityTaskResult.Scheduling(_) -> 
@@ -280,53 +336,70 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
                 | _ -> failwith "error"
 
     // Start Child Workflow Execution
-    member this.Bind(StartChildWorkflowExecutionAction.Attributes(attr), f:(StartChildWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
-
-        let combinedHistory = walker.FindChildWorkflowExecution(attr)
+    member this.Bind(action:StartChildWorkflowExecutionAction, f:(StartChildWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | StartChildWorkflowExecutionAction.Attributes(attr, pushToContext) ->
+            let combinedHistory = walker.FindChildWorkflowExecution(attr)
         
-        match (combinedHistory) with
-        // Not Started
-        | None ->
-            let d = new Decision();
-            d.DecisionType <- DecisionType.StartChildWorkflowExecution
-            d.StartChildWorkflowExecutionDecisionAttributes <- attr
-            response.Decisions.Add(d)
+            match (combinedHistory) with
+            // Not Started
+            | None ->
+                let d = new Decision();
+                d.DecisionType <- DecisionType.StartChildWorkflowExecution
+                d.StartChildWorkflowExecutionDecisionAttributes <- attr
+                response.Decisions.Add(d)
                 
-            f(StartChildWorkflowExecutionResult.Starting(d.StartChildWorkflowExecutionDecisionAttributes))
+                f(StartChildWorkflowExecutionResult.Starting(d.StartChildWorkflowExecutionDecisionAttributes))
 
-        // Completed
-        | SomeEventOfType(EventType.ChildWorkflowExecutionCompleted) hev ->
-            f(StartChildWorkflowExecutionResult.Completed(hev.ChildWorkflowExecutionCompletedEventAttributes))
+            // Completed
+            | SomeEventOfType(EventType.ChildWorkflowExecutionCompleted) hev ->
+                let result = StartChildWorkflowExecutionResult.Completed(hev.ChildWorkflowExecutionCompletedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
                  
-        // Canceled
-        | SomeEventOfType(EventType.ChildWorkflowExecutionCanceled) hev ->
-            f(StartChildWorkflowExecutionResult.Canceled(hev.ChildWorkflowExecutionCanceledEventAttributes))
+            // Canceled
+            | SomeEventOfType(EventType.ChildWorkflowExecutionCanceled) hev ->
+                let result = StartChildWorkflowExecutionResult.Canceled(hev.ChildWorkflowExecutionCanceledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // TimedOut
-        | SomeEventOfType(EventType.ChildWorkflowExecutionTimedOut) hev ->
-            f(StartChildWorkflowExecutionResult.TimedOut(hev.ChildWorkflowExecutionTimedOutEventAttributes))
+            // TimedOut
+            | SomeEventOfType(EventType.ChildWorkflowExecutionTimedOut) hev ->
+                let result = StartChildWorkflowExecutionResult.TimedOut(hev.ChildWorkflowExecutionTimedOutEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Failed
-        | SomeEventOfType(EventType.ChildWorkflowExecutionFailed) hev ->
-            f(StartChildWorkflowExecutionResult.Failed(hev.ChildWorkflowExecutionFailedEventAttributes))
+            // Failed
+            | SomeEventOfType(EventType.ChildWorkflowExecutionFailed) hev ->
+                let result = StartChildWorkflowExecutionResult.Failed(hev.ChildWorkflowExecutionFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Terminated
-        | SomeEventOfType(EventType.ChildWorkflowExecutionTerminated) hev ->
-            f(StartChildWorkflowExecutionResult.Terminated(hev.ChildWorkflowExecutionTerminatedEventAttributes))
+            // Terminated
+            | SomeEventOfType(EventType.ChildWorkflowExecutionTerminated) hev ->
+                let result = StartChildWorkflowExecutionResult.Terminated(hev.ChildWorkflowExecutionTerminatedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Started
-        | SomeEventOfType(EventType.ChildWorkflowExecutionStarted) hev ->
-            f(StartChildWorkflowExecutionResult.Started(hev.ChildWorkflowExecutionStartedEventAttributes))
+            // StartChildWorkflowExecutionFailed
+            | SomeEventOfType(EventType.StartChildWorkflowExecutionFailed) hev ->
+                let result = StartChildWorkflowExecutionResult.StartFailed(hev.StartChildWorkflowExecutionFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // StartChildWorkflowExecutionFailed
-        | SomeEventOfType(EventType.StartChildWorkflowExecutionFailed) hev ->
-            f(StartChildWorkflowExecutionResult.StartFailed(hev.StartChildWorkflowExecutionFailedEventAttributes))
+            // Started
+            | SomeEventOfType(EventType.ChildWorkflowExecutionStarted) hev ->
+                f(StartChildWorkflowExecutionResult.Started(hev.ChildWorkflowExecutionStartedEventAttributes))
 
-        // Initiated
-        | SomeEventOfType(EventType.StartChildWorkflowExecutionInitiated) hev ->
-            f(StartChildWorkflowExecutionResult.Initiated(hev.StartChildWorkflowExecutionInitiatedEventAttributes))
+            // Initiated
+            | SomeEventOfType(EventType.StartChildWorkflowExecutionInitiated) hev ->
+                f(StartChildWorkflowExecutionResult.Initiated(hev.StartChildWorkflowExecutionInitiatedEventAttributes))
 
-        | _ -> failwith "error"
+            | _ -> failwith "error"
+
+        | StartChildWorkflowExecutionAction.ResultFromContext(result) ->
+            f(result)
 
     // Wait For Child Workflow Execution
     member this.Bind(WaitForChildWorkflowExecutionAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
@@ -356,7 +429,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
 
     // Request Cancel External Workflow Execution
     member this.Bind(RequestCancelExternalWorkflowExecutionAction.Attributes(attr), f:(RequestCancelExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
-        
         let combinedHistory = walker.FindRequestCancelExternalWorkflowExecution(attr)
         
         match (combinedHistory) with
@@ -383,75 +455,99 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
         | _ -> failwith "error"
 
     // Start and Wait for Lambda Function
-    member this.Bind(ScheduleAndWaitForLambdaFunctionAction.Attributes(attr), f:(ScheduleAndWaitForLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
-
-        let combinedHistory = walker.FindLambdaFunction(attr)
+    member this.Bind(action:ScheduleAndWaitForLambdaFunctionAction, f:(ScheduleAndWaitForLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | ScheduleAndWaitForLambdaFunctionAction.Attributes(attr, pushToContext) ->
+            let combinedHistory = walker.FindLambdaFunction(attr)
         
-        match (combinedHistory) with
-        // Not Scheduled
-        | None ->
-            let d = new Decision();
-            d.DecisionType <- DecisionType.ScheduleLambdaFunction
-            d.ScheduleLambdaFunctionDecisionAttributes <- attr
-            response.Decisions.Add(d)
-            Wait()
+            match (combinedHistory) with
+            // Not Scheduled
+            | None ->
+                let d = new Decision();
+                d.DecisionType <- DecisionType.ScheduleLambdaFunction
+                d.ScheduleLambdaFunctionDecisionAttributes <- attr
+                response.Decisions.Add(d)
+                Wait()
 
-        // Lambda Function Completed
-        | SomeEventOfType(EventType.LambdaFunctionCompleted) hev -> 
-            f(ScheduleAndWaitForLambdaFunctionResult.Completed(hev.LambdaFunctionCompletedEventAttributes))
+            // Lambda Function Completed
+            | SomeEventOfType(EventType.LambdaFunctionCompleted) hev -> 
+                let result = ScheduleAndWaitForLambdaFunctionResult.Completed(hev.LambdaFunctionCompletedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Lambda Function Failed
-        | SomeEventOfType(EventType.LambdaFunctionFailed) hev -> 
-            f(ScheduleAndWaitForLambdaFunctionResult.Failed(hev.LambdaFunctionFailedEventAttributes))
+            // Lambda Function Failed
+            | SomeEventOfType(EventType.LambdaFunctionFailed) hev -> 
+                let result = ScheduleAndWaitForLambdaFunctionResult.Failed(hev.LambdaFunctionFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Lambda Function TimedOut
-        | SomeEventOfType(EventType.LambdaFunctionTimedOut) hev -> 
-            f(ScheduleAndWaitForLambdaFunctionResult.TimedOut(hev.LambdaFunctionTimedOutEventAttributes))
+            // Lambda Function TimedOut
+            | SomeEventOfType(EventType.LambdaFunctionTimedOut) hev -> 
+                let result = ScheduleAndWaitForLambdaFunctionResult.TimedOut(hev.LambdaFunctionTimedOutEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // StartLambdaFunctionFailed
-        | SomeEventOfType(EventType.StartLambdaFunctionFailed) hev -> 
-            f(ScheduleAndWaitForLambdaFunctionResult.StartFailed(hev.StartLambdaFunctionFailedEventAttributes))
+            // StartLambdaFunctionFailed
+            | SomeEventOfType(EventType.StartLambdaFunctionFailed) hev -> 
+                let result = ScheduleAndWaitForLambdaFunctionResult.StartFailed(hev.StartLambdaFunctionFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // ScheduleLambdaFunctionFailed
-        | SomeEventOfType(EventType.ScheduleLambdaFunctionFailed) hev -> 
-            f(ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(hev.ScheduleLambdaFunctionFailedEventAttributes))
+            // ScheduleLambdaFunctionFailed
+            | SomeEventOfType(EventType.ScheduleLambdaFunctionFailed) hev -> 
+                f(ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(hev.ScheduleLambdaFunctionFailedEventAttributes))
 
-        | _ -> 
-            // This lambda function is still running, continue blocking
-            Wait()
+            | _ -> 
+                // This lambda function is still running, continue blocking
+                Wait()
+
+        | ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(result) ->
+            f(result)
 
     // Start Timer
-    member this.Bind(StartTimerAction.Attributes(attr), f:(StartTimerResult -> RespondDecisionTaskCompletedRequest)) = 
+    member this.Bind(action:StartTimerAction, f:(StartTimerResult -> RespondDecisionTaskCompletedRequest)) = 
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with 
+        | StartTimerAction.Attributes(attr, pushToContext) ->
+            let combinedHistory = walker.FindTimer(attr)
 
-        let combinedHistory = walker.FindTimer(attr)
-
-        match (combinedHistory) with
-        // Timer Not Started
-        | None ->
-            let d = new Decision();
-            d.DecisionType <- DecisionType.StartTimer
-            d.StartTimerDecisionAttributes <- attr
-            response.Decisions.Add(d)
+            match (combinedHistory) with
+            // Timer Not Started
+            | None ->
+                let d = new Decision();
+                d.DecisionType <- DecisionType.StartTimer
+                d.StartTimerDecisionAttributes <- attr
+                response.Decisions.Add(d)
                 
-            f(StartTimerResult.Starting(d.StartTimerDecisionAttributes))
+                f(StartTimerResult.Starting(d.StartTimerDecisionAttributes))
 
-        // Fired
-        | SomeEventOfType(EventType.TimerFired) hev ->
-            f(StartTimerResult.Fired(hev.TimerFiredEventAttributes))
+            // Fired
+            | SomeEventOfType(EventType.TimerFired) hev ->
+                let result = StartTimerResult.Fired(hev.TimerFiredEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Canceled
-        | SomeEventOfType(EventType.TimerCanceled) hev ->
-            f(StartTimerResult.Canceled(hev.TimerCanceledEventAttributes))
+            // Canceled
+            | SomeEventOfType(EventType.TimerCanceled) hev ->
+                let result = StartTimerResult.Canceled(hev.TimerCanceledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // StartTimerFailed
-        | SomeEventOfType(EventType.StartTimerFailed) hev ->
-            f(StartTimerResult.StartTimerFailed(hev.StartTimerFailedEventAttributes))
+            // StartTimerFailed
+            | SomeEventOfType(EventType.StartTimerFailed) hev ->
+                let result = StartTimerResult.StartTimerFailed(hev.StartTimerFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // TimerStarted
-        | SomeEventOfType(EventType.TimerStarted) hev ->
-            f(StartTimerResult.Started(hev.TimerStartedEventAttributes))
+            // TimerStarted
+            | SomeEventOfType(EventType.TimerStarted) hev ->
+                f(StartTimerResult.Started(hev.TimerStartedEventAttributes))
 
-        | _ -> failwith "error"
+            | _ -> failwith "error"
+
+        | StartTimerAction.ResultFromContext(result) -> 
+            f(result)
 
     // Wait For Timer
     member this.Bind(WaitForTimerAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
@@ -468,7 +564,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
 
     // Cancel Timer
     member this.Bind(CancelTimerAction.StartResult(result), f:(CancelTimerResult -> RespondDecisionTaskCompletedRequest)) =
-
         match result with 
         // Starting
         | StartTimerResult.Starting(_) -> 
@@ -504,115 +599,149 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
             | _ -> failwith "error"
 
     // Marker Recorded
-    member this.Bind(MarkerRecordedAction.Attributes(markerName:string), f:(MarkerRecordedResult -> RespondDecisionTaskCompletedRequest)) =
-        let combinedHistory = walker.FindMarker(markerName)
+    member this.Bind(action:MarkerRecordedAction, f:(MarkerRecordedResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | MarkerRecordedAction.Attributes(markerName, pushToContext) ->
+            let combinedHistory = walker.FindMarker(markerName)
 
-        match combinedHistory with
-        // NotRecorded
-        | None ->
-            f(MarkerRecordedResult.NotRecorded)
+            match combinedHistory with
+            // NotRecorded
+            | None ->
+                f(MarkerRecordedResult.NotRecorded)
 
-        // RecordMarkerFailed
-        | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
-            f(MarkerRecordedResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes))
+            // RecordMarkerFailed
+            | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
+                let result = MarkerRecordedResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // MarkerRecorded
-        | SomeEventOfType(EventType.MarkerRecorded) hev ->
-            f(MarkerRecordedResult.MarkerRecorded(hev.MarkerRecordedEventAttributes))
+            // MarkerRecorded
+            | SomeEventOfType(EventType.MarkerRecorded) hev ->
+                let result = MarkerRecordedResult.MarkerRecorded(hev.MarkerRecordedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        | _ -> failwith "error"
+            | _ -> failwith "error"
+
+        | MarkerRecordedAction.ResultFromContext(result) ->
+            f(result)
 
     // Record Marker
-    member this.Bind(RecordMarkerAction.Attributes(attr), f:(RecordMarkerResult -> RespondDecisionTaskCompletedRequest)) =
-        let combinedHistory = walker.FindMarker(attr.MarkerName)
+    member this.Bind(action:RecordMarkerAction, f:(RecordMarkerResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | RecordMarkerAction.Attributes(attr, pushToContext) ->
+            let combinedHistory = walker.FindMarker(attr.MarkerName)
 
-        match combinedHistory with
-        // The marker was never recorded, record it now
-        | None ->
-            let d = new Decision();
-            d.DecisionType <- DecisionType.RecordMarker
-            d.RecordMarkerDecisionAttributes <- attr
-            response.Decisions.Add(d)
+            match combinedHistory with
+            // The marker was never recorded, record it now
+            | None ->
+                let d = new Decision();
+                d.DecisionType <- DecisionType.RecordMarker
+                d.RecordMarkerDecisionAttributes <- attr
+                response.Decisions.Add(d)
 
-            f(RecordMarkerResult.Recording)
+                f(RecordMarkerResult.Recording)
             
-        // RecordMarkerFailed
-        | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
-            f(RecordMarkerResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes))
+            // RecordMarkerFailed
+            | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
+                let result = RecordMarkerResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // MarkerRecorded
-        | SomeEventOfType(EventType.MarkerRecorded) hev ->
-            f(RecordMarkerResult.MarkerRecorded(hev.MarkerRecordedEventAttributes))
+            // MarkerRecorded
+            | SomeEventOfType(EventType.MarkerRecorded) hev ->
+                let result = RecordMarkerResult.MarkerRecorded(hev.MarkerRecordedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        | _ -> failwith "error"
+            | _ -> failwith "error"
+        | RecordMarkerAction.ResultFromContext(result) ->
+            f(result)
 
     // Signal External Workflow Execution
-    member this.Bind(SignalExternalWorkflowExecutionAction.Attributes(attr), f:(SignalExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(action:SignalExternalWorkflowExecutionAction, f:(SignalExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | SignalExternalWorkflowExecutionAction.Attributes(attr, pushToContext) ->
+            let combinedHistory = walker.FindSignalExternalWorkflow(attr)
 
-        let combinedHistory = walker.FindSignalExternalWorkflow(attr)
+            match combinedHistory with
+            // Signaling
+            | None -> 
+                // The signal was never sent, send it now                
+                let d = new Decision();
+                d.DecisionType <- DecisionType.SignalExternalWorkflowExecution
+                d.SignalExternalWorkflowExecutionDecisionAttributes <- attr
+                response.Decisions.Add(d)
+                f(SignalExternalWorkflowExecutionResult.Signaling)
 
-        match combinedHistory with
-        // Signaling
-        | None -> 
-            // The signal was never sent, send it now                
-            let d = new Decision();
-            d.DecisionType <- DecisionType.SignalExternalWorkflowExecution
-            d.SignalExternalWorkflowExecutionDecisionAttributes <- attr
-            response.Decisions.Add(d)
-            f(SignalExternalWorkflowExecutionResult.Signaling)
+            // Signaled
+            | SomeEventOfType(EventType.ExternalWorkflowExecutionSignaled) hev ->
+                let result = SignalExternalWorkflowExecutionResult.Signaled(hev.ExternalWorkflowExecutionSignaledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
 
-        // Signaled
-        | SomeEventOfType(EventType.ExternalWorkflowExecutionSignaled) hev ->
-            f(SignalExternalWorkflowExecutionResult.Signaled(hev.ExternalWorkflowExecutionSignaledEventAttributes))
-
-        // Failed
-        | SomeEventOfType(EventType.SignalExternalWorkflowExecutionFailed) hev ->
-            f(SignalExternalWorkflowExecutionResult.Failed(hev.SignalExternalWorkflowExecutionFailedEventAttributes))
+            // Failed
+            | SomeEventOfType(EventType.SignalExternalWorkflowExecutionFailed) hev ->
+                let result = SignalExternalWorkflowExecutionResult.Failed(hev.SignalExternalWorkflowExecutionFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
         
-        // Initiated
-        | SomeEventOfType(EventType.SignalExternalWorkflowExecutionInitiated) hev ->
-            f(SignalExternalWorkflowExecutionResult.Initiated(hev.SignalExternalWorkflowExecutionInitiatedEventAttributes))
+            // Initiated
+            | SomeEventOfType(EventType.SignalExternalWorkflowExecutionInitiated) hev ->
+                f(SignalExternalWorkflowExecutionResult.Initiated(hev.SignalExternalWorkflowExecutionInitiatedEventAttributes))
 
-        | _ -> failwith "error"
-
-    // Workflow Execution Signaled
-    member this.Bind(WorkflowExecutionSignaledAction.Attributes(signalName), f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
-        let combinedHistory = walker.FindSignaled(signalName)
-
-        match combinedHistory with
-        // Not Signaled
-        | None ->
-            f(WorkflowExecutionSignaledResult.NotSignaled)
-
-        // Signaled
-        | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
-            f(WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes))
-        
-        | _ -> failwith "error"
-
-    member this.Bind(contextAction:WorkflowExecutionSignaledFromContextAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
-        match contextAction with
-        | WorkflowExecutionSignaledFromContextAction.NotInContext(action) -> 
-            this.Bind(action, f)
-        | WorkflowExecutionSignaledFromContextAction.ResultFromContext(result) ->
+            | _ -> failwith "error"
+        | SignalExternalWorkflowExecutionAction.ResultFromContext(result) ->
             f(result)
-        | WorkflowExecutionSignaledFromContextAction.ExpectedButNotFound(ex) -> 
-            raise ex
+            
+    // Workflow Execution Signaled
+    member this.Bind(action:WorkflowExecutionSignaledAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | WorkflowExecutionSignaledAction.Attributes(signalName, pushToContext) ->
+            let combinedHistory = walker.FindSignaled(signalName)
+
+            match combinedHistory with
+            // Not Signaled
+            | None ->
+                f(WorkflowExecutionSignaledResult.NotSignaled)
+
+            // Signaled
+            | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
+                let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
+        
+            | _ -> failwith "error"
+
+        | WorkflowExecutionSignaledAction.ResultFromContext(result) ->
+            f(result)
 
     // Wait For Workflow Execution Signaled
-    member this.Bind(WaitForWorkflowExecutionSignaledAction.Attributes(signalName), f:(WaitForWorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
-        let combinedHistory = walker.FindSignaled(signalName)
+    member this.Bind(action:WaitForWorkflowExecutionSignaledAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | WaitForWorkflowExecutionSignaledAction.Attributes(signalName, pushToContext) ->
+            let combinedHistory = walker.FindSignaled(signalName)
 
-        match combinedHistory with
-        // Not Signaled, keep waiting
-        | None ->
-            Wait()
+            match combinedHistory with
+            // Not Signaled, keep waiting
+            | None ->
+                Wait()
 
-        // Signaled
-        | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
-            f(WaitForWorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes))
+            // Signaled
+            | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
+                let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                f(result)
         
-        | _ -> failwith "error"
+            | _ -> failwith "error"
+
+        | WaitForWorkflowExecutionSignaledAction.ResultFromContext(result) ->
+            f(result)
 
     // Workflow Execution Cancel Requested
     member this.Bind(WorkflowExecutionCancelRequestedAction.Attributes(), f:(WorkflowExecutionCancelRequestedResult -> RespondDecisionTaskCompletedRequest)) =
