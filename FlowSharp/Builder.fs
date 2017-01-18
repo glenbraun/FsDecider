@@ -590,6 +590,15 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool) =
         
         | _ -> failwith "error"
 
+    member this.Bind(contextAction:WorkflowExecutionSignaledFromContextAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
+        match contextAction with
+        | WorkflowExecutionSignaledFromContextAction.NotInContext(action) -> 
+            this.Bind(action, f)
+        | WorkflowExecutionSignaledFromContextAction.ResultFromContext(result) ->
+            f(result)
+        | WorkflowExecutionSignaledFromContextAction.ExpectedButNotFound(ex) -> 
+            raise ex
+
     // Wait For Workflow Execution Signaled
     member this.Bind(WaitForWorkflowExecutionSignaledAction.Attributes(signalName), f:(WaitForWorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
         let combinedHistory = walker.FindSignaled(signalName)

@@ -59,6 +59,7 @@
     <Compile Include="FlowSharp.fs" />
     <Compile Include="HistoryWalker.fs" />
     <Compile Include="Builder.fs" />
+    <Compile Include="SimpleExecutionContext.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

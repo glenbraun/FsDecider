@@ -159,6 +159,11 @@ type WorkflowExecutionSignaledResult =
     | NotSignaled
     | Signaled of WorkflowExecutionSignaledEventAttributes
 
+type WorkflowExecutionSignaledFromContextAction = 
+    | NotInContext of WorkflowExecutionSignaledAction
+    | ResultFromContext of WorkflowExecutionSignaledResult
+    | ExpectedButNotFound of Exception
+
 type WaitForWorkflowExecutionSignaledAction =
     | Attributes of SignalName:string
 
@@ -189,5 +194,8 @@ type MarkerRecordedResult =
     | NotRecorded
     | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
     | MarkerRecorded        of MarkerRecordedEventAttributes
-
-
+    
+type MarkerRecordedFromContextAction = 
+    | NotInContext of MarkerRecordedAction
+    | Result of MarkerRecordedResult
+    | ExpectedButNotFound of Exception
