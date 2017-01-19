@@ -15,6 +15,7 @@ open NUnit.Framework
 open FsUnit
 
 module TestGetExecutionContext =
+
     let private OfflineHistorySubstitutions =  
         Map.empty<string, string>
         |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
@@ -140,6 +141,15 @@ module TestGetExecutionContext =
         let executionContext = "Test Execution Context"
         let signalName = "Test Signal"
         let signalInput = "Test Signal Input"
+
+        let a1 = [typeof<ScheduleActivityTaskAction>.ToString(); "a1"; "true";]
+        let a2 = [typeof<ScheduleActivityTaskAction>.ToString(); "a1"; "true";]
+        let x1 = [typeof<StartChildWorkflowExecutionAction>.ToString(); "foo"; "bar"; "1";]
+
+        let map = Map.empty.Add(a1, "a1").Add(a2, "a2").Add(x1, "x1")
+
+        let ok = a1 = a2
+
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(DefaultContextManager() :> IContextManager)) {

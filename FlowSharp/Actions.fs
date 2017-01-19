@@ -55,11 +55,11 @@ type ScheduleActivityTaskResult =
 
 type ScheduleActivityTaskAction =
     | Attributes        of ScheduleActivityTaskDecisionAttributes * bool
-    | ResultFromContext of ScheduleActivityTaskResult
+    | ResultFromContext of ScheduleActivityTaskDecisionAttributes * ScheduleActivityTaskResult
 
 type ScheduleAndWaitForActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes * bool
-    | ResultFromContext of ScheduleActivityTaskResult
+    | ResultFromContext of ScheduleActivityTaskDecisionAttributes * ScheduleActivityTaskResult
 
 type WaitForActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult

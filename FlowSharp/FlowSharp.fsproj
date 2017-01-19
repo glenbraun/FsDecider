@@ -55,10 +55,12 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="EventPatterns.fs" />
     <Compile Include="Actions.fs" />
     <Compile Include="FlowSharp.fs" />
     <Compile Include="HistoryWalker.fs" />
-    <Compile Include="ExecutionContext.fs" />
+    <Compile Include="ContextExpression.fs" />
+    <Compile Include="ContextManager.fs" />
     <Compile Include="Builder.fs" />
     <Content Include="packages.config" />
   </ItemGroup>

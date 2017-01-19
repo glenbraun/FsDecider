@@ -7,6 +7,7 @@ open Amazon.SimpleWorkflow.Model
 
 open FlowSharp.Actions
 open FlowSharp.HistoryWalker
+open FlowSharp.EventPatterns
 open FlowSharp.ExecutionContext
 
 type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
@@ -211,7 +212,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> failwith "error"
 
-        | ScheduleActivityTaskAction.ResultFromContext(result) ->
+        | ScheduleActivityTaskAction.ResultFromContext(_, result) ->
             f(result)
 
     // Schedule and Wait for Activity Task
@@ -267,7 +268,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> failwith "error"
 
-        | ScheduleAndWaitForActivityTaskAction.ResultFromContext(result) ->
+        | ScheduleAndWaitForActivityTaskAction.ResultFromContext(_, result) ->
             f(result)
 
     // Wait For Activity Task
