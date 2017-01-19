@@ -139,22 +139,52 @@ module TestGetExecutionContext =
     let ``Simple Execution Context``() =
         let workflowId = "Simple Execution Context"
         let executionContext = "Test Execution Context"
+        let activityId = "Test Activity 1"
+        let activityInput = "Test Activity 1 Input"
+        let activityResult = "Test Activity 1 Result"
         let signalName = "Test Signal"
-        let signalInput = "Test Signal Input"
-
-        let a1 = [typeof<ScheduleActivityTaskAction>.ToString(); "a1"; "true";]
-        let a2 = [typeof<ScheduleActivityTaskAction>.ToString(); "a1"; "true";]
-        let x1 = [typeof<StartChildWorkflowExecutionAction>.ToString(); "foo"; "bar"; "1";]
-
-        let map = Map.empty.Add(a1, "a1").Add(a2, "a2").Add(x1, "x1")
-
-        let ok = a1 = a2
-
+        let executionContext = 
+            sprintf """ScheduleActivityTaskDecisionAttributes(ActivityId="%s",ActivityType=ActivityType(Name="%s",Version="%s"))=>Completed(Result="%s")""" activityId (TestConfiguration.TestActivityType.Name) (TestConfiguration.TestActivityType.Version) activityResult
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(DefaultContextManager() :> IContextManager)) {
 
-            return "OK"
+            // Schedule and Wait For Activity Task
+            let! result = FlowSharp.ScheduleAndWaitForActivityTask (
+                            TestConfiguration.TestActivityType, 
+                            activityId, 
+                            input=activityInput,
+                            taskList=TestConfiguration.TestTaskList, 
+                            heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                            scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                            scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                            startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
+                            pushToContext=true
+                        )
+
+            match result with
+            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult ->
+                    let! signal = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
+
+                    let! contextResult = FlowSharp.ScheduleAndWaitForActivityTask (
+                                            TestConfiguration.TestActivityType, 
+                                            activityId, 
+                                            input=activityInput,
+                                            taskList=TestConfiguration.TestTaskList, 
+                                            heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                            scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                            scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
+                                            startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
+                                            pushToContext=true
+                                        )
+
+
+                    match contextResult with
+                    | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> 
+                        return "TEST PASS"
+                    | _ -> 
+                        return "TEST FAIL"
+            | _ -> return "TEST FAIL"
         }
 
         // OfflineDecisionTask
@@ -168,30 +198,56 @@ module TestGetExecutionContext =
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              WorkflowExecutionSignaledEventAttributes(Input=signalInput, SignalName=signalName))
+                              ActivityTaskScheduledEventAttributes(ActivityId="Test Activity 1", ActivityType=ActivityType(Name="Activity1", Version="2"), DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input="Test Activity 1 Input", ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=6L))
+                              ActivityTaskCompletedEventAttributes(Result="Test Activity 1 Result", ScheduledEventId=5L, StartedEventId=6L))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskCompletedEventAttributes(ScheduledEventId=6L, StartedEventId=7L))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=8L, Result="TEST PASS"))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=8L))
+                          |> OfflineHistoryEvent (        // EventId = 10
+                              DecisionTaskCompletedEventAttributes(ExecutionContext="ScheduleActivityTaskDecisionAttributes(ActivityId=\"Test Activity 1\",ActivityType=ActivityType(Name=\"Activity1\",Version=\"2\"))=>Completed(Result=\"Test Activity 1 Result\")", ScheduledEventId=8L, StartedEventId=9L))
+                          |> OfflineHistoryEvent (        // EventId = 11
+                              WorkflowExecutionSignaledEventAttributes(Input="Some Signal Input", SignalName="Test Signal"))
+                          |> OfflineHistoryEvent (        // EventId = 12
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                          |> OfflineHistoryEvent (        // EventId = 13
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=12L))
+                          |> OfflineHistoryEvent (        // EventId = 14
+                              DecisionTaskCompletedEventAttributes(ExecutionContext="ScheduleActivityTaskDecisionAttributes(ActivityId=\"Test Activity 1\",ActivityType=ActivityType(Name=\"Activity1\",Version=\"2\"))=>Completed(Result=\"Test Activity 1 Result\")", ScheduledEventId=12L, StartedEventId=13L))
+                          |> OfflineHistoryEvent (        // EventId = 15
+                              WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=14L, Result="TEST PASS"))
 
         // Start the workflow
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 3 do
             match i with
             | 1 -> 
+                resp.Decisions.Count                    |> should equal 1
+                resp.Decisions.[0].DecisionType         |> should equal DecisionType.ScheduleActivityTask
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
+                                                        |> should equal activityId
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
+                                                        |> should equal TestConfiguration.TestActivityType.Name
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
+                                                        |> should equal TestConfiguration.TestActivityType.Version
+                resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
+                                                        |> should equal activityInput
+
+                TestHelper.RespondDecisionTaskCompleted resp
+                TestHelper.PollAndCompleteActivityTask (TestConfiguration.TestActivityType) (Some(fun _ -> activityResult))
+
+            | 2 ->
                 resp.Decisions.Count                    |> should equal 0
 
                 TestHelper.RespondDecisionTaskCompleted resp
+                TestHelper.SignalWorkflow runId workflowId signalName "Some Signal Input"
 
-                TestHelper.SignalWorkflow runId workflowId signalName signalInput
-
-            | 2 -> 
+            | 3 -> 
                 resp.Decisions.Count                    |> should equal 1
                 resp.Decisions.[0].DecisionType         |> should equal DecisionType.CompleteWorkflowExecution
                 resp.Decisions.[0].CompleteWorkflowExecutionDecisionAttributes.Result 

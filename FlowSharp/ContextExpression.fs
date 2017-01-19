@@ -3,6 +3,12 @@
 open System
 open System.Text
 
+open Amazon
+open Amazon.SimpleWorkflow
+open Amazon.SimpleWorkflow.Model
+
+open FlowSharp.Actions
+
 type internal ContextExpression =
     | Mappings of ActionToResultMapping list
 and ActionToResultMapping =
@@ -17,6 +23,35 @@ and ParameterValue =
     | StringValue of string
     | IntValue of int
     | ObjectValue of ObjectInitialization
+
+
+let FindParameter (name:string) (parameters:Parameter list) : Parameter option =
+    let Find (name:string) (Parameter.NameAndValue(label, _)) : bool =
+        match label with
+        | Label.Text(n) when n = name -> true
+        | _ -> false
+
+    parameters
+    |> List.tryFind (Find name)
+
+let rec ReadParameterActivityTypeValue (parameters:Parameter list) : ActivityType =
+    let activityType = ActivityType()
+
+    let parameter = FindParameter "ActivityType" parameters
+    match parameter with
+    | Some(Parameter.NameAndValue(_, ParameterValue.ObjectValue(ObjectInitialization.NameAndParameters(_, atParameters)))) -> 
+        activityType.Name <- ReadParameterStringValue "Name" atParameters
+        activityType.Version <- ReadParameterStringValue "Version" atParameters
+    | _ -> ()
+
+    activityType
+
+and ReadParameterStringValue (name:string) (parameters:Parameter list) : string =
+    let parameter = FindParameter name parameters
+
+    match parameter with
+    | Some(Parameter.NameAndValue(_, ParameterValue.StringValue(value))) -> value
+    | _ -> null
 
 type internal Writer() =
     let sb = StringBuilder()
@@ -86,8 +121,13 @@ type internal Writer() =
 
     member this.Write(ContextExpression.Mappings(mappings)) =
         sb.Clear() |> ignore
+        
         WriteActivityToResultMappings mappings
-        sb.ToString()
+        
+        if sb.Length = 0 then
+            null
+        else 
+            sb.ToString()
         
 type internal Parser() = 
     let rec SkipWhiteSpace (chars:char list) : char list =
@@ -232,17 +272,20 @@ type internal Parser() =
         let (mapping, chars) = ParseActivityToResultMapping chars
 
         match mapping with
-        | None -> ([], chars)
+        | None -> (mappings, chars)
         | Some(m) -> 
             let chars = SkipWhiteSpace chars
             ParseActivityToResultMappings chars (m :: mappings)
 
     member this.TryParseExecutionContext (executionContext:string) : ContextExpression option =
-        let (mappings, chars) = ParseActivityToResultMappings (executionContext |> List.ofSeq) []
+        if String.IsNullOrWhiteSpace(executionContext) 
+        then None
+        else
+            let (mappings, chars) = ParseActivityToResultMappings (executionContext |> List.ofSeq) []
 
-        let chars = SkipWhiteSpace chars
+            let chars = SkipWhiteSpace chars
 
-        match chars with
-        | [] -> Some(ContextExpression.Mappings(mappings))
-        | _ -> None
+            match chars with
+            | [] -> Some(ContextExpression.Mappings(mappings))
+            | _ -> None
     

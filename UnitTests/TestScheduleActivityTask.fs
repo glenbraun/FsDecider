@@ -38,7 +38,7 @@ module TestScheduleActivityTask =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
-            // Schedule and Wait for an Activity Task
+            // Schedule Activity Task
             let! result = FlowSharp.ScheduleActivityTask (
                             TestConfiguration.TestActivityType, 
                             activityId, 

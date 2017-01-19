@@ -26,11 +26,11 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
     let ReadContext () = 
         match ContextManager with
         | Some(cm) ->
-            let completed = walker.FindDecisionTaskCompleted()
+            let completed = walker.FindLatestDecisionTaskCompleted()
             match completed with
             | Some(c) -> 
                 cm.Read(c.DecisionTaskCompletedEventAttributes.ExecutionContext)
-            | None -> cm.Read("")
+            | None -> ()
         | None -> ()
     
     let WriteContext () =
@@ -52,7 +52,10 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             
             (fun () -> 
                 ReadContext()
-                f()
+
+                let result = f()
+                WriteContext()
+                result
             )
 
     member this.Run(f) : RespondDecisionTaskCompletedRequest = 
@@ -149,7 +152,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> failwith "error"
 
-        WriteContext()
         response
 
     member this.Return(result:string) = this.Return(ReturnResult.CompleteWorkflowExecution(result))
@@ -175,31 +177,31 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Completed
             | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
                 let result = ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Canceled
             | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
                 let result = ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Failed
             | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
                 let result = ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
         
             // TimedOut
             | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
                 let result = ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // ScheduleFailed
             | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
                 let result = ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Started
@@ -234,31 +236,31 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Completed
             | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
                 let result = ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Canceled
             | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
                 let result = ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Failed
             | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
                 let result = ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
         
             // TimedOut
             | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
                 let result = ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // ScheduleFailed
             | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
                 let result = ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Started
@@ -776,7 +778,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
     // Get Execution Context
     member this.Bind(GetExecutionContextAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
 
-        let completedEvent = walker.FindDecisionTaskCompleted()
+        let completedEvent = walker.FindLatestDecisionTaskCompleted()
 
         match (completedEvent) with
         | None ->
