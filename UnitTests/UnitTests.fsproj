@@ -88,6 +88,7 @@
     <Compile Include="TestWhileLoop.fs" />
     <Compile Include="TestTryWith.fs" />
     <Compile Include="TestTryFinally.fs" />
+    <Compile Include="TestExecutionContextManager.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

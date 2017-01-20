@@ -60,7 +60,7 @@
     <Compile Include="FlowSharp.fs" />
     <Compile Include="HistoryWalker.fs" />
     <Compile Include="ContextExpression.fs" />
-    <Compile Include="ContextManager.fs" />
+    <Compile Include="ExecutionContextManager.fs" />
     <Compile Include="Builder.fs" />
     <Content Include="packages.config" />
   </ItemGroup>

@@ -8,7 +8,7 @@ open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
 module TestHelper =
-    let PollAndDecide (taskList:TaskList) (deciderFunc: (DecisionTask -> RespondDecisionTaskCompletedRequest)) (offlineFunc: (unit -> DecisionTask)) (roundtrips: int) : (int * RespondDecisionTaskCompletedRequest) seq =
+    let PollAndDecide (taskList:TaskList) (deciderFunc: (DecisionTask -> RespondDecisionTaskCompletedRequest)) (offlineFunc: (unit -> DecisionTask)) (filterHistoryByPreviousStartedEventId:bool) (roundtrips: int) : (int * RespondDecisionTaskCompletedRequest) seq =
         
         // Split the offline history into separate decision tasks
         let OfflineDecisionTasks =
@@ -45,6 +45,9 @@ module TestHelper =
                         if TestConfiguration.ReverseOrder then
                             odt.Events <- ResizeArray<HistoryEvent>(odt.Events |> Seq.rev)
                         odt
+
+                if filterHistoryByPreviousStartedEventId then
+                    dt.Events <- ResizeArray<HistoryEvent>(dt.Events |> Seq.filter (fun hev -> dt.PreviousStartedEventId <= hev.EventId && hev.EventId <= dt.StartedEventId))
 
                 let resp = deciderFunc(dt)
                 yield (trip, resp)

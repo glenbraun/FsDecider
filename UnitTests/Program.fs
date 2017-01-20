@@ -225,7 +225,7 @@ let main argv =
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    let tests = testCase "GetExecutionContext"          <| TestGetExecutionContext.``Simple Execution Context``
+    let tests = testCase "GetExecutionContext"          <| TestExecutionContextManager.``Simple Execution Context``
 
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

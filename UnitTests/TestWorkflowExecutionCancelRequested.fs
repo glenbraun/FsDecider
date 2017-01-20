@@ -143,7 +143,7 @@ module TestWorkflowExecutionCancelRequested =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None (Some(ChildPolicy.REQUEST_CANCEL))
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -170,7 +170,7 @@ module TestWorkflowExecutionCancelRequested =
                 TestHelper.RespondDecisionTaskCompleted resp
 
                 // Process Child Workflow Decisions
-                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc1 1 do
+                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc1 false 1 do
                     match j with
                     | 1 -> 
                         childResp.Decisions.Count                    |> should equal 0
@@ -188,7 +188,7 @@ module TestWorkflowExecutionCancelRequested =
                 TestHelper.RespondDecisionTaskCompleted resp
 
                 // Process Child Workflow Decisions
-                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc2 1 do
+                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc2 false 1 do
                     match j with
                     | 1 -> 
                         childResp.Decisions.Count                    |> should equal 1
@@ -238,7 +238,7 @@ module TestWorkflowExecutionCancelRequested =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 1 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 1 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1

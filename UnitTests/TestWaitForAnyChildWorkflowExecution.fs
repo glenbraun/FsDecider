@@ -132,7 +132,7 @@ module TestWaitForAnyChildWorkflowExecution =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -180,7 +180,7 @@ module TestWaitForAnyChildWorkflowExecution =
 
                 // Process Child Workflow Decisions (twice)
                 for k = 1 to 2 do 
-                    for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc 1 do
+                    for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc false 1 do
                         match j with
                         | 1 -> 
                             childResp.Decisions.Count                    |> should equal 1
@@ -314,7 +314,7 @@ module TestWaitForAnyChildWorkflowExecution =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -361,7 +361,7 @@ module TestWaitForAnyChildWorkflowExecution =
                 TestHelper.RespondDecisionTaskCompleted resp
 
                 // Process Child Workflow Decisions (once)
-                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc 1 do
+                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc false 1 do
                     match j with
                     | 1 -> 
                         childResp.Decisions.Count                    |> should equal 1
@@ -500,7 +500,7 @@ module TestWaitForAnyChildWorkflowExecution =
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc 3 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 3 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -552,7 +552,7 @@ module TestWaitForAnyChildWorkflowExecution =
                 TestHelper.RespondDecisionTaskCompleted resp
 
                 // Process Child Workflow Decisions (once)
-                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc 1 do
+                for (j, childResp) in TestHelper.PollAndDecide childTaskList childDeciderFunc childOfflineFunc false 1 do
                     match j with
                     | 1 -> 
                         childResp.Decisions.Count                    |> should equal 1
