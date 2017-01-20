@@ -358,37 +358,37 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Completed
             | SomeEventOfType(EventType.ChildWorkflowExecutionCompleted) hev ->
                 let result = StartChildWorkflowExecutionResult.Completed(hev.ChildWorkflowExecutionCompletedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
                  
             // Canceled
             | SomeEventOfType(EventType.ChildWorkflowExecutionCanceled) hev ->
                 let result = StartChildWorkflowExecutionResult.Canceled(hev.ChildWorkflowExecutionCanceledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // TimedOut
             | SomeEventOfType(EventType.ChildWorkflowExecutionTimedOut) hev ->
                 let result = StartChildWorkflowExecutionResult.TimedOut(hev.ChildWorkflowExecutionTimedOutEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Failed
             | SomeEventOfType(EventType.ChildWorkflowExecutionFailed) hev ->
                 let result = StartChildWorkflowExecutionResult.Failed(hev.ChildWorkflowExecutionFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Terminated
             | SomeEventOfType(EventType.ChildWorkflowExecutionTerminated) hev ->
                 let result = StartChildWorkflowExecutionResult.Terminated(hev.ChildWorkflowExecutionTerminatedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // StartChildWorkflowExecutionFailed
             | SomeEventOfType(EventType.StartChildWorkflowExecutionFailed) hev ->
                 let result = StartChildWorkflowExecutionResult.StartFailed(hev.StartChildWorkflowExecutionFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Started
@@ -401,7 +401,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> failwith "error"
 
-        | StartChildWorkflowExecutionAction.ResultFromContext(result) ->
+        | StartChildWorkflowExecutionAction.ResultFromContext(_, result) ->
             f(result)
 
     // Wait For Child Workflow Execution
@@ -476,25 +476,25 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Lambda Function Completed
             | SomeEventOfType(EventType.LambdaFunctionCompleted) hev -> 
                 let result = ScheduleAndWaitForLambdaFunctionResult.Completed(hev.LambdaFunctionCompletedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Lambda Function Failed
             | SomeEventOfType(EventType.LambdaFunctionFailed) hev -> 
                 let result = ScheduleAndWaitForLambdaFunctionResult.Failed(hev.LambdaFunctionFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Lambda Function TimedOut
             | SomeEventOfType(EventType.LambdaFunctionTimedOut) hev -> 
                 let result = ScheduleAndWaitForLambdaFunctionResult.TimedOut(hev.LambdaFunctionTimedOutEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // StartLambdaFunctionFailed
             | SomeEventOfType(EventType.StartLambdaFunctionFailed) hev -> 
                 let result = ScheduleAndWaitForLambdaFunctionResult.StartFailed(hev.StartLambdaFunctionFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // ScheduleLambdaFunctionFailed
@@ -505,7 +505,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 // This lambda function is still running, continue blocking
                 Wait()
 
-        | ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(result) ->
+        | ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(_, result) ->
             f(result)
 
     // Start Timer
@@ -528,19 +528,19 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Fired
             | SomeEventOfType(EventType.TimerFired) hev ->
                 let result = StartTimerResult.Fired(hev.TimerFiredEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Canceled
             | SomeEventOfType(EventType.TimerCanceled) hev ->
                 let result = StartTimerResult.Canceled(hev.TimerCanceledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // StartTimerFailed
             | SomeEventOfType(EventType.StartTimerFailed) hev ->
                 let result = StartTimerResult.StartTimerFailed(hev.StartTimerFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // TimerStarted
@@ -549,7 +549,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> failwith "error"
 
-        | StartTimerAction.ResultFromContext(result) -> 
+        | StartTimerAction.ResultFromContext(_, result) -> 
             f(result)
 
     // Wait For Timer
@@ -616,18 +616,18 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // RecordMarkerFailed
             | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
                 let result = MarkerRecordedResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(markerName, result)
                 f(result)
 
             // MarkerRecorded
             | SomeEventOfType(EventType.MarkerRecorded) hev ->
                 let result = MarkerRecordedResult.MarkerRecorded(hev.MarkerRecordedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(markerName, result)
                 f(result)
 
             | _ -> failwith "error"
 
-        | MarkerRecordedAction.ResultFromContext(result) ->
+        | MarkerRecordedAction.ResultFromContext(_, result) ->
             f(result)
 
     // Record Marker
@@ -650,17 +650,17 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // RecordMarkerFailed
             | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
                 let result = RecordMarkerResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // MarkerRecorded
             | SomeEventOfType(EventType.MarkerRecorded) hev ->
                 let result = RecordMarkerResult.MarkerRecorded(hev.MarkerRecordedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             | _ -> failwith "error"
-        | RecordMarkerAction.ResultFromContext(result) ->
+        | RecordMarkerAction.ResultFromContext(_, result) ->
             f(result)
 
     // Signal External Workflow Execution
@@ -683,13 +683,13 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Signaled
             | SomeEventOfType(EventType.ExternalWorkflowExecutionSignaled) hev ->
                 let result = SignalExternalWorkflowExecutionResult.Signaled(hev.ExternalWorkflowExecutionSignaledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Failed
             | SomeEventOfType(EventType.SignalExternalWorkflowExecutionFailed) hev ->
                 let result = SignalExternalWorkflowExecutionResult.Failed(hev.SignalExternalWorkflowExecutionFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
         
             // Initiated
@@ -697,7 +697,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 f(SignalExternalWorkflowExecutionResult.Initiated(hev.SignalExternalWorkflowExecutionInitiatedEventAttributes))
 
             | _ -> failwith "error"
-        | SignalExternalWorkflowExecutionAction.ResultFromContext(result) ->
+        | SignalExternalWorkflowExecutionAction.ResultFromContext(_, result) ->
             f(result)
             
     // Workflow Execution Signaled
@@ -715,12 +715,12 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Signaled
             | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
                 let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
                 f(result)
         
             | _ -> failwith "error"
 
-        | WorkflowExecutionSignaledAction.ResultFromContext(result) ->
+        | WorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             f(result)
 
     // Wait For Workflow Execution Signaled
@@ -738,12 +738,12 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Signaled
             | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
                 let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(action, result)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
                 f(result)
         
             | _ -> failwith "error"
 
-        | WaitForWorkflowExecutionSignaledAction.ResultFromContext(result) ->
+        | WaitForWorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             f(result)
 
     // Workflow Execution Cancel Requested

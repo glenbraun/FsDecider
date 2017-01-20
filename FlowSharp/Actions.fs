@@ -88,7 +88,7 @@ type ScheduleAndWaitForLambdaFunctionResult =
 
 type ScheduleAndWaitForLambdaFunctionAction =
     | Attributes        of ScheduleLambdaFunctionDecisionAttributes * bool
-    | ResultFromContext of ScheduleAndWaitForLambdaFunctionResult
+    | ResultFromContext of ScheduleLambdaFunctionDecisionAttributes * ScheduleAndWaitForLambdaFunctionResult
 
 type StartChildWorkflowExecutionResult =
     | Starting          of StartChildWorkflowExecutionDecisionAttributes
@@ -113,7 +113,7 @@ type StartChildWorkflowExecutionResult =
 
 type StartChildWorkflowExecutionAction =
     | Attributes        of StartChildWorkflowExecutionDecisionAttributes * bool
-    | ResultFromContext of StartChildWorkflowExecutionResult
+    | ResultFromContext of StartChildWorkflowExecutionDecisionAttributes * StartChildWorkflowExecutionResult
 
 type WaitForChildWorkflowExecutionAction =
     | StartResult of StartChildWorkflowExecutionResult
@@ -142,7 +142,7 @@ type StartTimerResult =
 
 type StartTimerAction =
     | Attributes        of StartTimerDecisionAttributes * bool
-    | ResultFromContext of StartTimerResult
+    | ResultFromContext of StartTimerDecisionAttributes * StartTimerResult
 
 type WaitForTimerAction =
     | StartResult of StartTimerResult
@@ -163,11 +163,11 @@ type WorkflowExecutionSignaledResult =
 
 type WorkflowExecutionSignaledAction =
     | Attributes        of string * bool
-    | ResultFromContext of WorkflowExecutionSignaledResult
+    | ResultFromContext of string * WorkflowExecutionSignaledResult
 
 type WaitForWorkflowExecutionSignaledAction =
     | Attributes of SignalName:string * bool
-    | ResultFromContext of WorkflowExecutionSignaledResult
+    | ResultFromContext of string * WorkflowExecutionSignaledResult
 
 type SignalExternalWorkflowExecutionResult = 
     | Signaling
@@ -177,22 +177,22 @@ type SignalExternalWorkflowExecutionResult =
 
 type SignalExternalWorkflowExecutionAction = 
     | Attributes        of SignalExternalWorkflowExecutionDecisionAttributes * bool
-    | ResultFromContext of SignalExternalWorkflowExecutionResult
+    | ResultFromContext of SignalExternalWorkflowExecutionDecisionAttributes * SignalExternalWorkflowExecutionResult
 
 type RecordMarkerResult = 
     | Recording
-    | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
     | MarkerRecorded        of MarkerRecordedEventAttributes
+    | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
 
 type RecordMarkerAction = 
     | Attributes        of RecordMarkerDecisionAttributes * bool
-    | ResultFromContext of RecordMarkerResult
+    | ResultFromContext of RecordMarkerDecisionAttributes * RecordMarkerResult
 
 type MarkerRecordedResult = 
     | NotRecorded
-    | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
     | MarkerRecorded        of MarkerRecordedEventAttributes
+    | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
     
 type MarkerRecordedAction = 
     | Attributes        of string * bool
-    | ResultFromContext of MarkerRecordedResult
+    | ResultFromContext of string * MarkerRecordedResult

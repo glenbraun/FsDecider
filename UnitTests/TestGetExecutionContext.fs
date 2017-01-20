@@ -147,7 +147,7 @@ module TestGetExecutionContext =
             sprintf """ScheduleActivityTaskDecisionAttributes(ActivityId="%s",ActivityType=ActivityType(Name="%s",Version="%s"))=>Completed(Result="%s")""" activityId (TestConfiguration.TestActivityType.Name) (TestConfiguration.TestActivityType.Version) activityResult
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(DefaultContextManager() :> IContextManager)) {
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(ExecutionContextManager() :> IContextManager)) {
 
             // Schedule and Wait For Activity Task
             let! result = FlowSharp.ScheduleAndWaitForActivityTask (
