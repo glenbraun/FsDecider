@@ -113,7 +113,7 @@ module TestWaitForTimer =
                 do! FlowSharp.WaitForTimer(timer1)
 
             | StartTimerResult.Started(_) ->
-                let! cancel = FlowSharp.CancelTimer(timer1)
+                do! FlowSharp.CancelTimer(timer1)
                 do! FlowSharp.Wait()
                 
             | StartTimerResult.Canceled(attr) when attr.TimerId = timerId -> return "TEST PASS"

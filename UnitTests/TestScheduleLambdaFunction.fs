@@ -683,3 +683,65 @@ module TestScheduleLambdaFunction =
 
         // Generate Offline History
         TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId (OfflineHistorySubstitutions.Remove("LambdaRole").Add("LambdaRole", "lambdaRole"))
+
+    let ``Schedule Lambda Function using do!``() =
+        let workflowId = "Schedule Lambda Function using do!"
+        let lambdaId = "lambda1"
+        let FiveSeconds = "5"
+
+        let deciderFunc(dt:DecisionTask) =
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            
+            // Schedule a Lambda Function
+            do! FlowSharp.ScheduleLambdaFunction (
+                            id=lambdaId,
+                            name=TestConfiguration.TestLambdaName,
+                            input=TestConfiguration.TestLambdaInput,
+                            startToCloseTimeout=FiveSeconds
+                          )
+
+            return "TEST PASS"
+        }
+
+        // OfflineDecisionTask
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+                          |> OfflineHistoryEvent (        // EventId = 1
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                          |> OfflineHistoryEvent (        // EventId = 2
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                          |> OfflineHistoryEvent (        // EventId = 3
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                          |> OfflineHistoryEvent (        // EventId = 4
+                              DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
+                          |> OfflineHistoryEvent (        // EventId = 5
+                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId, Input=TestConfiguration.TestLambdaInput, Name=TestConfiguration.TestLambdaName, StartToCloseTimeout="5"))
+                          |> OfflineHistoryEvent (        // EventId = 6
+                              WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=4L, Result="TEST PASS"))
+
+        // Start the workflow
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+
+        // Poll and make decisions
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 1 do
+            match i with
+            | 1 -> 
+                resp.Decisions.Count                    |> should equal 2
+                resp.Decisions.[0].DecisionType         |> should equal DecisionType.ScheduleLambdaFunction
+                resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Id
+                                                        |> should equal lambdaId
+                resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Name
+                                                        |> should equal TestConfiguration.TestLambdaName
+                resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Input
+                                                        |> should equal TestConfiguration.TestLambdaInput
+                resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout
+                                                        |> should equal (FiveSeconds.ToString())
+
+                resp.Decisions.[1].DecisionType         |> should equal DecisionType.CompleteWorkflowExecution
+                resp.Decisions.[1].CompleteWorkflowExecutionDecisionAttributes.Result 
+                                                        |> should equal "TEST PASS"
+
+                TestHelper.RespondDecisionTaskCompleted resp
+            | _ -> ()
+
+        // Generate Offline History
+        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions

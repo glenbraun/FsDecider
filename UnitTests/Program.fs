@@ -22,6 +22,7 @@ let tests =
                 testCase "TimedOut"             <| TestScheduleActivityTask.``Schedule Activity Task with result of TimedOut``
                 testCase "Failed"               <| TestScheduleActivityTask.``Schedule Activity Task with result of Failed``
                 testCase "ScheduleFailed"       <| TestScheduleActivityTask.``Schedule Activity Task with Schedule Failure``
+                testCase "Schedule using do!"   <| TestScheduleActivityTask.``Schedule Activity Task using do!``
             ]
             
             testList "WaitForActivityTask" [
@@ -49,6 +50,7 @@ let tests =
                 testCase "RequestCancelFailed"      <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of RequestCancelFailed``
                 testCase "ActivityFinished"         <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityFinished``
                 testCase "ActivityScheduleFailed"   <| TestRequestCancelActivityTask.``Request Cancel Activity Task with result of ActivityScheduleFailed``
+                testCase "Cancel using do!"         <| TestRequestCancelActivityTask.``Request Cancel Activity Task using do!``
             ]
             
             testList "StartChildWorkflowExecution" [
@@ -61,6 +63,7 @@ let tests =
                 testCase "TimedOut"             <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of TimedOut``
                 testCase "Terminated"           <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of Terminated``
                 testCase "StartFailed"          <| TestStartChildWorkflowExecution.``Start Child Workflow Execution with result of StartFailed``
+                testCase "Start using do!"      <| TestStartChildWorkflowExecution.``Start Child Workflow Execution using do!``
             ]
             
             testList "WaitForChildWorkflowExecution" [
@@ -89,6 +92,7 @@ let tests =
                 testCase "Initiated"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Initiated``
                 testCase "Delivered"            <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Delivered``
                 testCase "Failed"               <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Failed``
+                testCase "Cancel using do!"     <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution using do!``
             ]
             
             testList "ScheduleLambdaFunction" [
@@ -100,6 +104,7 @@ let tests =
                 testCase "TimedOut"             <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of TimedOut``
                 testCase "StartFailed"          <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of StartFailed``
                 testCase "ScheduleFailed"       <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of ScheduleFailed``
+                testCase "Schedule using do!"   <| TestScheduleLambdaFunction.``Schedule Lambda Function using do!``
             ]
 
             testList "WaitForLambdaFunction" [
@@ -128,6 +133,7 @@ let tests =
                 testCase "Fired"                <| TestStartTimer.``Start Timer with result of Fired``
                 testCase "Canceled"             <| TestStartTimer.``Start Timer with result of Canceled``
                 testCase "StartTimerFailed"     <| TestStartTimer.``Start Timer with result of StartTimerFailed``
+                testCase "Start using do!"      <| TestStartTimer.``Start Timer using do!``
             ]
             
             testList "WaitForTimer" [
@@ -142,6 +148,7 @@ let tests =
                 testCase "Fired"                <| TestCancelTimer.``Cancel Timer with result of Fired``
                 testCase "StartTimerFailed"     <| TestCancelTimer.``Cancel Timer with result of StartTimerFailed``
                 testCase "CancelTimerFailed"    <| TestCancelTimer.``Cancel Timer with result of CancelTimerFailed``
+                testCase "Cancel using do!"     <| TestCancelTimer.``Cancel Timer using do!``
             ]
             
             testList "MarkerRecorded" [
@@ -154,6 +161,7 @@ let tests =
                 testCase "Recording"            <| TestRecordMarker.``Record Marker with result of Recording``
                 testCase "RecordMarkerFailed"   <| TestRecordMarker.``Record Marker with result of RecordMarkerFailed``
                 testCase "MarkerRecorded"       <| TestRecordMarker.``Record Marker with result of MarkerRecorded``
+                testCase "Record using do!"     <| TestRecordMarker.``Record Marker using do!``
             ]
             
             testList "SignalExternalWorkflowExecution" [
@@ -304,7 +312,7 @@ let main argv =
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    //let tests = testCase "SignalExternalWorkflowExecutionAction"    <| TestRemoveFromContext.``Test context for RemoveFromContext using MarkerRecordedAction``
+    //let tests = testCase "Record using do!"     <| TestRecordMarker.``Record Marker using do!``
     
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

@@ -227,3 +227,55 @@ module TestRecordMarker =
                     TestHelper.RespondDecisionTaskCompleted resp
                 | _ -> ()
 
+
+    let ``Record Marker using do!``() =
+        let workflowId = "Record Marker using do!"
+        let markerName = "Test Marker"
+        let markerDetails = "Test Marker Details"
+
+        let deciderFunc(dt:DecisionTask) =
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            
+            // Record a Marker
+            do! FlowSharp.RecordMarker(markerName, markerDetails)
+
+            return "TEST PASS"
+        }
+
+        // OfflineDecisionTask
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+                          |> OfflineHistoryEvent (        // EventId = 1
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                          |> OfflineHistoryEvent (        // EventId = 2
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                          |> OfflineHistoryEvent (        // EventId = 3
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                          |> OfflineHistoryEvent (        // EventId = 4
+                              DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
+                          |> OfflineHistoryEvent (        // EventId = 5
+                              MarkerRecordedEventAttributes(DecisionTaskCompletedEventId=4L, Details=markerDetails, MarkerName=markerName))
+                          |> OfflineHistoryEvent (        // EventId = 6
+                              WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=4L, Result="TEST PASS"))
+
+        // Start the workflow
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+
+        // Poll and make decisions
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 1 do
+            match i with
+            | 1 -> 
+                resp.Decisions.Count                    |> should equal 2
+                resp.Decisions.[0].DecisionType         |> should equal DecisionType.RecordMarker
+                resp.Decisions.[0].RecordMarkerDecisionAttributes.MarkerName
+                                                        |> should equal markerName
+                resp.Decisions.[0].RecordMarkerDecisionAttributes.Details
+                                                        |> should equal markerDetails
+                resp.Decisions.[1].DecisionType         |> should equal DecisionType.CompleteWorkflowExecution
+                resp.Decisions.[1].CompleteWorkflowExecutionDecisionAttributes.Result 
+                                                        |> should equal "TEST PASS"
+
+                TestHelper.RespondDecisionTaskCompleted resp
+            | _ -> ()
+
+        // Generate Offline History
+        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions

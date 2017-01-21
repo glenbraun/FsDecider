@@ -158,7 +158,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
     member this.Bind(action:WaitAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
         Wait()
 
-    // Schedule Activity Task
+    // Schedule Activity Task (do!)
+    member this.Bind(action:ScheduleActivityTaskAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
+        let DoFunction (result:ScheduleActivityTaskResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Schedule Activity Task (let!)
     member this.Bind(action:ScheduleActivityTaskAction, f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with 
@@ -218,13 +225,13 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | ScheduleActivityTaskAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Wait For Activity Task
+    // Wait For Activity Task (do!)
     member this.Bind(WaitForActivityTaskAction.ScheduleResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         match (result.IsFinished()) with 
         | true  -> f()
         | false -> Wait()
 
-    // Wait For Any Activity Tasks
+    // Wait For Any Activity Tasks (do!)
     member this.Bind(WaitForAnyActivityTaskAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let anyFinished = 
             results
@@ -234,7 +241,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | true  -> f()
         | false -> Wait()
 
-    // Wait For All Activity Tasks
+    // Wait For All Activity Tasks (do!)
     member this.Bind(WaitForAllActivityTaskAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let allFinished = 
             results
@@ -244,7 +251,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | true  -> f()
         | false -> Wait()
 
-    // Request Cancel Activity Task 
+    // Request Cancel Activity Task (do!)
+    member this.Bind(action:RequestCancelActivityTaskAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
+        let DoFunction (result:RequestCancelActivityTaskResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Request Cancel Activity Task (let!)
     member this.Bind(RequestCancelActivityTaskAction.ScheduleResult(schedule), f:(RequestCancelActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
         match schedule with 
         // Scheduling
@@ -284,7 +298,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
                 | _ -> failwith "error"
 
-    // Start Child Workflow Execution
+    // Start Child Workflow Execution (do!)
+    member this.Bind(action:StartChildWorkflowExecutionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let DoFunction (result:StartChildWorkflowExecutionResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Start Child Workflow Execution (let!)
     member this.Bind(action:StartChildWorkflowExecutionAction, f:(StartChildWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
@@ -350,13 +371,13 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | StartChildWorkflowExecutionAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Wait For Child Workflow Execution
+    // Wait For Child Workflow Execution (do!)
     member this.Bind(WaitForChildWorkflowExecutionAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         match (result.IsFinished()) with 
         | true  -> f()
         | false -> Wait() 
 
-    // Wait For Any Child Workflow Execution
+    // Wait For Any Child Workflow Execution (do!)
     member this.Bind(WaitForAnyChildWorkflowExecutionAction.StartResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let anyFinished = 
             results
@@ -366,7 +387,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | true  -> f()
         | false -> Wait()
 
-    // Wait For All Child Workflow Execution
+    // Wait For All Child Workflow Execution (do!)
     member this.Bind(WaitForAllChildWorkflowExecutionAction.StartResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let allFinished = 
             results
@@ -376,7 +397,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | true  -> f()
         | false -> Wait()
 
-    // Request Cancel External Workflow Execution
+    // Request Cancel External Workflow Execution (do!)
+    member this.Bind(action:RequestCancelExternalWorkflowExecutionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let DoFunction (result:RequestCancelExternalWorkflowExecutionResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Request Cancel External Workflow Execution (let!)
     member this.Bind(RequestCancelExternalWorkflowExecutionAction.Attributes(attr), f:(RequestCancelExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
         let combinedHistory = walker.FindRequestCancelExternalWorkflowExecution(attr)
         
@@ -403,7 +431,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
         | _ -> failwith "error"
 
-    // Schedule Lambda Function
+    // Schedule Lambda Function (do!)
+    member this.Bind(action:ScheduleLambdaFunctionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
+        let DoFunction (result:ScheduleLambdaFunctionResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Schedule Lambda Function (let!)
     member this.Bind(action:ScheduleLambdaFunctionAction, f:(ScheduleLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
@@ -463,13 +498,13 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | ScheduleLambdaFunctionAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Wait For Lambda Function
+    // Wait For Lambda Function (do!)
     member this.Bind(WaitForLambdaFunctionAction.ScheduleResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         match (result.IsFinished()) with 
         | true  -> f()
         | false -> Wait() 
 
-    // Wait For Any Lambda Function
+    // Wait For Any Lambda Function (do!)
     member this.Bind(WaitForAnyLambdaFunctionAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let anyFinished = 
             results
@@ -479,7 +514,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | true  -> f()
         | false -> Wait()
 
-    // Wait For All Lambda Function
+    // Wait For All Lambda Function (do!)
     member this.Bind(WaitForAllLambdaFunctionAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         let allFinished = 
             results
@@ -489,7 +524,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | true  -> f()
         | false -> Wait()
 
-    // Start Timer
+    // Start Timer (do!)
+    member this.Bind(action:StartTimerAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
+        let DoFunction (result:StartTimerResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Start Timer (let!)
     member this.Bind(action:StartTimerAction, f:(StartTimerResult -> RespondDecisionTaskCompletedRequest)) = 
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with 
@@ -533,7 +575,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | StartTimerAction.ResultFromContext(_, result) -> 
             f(result)
 
-    // Wait For Timer
+    // Wait For Timer (do!)
     member this.Bind(WaitForTimerAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         match result with 
         // Canceled | Fired | StartTimerFailed
@@ -546,7 +588,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | StartTimerResult.Starting(_) -> 
             Wait()
 
-    // Cancel Timer
+    // Cancel Timer (do!)
+    member this.Bind(action:CancelTimerAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let DoFunction (result:CancelTimerResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Cancel Timer (let!)
     member this.Bind(CancelTimerAction.StartResult(result), f:(CancelTimerResult -> RespondDecisionTaskCompletedRequest)) =
         match result with 
         // Starting
@@ -582,7 +631,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> failwith "error"
 
-    // Marker Recorded
+    // Marker Recorded (let!)
     member this.Bind(action:MarkerRecordedAction, f:(MarkerRecordedResult -> RespondDecisionTaskCompletedRequest)) =
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
@@ -611,7 +660,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | MarkerRecordedAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Record Marker
+    // Record Marker (do!)
+    member this.Bind(action:RecordMarkerAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let DoFunction (result:RecordMarkerResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Record Marker (let!)
     member this.Bind(action:RecordMarkerAction, f:(RecordMarkerResult -> RespondDecisionTaskCompletedRequest)) =
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
@@ -644,7 +700,14 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | RecordMarkerAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Signal External Workflow Execution
+    // Signal External Workflow Execution (do!)
+    member this.Bind(action:SignalExternalWorkflowExecutionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let DoFunction (result:SignalExternalWorkflowExecutionResult) : RespondDecisionTaskCompletedRequest =            
+            f()
+
+        this.Bind(action, DoFunction)
+
+    // Signal External Workflow Execution (let!)
     member this.Bind(action:SignalExternalWorkflowExecutionAction, f:(SignalExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
@@ -681,7 +744,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | SignalExternalWorkflowExecutionAction.ResultFromContext(_, result) ->
             f(result)
             
-    // Workflow Execution Signaled
+    // Workflow Execution Signaled (let!)
     member this.Bind(action:WorkflowExecutionSignaledAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
@@ -704,7 +767,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | WorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Wait For Workflow Execution Signaled
+    // Wait For Workflow Execution Signaled (do!)
     member this.Bind(action:WaitForWorkflowExecutionSignaledAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
@@ -727,7 +790,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | WaitForWorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Workflow Execution Cancel Requested
+    // Workflow Execution Cancel Requested (let!)
     member this.Bind(WorkflowExecutionCancelRequestedAction.Attributes(), f:(WorkflowExecutionCancelRequestedResult -> RespondDecisionTaskCompletedRequest)) =
         let cancelRequestedEvent = walker.FindWorkflowExecutionCancelRequested()
 
@@ -742,7 +805,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             
         | _ -> failwith "error"
 
-    // Get Workflow Execution Input
+    // Get Workflow Execution Input (let!)
     member this.Bind(GetWorkflowExecutionInputAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
 
         let startedEvent = walker.FindWorkflowExecutionStarted()
@@ -756,7 +819,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
         | _ -> failwith "error"
 
-    // Get Execution Context
+    // Get Execution Context (let!)
     member this.Bind(GetExecutionContextAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
 
         let completedEvent = walker.FindLatestDecisionTaskCompleted()
@@ -770,12 +833,12 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
         | _ -> failwith "error"
 
-    // Set Execution Context
+    // Set Execution Context (do!)
     member this.Bind(SetExecutionContextAction.Attributes(context), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         response.ExecutionContext <- context
         f()
 
-    // Remove From Context
+    // Remove From Context (do!)
     member this.Bind(action:RemoveFromContextAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
         if ContextManager.IsSome then ContextManager.Value.Remove(action)
         f()

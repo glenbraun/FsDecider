@@ -401,3 +401,52 @@ module TestStartTimer =
 
                     TestHelper.RespondDecisionTaskCompleted resp
                 | _ -> ()
+
+    let ``Start Timer using do!``() =
+        let workflowId = "Start Timer using do!"
+        let signalName = "Test Signal"
+        let timerId = "timer1"
+        let startToFireTimeout = "5"
+
+        let deciderFunc(dt:DecisionTask) =
+            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            
+            // Start a Timer
+            do! FlowSharp.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
+
+            return "TEST PASS"
+        }
+
+        // OfflineDecisionTask
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+                          |> OfflineHistoryEvent (        // EventId = 1
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                          |> OfflineHistoryEvent (        // EventId = 2
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                          |> OfflineHistoryEvent (        // EventId = 3
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                          |> OfflineHistoryEvent (        // EventId = 4
+                              WorkflowExecutionTerminatedEventAttributes(Cause=WorkflowExecutionTerminatedCause.OPERATOR_INITIATED, ChildPolicy=ChildPolicy.TERMINATE, Details="Terminated intentionally", Reason="FlowSharp Unit Tests"))
+
+        // Start the workflow
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+
+        // Poll and make decisions
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 1 do
+            match i with
+            | 1 -> 
+                resp.Decisions.Count                    |> should equal 2
+                resp.Decisions.[0].DecisionType         |> should equal DecisionType.StartTimer
+                resp.Decisions.[0].StartTimerDecisionAttributes.TimerId
+                                                        |> should equal timerId
+                resp.Decisions.[0].StartTimerDecisionAttributes.StartToFireTimeout
+                                                        |> should equal (startToFireTimeout.ToString())
+                resp.Decisions.[1].DecisionType         |> should equal DecisionType.CompleteWorkflowExecution
+                resp.Decisions.[1].CompleteWorkflowExecutionDecisionAttributes.Result 
+                                                        |> should equal "TEST PASS"
+
+                TestHelper.TerminateWorkflow runId workflowId "FlowSharp Unit Tests" "Terminated intentionally"
+            | _ -> ()
+
+        // Generate Offline History
+        TestHelper.GenerateOfflineDecisionTaskCodeSnippet runId workflowId OfflineHistorySubstitutions
