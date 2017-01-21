@@ -374,6 +374,7 @@ module internal Extensions =
             let attr = StartChildWorkflowExecutionDecisionAttributes()
             attr.WorkflowId     <- ReadParameterStringValue "WorkflowId" parameters
             attr.WorkflowType   <- ReadParameterWorkflowTypeValue parameters
+            attr.Control        <- ReadParameterStringValue "Control" parameters
             attr
 
         member this.GetExpression() =
@@ -384,7 +385,8 @@ module internal Extensions =
                         [
                             PSV "WorkflowId" this.WorkflowId
                             PWorkflowType this.WorkflowType
-                        ]
+                        ] @ 
+                        PSVOrNull "Control" this.Control
                 )
 
     type StartTimerDecisionAttributes with
@@ -415,12 +417,38 @@ module internal Extensions =
             attr.WorkflowId        <- ReadParameterStringValue "WorkflowId" parameters
             attr
 
+        member this.GetExpression() =
+            ObjectInitialization.NameAndParameters
+                (
+                    Name=Label.Text("SignalExternalWorkflowExecution"),
+                    Parameters=
+                        [
+                            PSV "SignalName" this.SignalName
+                            PSV "WorkflowId" this.WorkflowId
+                        ] @
+                        PSVOrNull "RunId" this.RunId 
+                          @
+                        PSVOrNull "Control" this.Control 
+                )
+
     type RecordMarkerDecisionAttributes with
         static member CreateFromExpression(ObjectInitialization.NameAndParameters(_, parameters)) =
             let attr = RecordMarkerDecisionAttributes()
             attr.MarkerName     <- ReadParameterStringValue "MarkerName" parameters
             attr.Details        <- ReadParameterStringValue "Details" parameters
             attr
+
+        member this.GetExpression() =
+            ObjectInitialization.NameAndParameters
+                (
+                    Name=Label.Text("RecordMarker"),
+                    Parameters=
+                        [
+                            PSV "MarkerName" this.MarkerName
+                        ] @
+                        PSVOrNull "Details" this.Details
+                )
+
 
     type ScheduleActivityTaskAction with
         member this.GetAttributes() =
@@ -463,7 +491,26 @@ module internal Extensions =
             match this with
             | RecordMarkerAction.ResultFromContext(attr, _) -> attr
             | RecordMarkerAction.Attributes(attr, _) -> attr
+
+    type WorkflowExecutionSignaledAction with
+        member this.GetAttributes() =
+            match this with
+            | WorkflowExecutionSignaledAction.ResultFromContext(signalName, _) -> signalName
+            | WorkflowExecutionSignaledAction.Attributes(signalName, _) -> signalName
+
+    type WaitForWorkflowExecutionSignaledAction with
+        member this.GetAttributes() =
+            match this with
+            | WaitForWorkflowExecutionSignaledAction.ResultFromContext(signalName, _) -> signalName
+            | WaitForWorkflowExecutionSignaledAction.Attributes(signalName, _) -> signalName
         
+    type MarkerRecordedAction with
+        member this.GetAttributes() =
+            match this with
+            | MarkerRecordedAction.ResultFromContext(markerName, _) -> markerName
+            | MarkerRecordedAction.Attributes(markerName, _) -> markerName
+        
+
     type ScheduleActivityTaskResult with
         static member CreateFromExpression(result:ObjectInitialization) =
             match result with
@@ -486,7 +533,7 @@ module internal Extensions =
             | ObjectInitialization.NameAndParameters(Label.Text("TimedOut"), parameters) ->
                 let attr = ActivityTaskTimedOutEventAttributes()
                 attr.TimeoutType <- ActivityTaskTimeoutType.FindValue(ReadParameterStringValue "TimeoutType" parameters)
-                attr.Details <- ReadParameterStringValue "TimeoutType" parameters
+                attr.Details <- ReadParameterStringValue "Details" parameters
                 ScheduleActivityTaskResult.TimedOut(attr)
 
             | ObjectInitialization.NameAndParameters(Label.Text("ScheduleFailed"), parameters) -> 
@@ -613,7 +660,7 @@ module internal Extensions =
 
             | ObjectInitialization.NameAndParameters(Label.Text("StartFailed"), parameters) -> 
                 let attr = StartChildWorkflowExecutionFailedEventAttributes()
-                attr.Cause <- StartChildWorkflowExecutionFailedCause.FindValue(ReadParameterStringValue "Reason" parameters)
+                attr.Cause <- StartChildWorkflowExecutionFailedCause.FindValue(ReadParameterStringValue "Cause" parameters)
                 attr.Control <- ReadParameterStringValue "Control" parameters
                 attr.WorkflowId <- ReadParameterStringValue "WorkflowId" parameters
                 attr.WorkflowType <- ReadParameterWorkflowTypeValue parameters
@@ -753,11 +800,11 @@ module internal Extensions =
     type MarkerRecordedResult with
         static member CreateFromExpression(result:ObjectInitialization) =
             match result with
-            | ObjectInitialization.NameAndParameters(Label.Text("MarkerRecorded"), parameters) -> 
+            | ObjectInitialization.NameAndParameters(Label.Text("Recorded"), parameters) -> 
                 let attr = MarkerRecordedEventAttributes()
                 attr.MarkerName <- ReadParameterStringValue "MarkerName" parameters
                 attr.Details <- ReadParameterStringValue "Details" parameters
-                MarkerRecordedResult.MarkerRecorded(attr)
+                MarkerRecordedResult.Recorded(attr)
 
             | ObjectInitialization.NameAndParameters(Label.Text("RecordMarkerFailed"), parameters) -> 
                 let attr = RecordMarkerFailedEventAttributes()
@@ -769,8 +816,8 @@ module internal Extensions =
 
         member this.GetExpression() =
             match this with
-            | MarkerRecordedResult.MarkerRecorded(attr) ->
-                ObjectInitialization.NameAndParameters(Name=Label.Text("MarkerRecorded"), 
+            | MarkerRecordedResult.Recorded(attr) ->
+                ObjectInitialization.NameAndParameters(Name=Label.Text("Recorded"), 
                     Parameters=
                         [
                             PSV "MarkerName" attr.MarkerName
@@ -828,11 +875,11 @@ module internal Extensions =
     type RecordMarkerResult with
         static member CreateFromExpression(result:ObjectInitialization) =
             match result with
-            | ObjectInitialization.NameAndParameters(Label.Text("MarkerRecorded"), parameters) -> 
+            | ObjectInitialization.NameAndParameters(Label.Text("Recorded"), parameters) -> 
                 let attr = MarkerRecordedEventAttributes()
                 attr.MarkerName <- ReadParameterStringValue "MarkerName" parameters
                 attr.Details <- ReadParameterStringValue "Details" parameters
-                RecordMarkerResult.MarkerRecorded(attr)
+                RecordMarkerResult.Recorded(attr)
 
             | ObjectInitialization.NameAndParameters(Label.Text("RecordMarkerFailed"), parameters) -> 
                 let attr = RecordMarkerFailedEventAttributes()
@@ -844,8 +891,8 @@ module internal Extensions =
 
         member this.GetExpression() =
             match this with
-            | RecordMarkerResult.MarkerRecorded(attr) ->
-                ObjectInitialization.NameAndParameters(Name=Label.Text("MarkerRecorded"),Parameters=[PSV "MarkerName" attr.MarkerName] @ PSVOrNull "Details" attr.Details)
+            | RecordMarkerResult.Recorded(attr) ->
+                ObjectInitialization.NameAndParameters(Name=Label.Text("Recorded"),Parameters=[PSV "MarkerName" attr.MarkerName] @ PSVOrNull "Details" attr.Details)
 
             | RecordMarkerResult.RecordMarkerFailed(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("RecordMarkerFailed"),Parameters=[PSV "MarkerName" attr.MarkerName; PSV "Cause" attr.Cause.Value;])

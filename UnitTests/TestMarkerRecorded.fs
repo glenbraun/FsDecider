@@ -87,12 +87,12 @@ module TestMarkerRecorded =
             match marker with
             | RecordMarkerResult.Recording -> return ()
             | RecordMarkerResult.RecordMarkerFailed(_) -> return "TEST FAIL"
-            | RecordMarkerResult.MarkerRecorded(_) -> ()
+            | RecordMarkerResult.Recorded(_) -> ()
 
             // See if marker was recorded
             let! recorded = FlowSharp.MarkerRecorded(markerName)
             match recorded with
-            | MarkerRecordedResult.MarkerRecorded(attr) when attr.MarkerName = markerName && attr.Details = markerDetails -> return "TEST PASS"
+            | MarkerRecordedResult.Recorded(attr) when attr.MarkerName = markerName && attr.Details = markerDetails -> return "TEST PASS"
             |_ -> return "TEST FAIL"
         }
 

@@ -42,7 +42,7 @@ module TestRecordMarker =
             | RecordMarkerResult.Recording ->
                 return ()
 
-            | RecordMarkerResult.MarkerRecorded(attr) when attr.MarkerName = markerName && attr.Details = markerDetails -> return "TEST PASS"
+            | RecordMarkerResult.Recorded(attr) when attr.MarkerName = markerName && attr.Details = markerDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 

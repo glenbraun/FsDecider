@@ -216,6 +216,59 @@ let tests =
                 testCase "TryFinallyContinueAsNew"                <| TestTryFinally.``A Try Finally expression with an excpetion from a ContinueAsNew``
             ]            
         ]
+
+        testList "Primary ExecutionContextManager Tests" [
+            
+            testList "ScheduleActivityTask" [
+                testCase "Completed"                                <| TestExecutionContextManager.``Test context for ScheduleActivityTask with Completed result``
+                testCase "Canceled"                                 <| TestExecutionContextManager.``Test context for ScheduleActivityTask with Canceled result``
+                testCase "TimedOut"                                 <| TestExecutionContextManager.``Test context for ScheduleActivityTask with TimedOut result``
+                testCase "Failed"                                   <| TestExecutionContextManager.``Test context for ScheduleActivityTask with Failed result``
+                testCase "ScheduleFailed"                           <| TestExecutionContextManager.``Test context for ScheduleActivityTask with ScheduleFailed result``
+            ]
+
+            testList "ScheduleLambdaFunction" [
+                testCase "Completed"                                <| TestExecutionContextManager.``Test context for ScheduleLambdaFunction with Completed result``
+                testCase "Failed"                                   <| TestExecutionContextManager.``Test context for ScheduleLambdaFunction with Failed result``
+                testCase "TimedOut"                                 <| TestExecutionContextManager.``Test context for ScheduleLambdaFunction with TimedOut result``
+                testCase "StartFailed"                              <| TestExecutionContextManager.``Test context for ScheduleLambdaFunction with StartFailed result``
+                testCase "ScheduleFailed"                           <| TestExecutionContextManager.``Test context for ScheduleLambdaFunction with ScheduleFailed result``
+            ]
+
+            testList "StartChildWorkflowExecution" [
+                testCase "Completed"                                <| TestExecutionContextManager.``Test context for StartChildWorkflowExecution with Completed result``
+                testCase "Canceled"                                 <| TestExecutionContextManager.``Test context for StartChildWorkflowExecution with Canceled result``
+                testCase "Failed"                                   <| TestExecutionContextManager.``Test context for StartChildWorkflowExecution with Failed result``
+                testCase "TimedOut"                                 <| TestExecutionContextManager.``Test context for StartChildWorkflowExecution with TimedOut result``
+                testCase "Terminated"                               <| TestExecutionContextManager.``Test context for StartChildWorkflowExecution with Terminated result``
+                testCase "StartFailed"                              <| TestExecutionContextManager.``Test context for StartChildWorkflowExecution with StartFailed result``
+            ]
+
+            testList "StartTimer" [
+                testCase "Fired"                                    <| TestExecutionContextManager.``Test context for StartTimer with Fired result``
+                testCase "Canceled"                                 <| TestExecutionContextManager.``Test context for StartTimer with Canceled result``
+                testCase "StartTimerFailed"                         <| TestExecutionContextManager.``Test context for StartTimer with StartTimerFailed result``
+            ]
+
+            testList "WorkflowExecutionSignaled" [
+                testCase "Signaled"                                 <| TestExecutionContextManager.``Test context for WorkflowExecutionSignaled with Signaled result``
+            ]
+
+            testList "SignalExternalWorkflowExecution" [
+                testCase "Signaled"                                 <| TestExecutionContextManager.``Test context for SignalExternalWorkflowExecution with Signaled result``
+                testCase "Failed"                                   <| TestExecutionContextManager.``Test context for SignalExternalWorkflowExecution with Failed result``
+            ]
+
+            testList "RecordMarker" [
+                testCase "Recorded"                                 <| TestExecutionContextManager.``Test context for RecordMarker with Recorded result``
+                testCase "RecordMarkerFailed"                       <| TestExecutionContextManager.``Test context for RecordMarker with RecordMarkerFailed result``
+            ]
+
+            testList "MarkerRecorded" [
+                testCase "Recorded"                                 <| TestExecutionContextManager.``Test context for MarkerRecorded with Recorded result``
+                testCase "RecordMarkerFailed"                       <| TestExecutionContextManager.``Test context for MarkerRecorded with RecordMarkerFailed result``
+            ]
+        ]
         
     ]
 
@@ -225,8 +278,8 @@ let main argv =
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    let tests = testCase "GetExecutionContext"          <| TestExecutionContextManager.``Simple Execution Context``
-
+    //let tests = testCase "RecordMarkerFailed"                       <| TestExecutionContextManager.``Test context for MarkerRecorded with RecordMarkerFailed result``
+    
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
      

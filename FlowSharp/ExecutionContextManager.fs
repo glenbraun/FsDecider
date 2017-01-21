@@ -129,29 +129,105 @@ type ExecutionContextManager() =
         | Some(r) -> ScheduleAndWaitForActivityTaskAction.ResultFromContext(attr, ScheduleActivityTaskResult.CreateFromExpression(r))
 
 
-    member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleAndWaitForLambdaFunctionResult) : unit = ()
-    member this.Pull(action:ScheduleAndWaitForLambdaFunctionAction) : ScheduleAndWaitForLambdaFunctionAction = action
+    member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleAndWaitForLambdaFunctionResult) : unit = 
+        let key = attr.GetExpression()
+        AddMapping key (result.GetExpression())
 
-    member this.Push(attr:StartChildWorkflowExecutionDecisionAttributes, result:StartChildWorkflowExecutionResult) : unit = ()
-    member this.Pull(action:StartChildWorkflowExecutionAction) : StartChildWorkflowExecutionAction = action
+    member this.Pull(action:ScheduleAndWaitForLambdaFunctionAction) : ScheduleAndWaitForLambdaFunctionAction = 
+        let attr = action.GetAttributes()
+        let key = attr.GetExpression()
+        let result = actionToResultMap.TryFind key
 
-    member this.Push(attr:StartTimerDecisionAttributes, result:StartTimerResult) : unit = ()
-    member this.Pull(action:StartTimerAction) : StartTimerAction = action
+        match result with
+        | None -> action
+        | Some(r) -> ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(attr, ScheduleAndWaitForLambdaFunctionResult.CreateFromExpression(r))
 
-    member this.Pull(action:WorkflowExecutionSignaledAction) : WorkflowExecutionSignaledAction = action
-    member this.Push(action:WorkflowExecutionSignaledAction, result:WorkflowExecutionSignaledResult) : unit = ()
+    member this.Push(attr:StartChildWorkflowExecutionDecisionAttributes, result:StartChildWorkflowExecutionResult) : unit = 
+        let key = attr.GetExpression()
+        AddMapping key (result.GetExpression())
 
-    member this.Push(signalName:string, result:WorkflowExecutionSignaledResult) : unit = ()
-    member this.Pull(action:WaitForWorkflowExecutionSignaledAction) : WaitForWorkflowExecutionSignaledAction = action
+    member this.Pull(action:StartChildWorkflowExecutionAction) : StartChildWorkflowExecutionAction = 
+        let attr = action.GetAttributes()
+        let key = attr.GetExpression()
+        let result = actionToResultMap.TryFind key
 
-    member this.Push(attr:SignalExternalWorkflowExecutionDecisionAttributes, result:SignalExternalWorkflowExecutionResult) : unit = ()
-    member this.Pull(action:SignalExternalWorkflowExecutionAction) : SignalExternalWorkflowExecutionAction = action
+        match result with
+        | None -> action
+        | Some(r) -> StartChildWorkflowExecutionAction.ResultFromContext(attr, StartChildWorkflowExecutionResult.CreateFromExpression(r))
 
-    member this.Push(attr:RecordMarkerDecisionAttributes, result:RecordMarkerResult) : unit = ()
-    member this.Pull(action:RecordMarkerAction) : RecordMarkerAction = action
+    member this.Push(attr:StartTimerDecisionAttributes, result:StartTimerResult) : unit = 
+        let key = attr.GetExpression()
+        AddMapping key (result.GetExpression())
 
-    member this.Push(markerName:string, result:MarkerRecordedResult) : unit = ()
-    member this.Pull(action:MarkerRecordedAction) : MarkerRecordedAction = action
+    member this.Pull(action:StartTimerAction) : StartTimerAction = 
+        let attr = action.GetAttributes()
+        let key = attr.GetExpression()
+        let result = actionToResultMap.TryFind key
+
+        match result with
+        | None -> action
+        | Some(r) -> StartTimerAction.ResultFromContext(attr, StartTimerResult.CreateFromExpression(r))
+
+    member this.Push(signalName:string, result:WorkflowExecutionSignaledResult) : unit = 
+        let key = ObjectInitialization.NameAndParameters(Name=Label.Text("WorkflowExecutionSignaled"), Parameters=[PSV "SignalName" signalName])
+        AddMapping key (result.GetExpression())
+
+    member this.Pull(action:WorkflowExecutionSignaledAction) : WorkflowExecutionSignaledAction = 
+        let signalName = action.GetAttributes()
+        let key = ObjectInitialization.NameAndParameters(Name=Label.Text("WorkflowExecutionSignaled"), Parameters=[PSV "SignalName" signalName])
+        let result = actionToResultMap.TryFind key
+
+        match result with
+        | None -> action
+        | Some(r) -> WorkflowExecutionSignaledAction.ResultFromContext(signalName, WorkflowExecutionSignaledResult.CreateFromExpression(r))
+
+    member this.Pull(action:WaitForWorkflowExecutionSignaledAction) : WaitForWorkflowExecutionSignaledAction = 
+        let signalName = action.GetAttributes()
+        let key = ObjectInitialization.NameAndParameters(Name=Label.Text("WorkflowExecutionSignaled"), Parameters=[PSV "SignalName" signalName])
+        let result = actionToResultMap.TryFind key
+
+        match result with
+        | None -> action
+        | Some(r) -> WaitForWorkflowExecutionSignaledAction.ResultFromContext(signalName, WorkflowExecutionSignaledResult.CreateFromExpression(r))
+
+    member this.Push(attr:SignalExternalWorkflowExecutionDecisionAttributes, result:SignalExternalWorkflowExecutionResult) : unit = 
+        let key = attr.GetExpression()
+        AddMapping key (result.GetExpression())
+
+    member this.Pull(action:SignalExternalWorkflowExecutionAction) : SignalExternalWorkflowExecutionAction = 
+        let attr = action.GetAttributes()
+        let key = attr.GetExpression()
+        let result = actionToResultMap.TryFind key
+
+        match result with
+        | None -> action
+        | Some(r) -> SignalExternalWorkflowExecutionAction.ResultFromContext(attr, SignalExternalWorkflowExecutionResult.CreateFromExpression(r))
+
+    member this.Push(markerName:string, result:MarkerRecordedResult) : unit = 
+        let key = ObjectInitialization.NameAndParameters(Name=Label.Text("MarkerRecorded"), Parameters=[PSV "MarkerName" markerName])
+        AddMapping key (result.GetExpression())
+
+    member this.Pull(action:RecordMarkerAction) : RecordMarkerAction = 
+        let attr = action.GetAttributes()
+        let key = attr.GetExpression()
+        let result = actionToResultMap.TryFind key
+
+        match result with
+        | None -> action
+        | Some(r) -> RecordMarkerAction.ResultFromContext(attr, RecordMarkerResult.CreateFromExpression(r))
+
+    member this.Push(attr:RecordMarkerDecisionAttributes, result:RecordMarkerResult) : unit =
+        let key = attr.GetExpression()
+        AddMapping key (result.GetExpression())
+    
+    member this.Pull(action:MarkerRecordedAction) : MarkerRecordedAction = 
+        let markerName = action.GetAttributes()
+        let key = ObjectInitialization.NameAndParameters(Name=Label.Text("MarkerRecorded"), Parameters=[PSV "MarkerName" markerName])
+        let result = actionToResultMap.TryFind key
+
+        match result with
+        | None -> action
+        | Some(r) -> MarkerRecordedAction.ResultFromContext(markerName, MarkerRecordedResult.CreateFromExpression(r))
 
     interface IContextManager with 
         member this.Push(attr:ScheduleActivityTaskDecisionAttributes, result:ScheduleActivityTaskResult) : unit = this.Push(attr, result)

@@ -181,7 +181,7 @@ type SignalExternalWorkflowExecutionAction =
 
 type RecordMarkerResult = 
     | Recording
-    | MarkerRecorded        of MarkerRecordedEventAttributes
+    | Recorded              of MarkerRecordedEventAttributes
     | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
 
 type RecordMarkerAction = 
@@ -190,7 +190,7 @@ type RecordMarkerAction =
 
 type MarkerRecordedResult = 
     | NotRecorded
-    | MarkerRecorded        of MarkerRecordedEventAttributes
+    | Recorded              of MarkerRecordedEventAttributes
     | RecordMarkerFailed    of RecordMarkerFailedEventAttributes
     
 type MarkerRecordedAction = 

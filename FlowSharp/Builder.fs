@@ -621,7 +621,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             // MarkerRecorded
             | SomeEventOfType(EventType.MarkerRecorded) hev ->
-                let result = MarkerRecordedResult.MarkerRecorded(hev.MarkerRecordedEventAttributes)
+                let result = MarkerRecordedResult.Recorded(hev.MarkerRecordedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(markerName, result)
                 f(result)
 
@@ -655,7 +655,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             // MarkerRecorded
             | SomeEventOfType(EventType.MarkerRecorded) hev ->
-                let result = RecordMarkerResult.MarkerRecorded(hev.MarkerRecordedEventAttributes)
+                let result = RecordMarkerResult.Recorded(hev.MarkerRecordedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
