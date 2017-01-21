@@ -286,13 +286,13 @@ let tests =
 
             testList "RemoveFromContext" [
                 testCase "ScheduleActivityTaskAction"               <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleActivityTaskAction``
-                // TODO testCase "ScheduleLambdaFunctionAction"   <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleLambdaFunctionAction``
-                // TODO testCase "StartChildWorkflowExecutionAction"        <| TestRemoveFromContext.``Test context for RemoveFromContext using StartChildWorkflowExecutionAction``
-                // TODO testCase "StartTimerAction"                         <| TestRemoveFromContext.``Test context for RemoveFromContext using StartTimerAction``
-                // TODO testCase "WorkflowExecutionSignaledAction"          <| TestRemoveFromContext.``Test context for RemoveFromContext using WorkflowExecutionSignaledAction``
-                // TODO testCase "SignalExternalWorkflowExecutionAction"    <| TestRemoveFromContext.``Test context for RemoveFromContext using SignalExternalWorkflowExecutionAction``
-                // TODO testCase "RecordMarkerAction"                       <| TestRemoveFromContext.``Test context for RemoveFromContext using RecordMarkerAction``
-                // TODO testCase "MarkerRecordedAction"                     <| TestRemoveFromContext.``Test context for RemoveFromContext using MarkerRecordedAction``
+                testCase "ScheduleLambdaFunctionAction"             <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleLambdaFunctionAction``
+                testCase "StartChildWorkflowExecutionAction"        <| TestRemoveFromContext.``Test context for RemoveFromContext using StartChildWorkflowExecutionAction``
+                testCase "StartTimerAction"                         <| TestRemoveFromContext.``Test context for RemoveFromContext using StartTimerAction``
+                testCase "WorkflowExecutionSignaledAction"          <| TestRemoveFromContext.``Test context for RemoveFromContext using WorkflowExecutionSignaledAction``
+                testCase "SignalExternalWorkflowExecutionAction"    <| TestRemoveFromContext.``Test context for RemoveFromContext using SignalExternalWorkflowExecutionAction``
+                testCase "RecordMarkerAction"                       <| TestRemoveFromContext.``Test context for RemoveFromContext using RecordMarkerAction``
+                testCase "MarkerRecordedAction"                     <| TestRemoveFromContext.``Test context for RemoveFromContext using MarkerRecordedAction``
             ]
         ]
         
@@ -304,7 +304,7 @@ let main argv =
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    let tests = testCase "AllCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with One Completed Lambda Function``
+    //let tests = testCase "SignalExternalWorkflowExecutionAction"    <| TestRemoveFromContext.``Test context for RemoveFromContext using MarkerRecordedAction``
     
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
