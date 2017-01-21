@@ -24,7 +24,6 @@ type IContextManager =
         abstract member Push : string * MarkerRecordedResult                                                                -> unit
 
         abstract member Pull : ScheduleActivityTaskAction               -> ScheduleActivityTaskAction
-        abstract member Pull : ScheduleAndWaitForActivityTaskAction     -> ScheduleAndWaitForActivityTaskAction
         abstract member Pull : ScheduleAndWaitForLambdaFunctionAction   -> ScheduleAndWaitForLambdaFunctionAction
         abstract member Pull : StartChildWorkflowExecutionAction        -> StartChildWorkflowExecutionAction
         abstract member Pull : StartTimerAction                         -> StartTimerAction
@@ -163,15 +162,6 @@ type ExecutionContextManager() =
         | None -> action
         | Some(r) -> ScheduleActivityTaskAction.ResultFromContext(attr, ScheduleActivityTaskResult.CreateFromExpression(r))
 
-    member this.Pull(action:ScheduleAndWaitForActivityTaskAction) : ScheduleAndWaitForActivityTaskAction = 
-        let attr = action.GetAttributes()
-        let key = attr.GetExpression()
-        let result = actionToResultMap.TryFind key
-
-        match result with
-        | None -> action
-        | Some(r) -> ScheduleAndWaitForActivityTaskAction.ResultFromContext(attr, ScheduleActivityTaskResult.CreateFromExpression(r))
-
     member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleAndWaitForLambdaFunctionResult) : unit = 
         let key = attr.GetExpression()
         AddMapping key (result.GetExpression())
@@ -275,7 +265,6 @@ type ExecutionContextManager() =
     interface IContextManager with 
         member this.Push(attr:ScheduleActivityTaskDecisionAttributes, result:ScheduleActivityTaskResult) : unit = this.Push(attr, result)
         member this.Pull(action:ScheduleActivityTaskAction) : ScheduleActivityTaskAction = this.Pull(action)
-        member this.Pull(action:ScheduleAndWaitForActivityTaskAction) : ScheduleAndWaitForActivityTaskAction = this.Pull(action)
 
         member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleAndWaitForLambdaFunctionResult) : unit = this.Push(attr, result)
         member this.Pull(action:ScheduleAndWaitForLambdaFunctionAction) : ScheduleAndWaitForLambdaFunctionAction = this.Pull(action)

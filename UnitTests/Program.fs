@@ -24,14 +24,6 @@ let tests =
                 testCase "ScheduleFailed"       <| TestScheduleActivityTask.``Schedule Activity Task with Schedule Failure``
             ]
             
-            testList "ScheduleAndWaitForActivityTask" [
-                testCase "Completed"            <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Completed Activity Task``
-                testCase "Canceled"             <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Canceled Activity Task``
-                testCase "Failed"               <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Failed Activity Task``
-                testCase "TimedOut"             <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with One Timed Out Activity Task``
-                testCase "ScheduleFailed"       <| TestScheduleAndWaitForActivityTask.``Schedule And Wait For Activity Task with Activity Task Schedule Failure``
-            ]
-            
             testList "WaitForActivityTask" [
                 testCase "Completed"            <| TestWaitForActivityTask.``Wait For Activity Task with One Completed Activity Task``
                 testCase "Canceled"             <| TestWaitForActivityTask.``Wait For Activity Task with One Canceled Activity Task``
@@ -271,7 +263,6 @@ let tests =
 
             testList "RemoveFromContext" [
                 testCase "ScheduleActivityTaskAction"               <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleActivityTaskAction``
-                // TODO testCase "ScheduleAndWaitForActivityTaskAction"     <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleAndWaitForActivityTaskAction``
                 // TODO testCase "ScheduleAndWaitForLambdaFunctionAction"   <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleAndWaitForLambdaFunctionAction``
                 // TODO testCase "StartChildWorkflowExecutionAction"        <| TestRemoveFromContext.``Test context for RemoveFromContext using StartChildWorkflowExecutionAction``
                 // TODO testCase "StartTimerAction"                         <| TestRemoveFromContext.``Test context for RemoveFromContext using StartTimerAction``
@@ -286,7 +277,7 @@ let tests =
 
 [<EntryPoint>]
 let main argv = 
-    TestConfiguration.ReverseOrder <- false
+    TestConfiguration.ReverseOrder <- true
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 

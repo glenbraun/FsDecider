@@ -133,7 +133,7 @@ module TestForLoop =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 for i = 1 to 2 do
                     // Schedule and Wait for an Activity Task
-                    let! result = FlowSharp.ScheduleAndWaitForActivityTask (
+                    let! result = FlowSharp.ScheduleActivityTask (
                                     TestConfiguration.TestActivityType, 
                                     activityId+(i.ToString()), 
                                     input=i.ToString(),
@@ -143,6 +143,8 @@ module TestForLoop =
                                     scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                     startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                                 )
+
+                    do! FlowSharp.WaitForActivityTask(result)
 
                     match result with
                     | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> ()

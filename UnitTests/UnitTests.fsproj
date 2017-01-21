@@ -60,7 +60,6 @@
     <Compile Include="OfflineHistory.fs" />
     <Compile Include="TestHelper.fs" />
     <Compile Include="TestScheduleActivityTask.fs" />
-    <Compile Include="TestScheduleAndWaitForActivityTask.fs" />
     <Compile Include="TestWaitForActivityTask.fs" />
     <Compile Include="TestWaitForAnyActivityTask.fs" />
     <Compile Include="TestWaitForAllActivityTask.fs" />

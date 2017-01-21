@@ -72,15 +72,6 @@ type ScheduleActivityTaskAction =
             | ScheduleActivityTaskAction.ResultFromContext(attr, _) -> attr
             | ScheduleActivityTaskAction.Attributes(attr, _) -> attr
 
-type ScheduleAndWaitForActivityTaskAction =
-    | Attributes of ScheduleActivityTaskDecisionAttributes * bool
-    | ResultFromContext of ScheduleActivityTaskDecisionAttributes * ScheduleActivityTaskResult
-
-    member this.GetAttributes() =
-        match this with
-        | ScheduleAndWaitForActivityTaskAction.ResultFromContext(attr, _) -> attr
-        | ScheduleAndWaitForActivityTaskAction.Attributes(attr, _) -> attr
-
 type WaitForActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
 

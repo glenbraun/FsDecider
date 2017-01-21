@@ -217,62 +217,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | ScheduleActivityTaskAction.ResultFromContext(_, result) ->
             f(result)
 
-    // Schedule and Wait for Activity Task
-    member this.Bind(action:ScheduleAndWaitForActivityTaskAction, f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
-        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
-        match action with 
-        | ScheduleAndWaitForActivityTaskAction.Attributes(attr, pushToContext) ->
-            let combinedHistory = walker.FindActivityTask(attr)
-
-            match (combinedHistory) with
-            // Not scheduled yet
-            | None ->
-                let d = new Decision();
-                d.DecisionType <- DecisionType.ScheduleActivityTask
-                d.ScheduleActivityTaskDecisionAttributes <- attr
-                response.Decisions.Add(d)
-                Wait()
-            
-            // Completed
-            | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
-                let result = ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
-                f(result)
-
-            // Canceled
-            | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
-                let result = ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
-                f(result)
-
-            // Failed
-            | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
-                let result = ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
-                f(result)
-        
-            // TimedOut
-            | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
-                let result = ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
-                f(result)
-
-            // ScheduleFailed
-            | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
-                let result = ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
-                f(result)
-
-            // Started
-            // Scheduled
-            | SomeEventOfType(EventType.ActivityTaskScheduled) hev ->
-                Wait()
-
-            | _ -> failwith "error"
-
-        | ScheduleAndWaitForActivityTaskAction.ResultFromContext(_, result) ->
-            f(result)
-
     // Wait For Activity Task
     member this.Bind(WaitForActivityTaskAction.ScheduleResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         match (result.IsFinished()) with 

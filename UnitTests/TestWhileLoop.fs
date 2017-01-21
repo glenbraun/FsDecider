@@ -85,7 +85,7 @@ module TestWhileLoop =
                     tries := !tries + 1
 
                     // Schedule and Wait for an Activity Task
-                    let! result = FlowSharp.ScheduleAndWaitForActivityTask (
+                    let! result = FlowSharp.ScheduleActivityTask (
                                     TestConfiguration.TestActivityType, 
                                     activityId+((!tries).ToString()), 
                                     input=(!tries).ToString(),
@@ -95,6 +95,8 @@ module TestWhileLoop =
                                     scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                     startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                                 )
+
+                    do! FlowSharp.WaitForActivityTask(result)
 
                     match result with
                     | ScheduleActivityTaskResult.Completed(attr) -> return "TEST PASS"

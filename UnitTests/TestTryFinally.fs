@@ -92,7 +92,7 @@ module TestTryFinally =
                     x := !x + 1
 
                     // Schedule and Wait for an Activity Task
-                    let! result = FlowSharp.ScheduleAndWaitForActivityTask (
+                    let! result = FlowSharp.ScheduleActivityTask (
                                     TestConfiguration.TestActivityType, 
                                     activityId, 
                                     input=activityInput,
@@ -102,6 +102,8 @@ module TestTryFinally =
                                     scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                     startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                                 )
+
+                    do! FlowSharp.WaitForActivityTask(result)
 
                     match result with
                     | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> 
