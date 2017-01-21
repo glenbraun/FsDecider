@@ -272,7 +272,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                     d.RequestCancelActivityTaskDecisionAttributes <- new RequestCancelActivityTaskDecisionAttributes()
                     d.RequestCancelActivityTaskDecisionAttributes.ActivityId <- activityId
                     response.Decisions.Add(d)
-                    Wait()
+
+                    f(RequestCancelActivityTaskResult.Requesting)
 
                 | SomeEventOfType(EventType.ActivityTaskCancelRequested) hev ->
                     f(RequestCancelActivityTaskResult.CancelRequested(hev.ActivityTaskCancelRequestedEventAttributes))

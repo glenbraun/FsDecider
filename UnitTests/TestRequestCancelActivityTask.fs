@@ -55,6 +55,7 @@ module TestRequestCancelActivityTask =
             let! cancel = FlowSharp.RequestCancelActivityTask(activity)
 
             match cancel with
+            | RequestCancelActivityTaskResult.Requesting -> return ()
             | RequestCancelActivityTaskResult.CancelRequested(attr) when attr.ActivityId = activityId -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -191,6 +192,7 @@ module TestRequestCancelActivityTask =
             let! cancel = FlowSharp.RequestCancelActivityTask(fakeStart)
 
             match cancel with
+            | RequestCancelActivityTaskResult.Requesting -> return ()
             | RequestCancelActivityTaskResult.RequestCancelFailed(attr) 
                 when attr.ActivityId = fakeActivityId &&
                      attr.Cause = cancelCause -> return "TEST PASS"
@@ -303,6 +305,7 @@ module TestRequestCancelActivityTask =
             let! cancel = FlowSharp.RequestCancelActivityTask(activity)
 
             match cancel with
+            | RequestCancelActivityTaskResult.Requesting -> return ()
             | RequestCancelActivityTaskResult.ActivityFinished -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -395,6 +398,7 @@ module TestRequestCancelActivityTask =
             let! cancel = FlowSharp.RequestCancelActivityTask(activity)
 
             match cancel with
+            | RequestCancelActivityTaskResult.Requesting -> return ()
             | RequestCancelActivityTaskResult.ActivityScheduleFailed -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }

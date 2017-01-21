@@ -85,6 +85,7 @@ type RequestCancelActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
 
 type RequestCancelActivityTaskResult =
+    | Requesting
     | CancelRequested       of ActivityTaskCancelRequestedEventAttributes
     | RequestCancelFailed   of RequestCancelActivityTaskFailedEventAttributes
     | ActivityFinished
