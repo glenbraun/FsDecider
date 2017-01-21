@@ -68,9 +68,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         blockFlag <- true
 
         match result with
-        | ReturnResult.RespondDecisionTaskCompleted ->
-            ()
-
         | ReturnResult.CompleteWorkflowExecution(r) -> 
             // Look for possible return failures
             let exceptionEvent = walker.FindWorkflowException(EventType.CompleteWorkflowExecutionFailed, exceptionEvents)
@@ -155,7 +152,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         response
 
     member this.Return(result:string) = this.Return(ReturnResult.CompleteWorkflowExecution(result))
-    member this.Return(result:unit) = this.Return(ReturnResult.RespondDecisionTaskCompleted)
+    member this.Return(result:unit) = this.Return(ReturnResult.CompleteWorkflowExecution(null))
 
     // Wait
     member this.Bind(action:WaitAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 

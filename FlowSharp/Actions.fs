@@ -35,7 +35,6 @@ type WaitAction =
     | Attributes of unit
 
 type ReturnResult = 
-    | RespondDecisionTaskCompleted
     | CompleteWorkflowExecution         of Result:string
     | CancelWorkflowExecution           of Details:string
     | FailWorkflowExecution             of Reason:string * Details:string
