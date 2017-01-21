@@ -37,7 +37,7 @@ module TestWorkflowExecutionSignaled =
                 
             match signal with
             | WorkflowExecutionSignaledResult.NotSignaled -> 
-                return ()
+                do! FlowSharp.Wait()
                 
             | WorkflowExecutionSignaledResult.Signaled(attr) when
                 attr.SignalName = signalName &&

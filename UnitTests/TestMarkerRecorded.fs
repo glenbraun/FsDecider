@@ -85,7 +85,7 @@ module TestMarkerRecorded =
             let! marker = FlowSharp.RecordMarker(markerName, markerDetails)
 
             match marker with
-            | RecordMarkerResult.Recording -> return ()
+            | RecordMarkerResult.Recording -> do! FlowSharp.Wait()
             | RecordMarkerResult.RecordMarkerFailed(_) -> return "TEST FAIL"
             | RecordMarkerResult.Recorded(_) -> ()
 
@@ -164,7 +164,7 @@ module TestMarkerRecorded =
             let! recorded = FlowSharp.MarkerRecorded(markerName)
 
             match recorded with
-            | MarkerRecordedResult.NotRecorded -> return ()
+            | MarkerRecordedResult.NotRecorded -> do! FlowSharp.Wait()
             | MarkerRecordedResult.RecordMarkerFailed(attr) when attr.MarkerName = markerName && attr.Cause = cause -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }

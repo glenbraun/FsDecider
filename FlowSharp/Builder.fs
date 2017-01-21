@@ -156,7 +156,11 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
     member this.Return(result:string) = this.Return(ReturnResult.CompleteWorkflowExecution(result))
     member this.Return(result:unit) = this.Return(ReturnResult.RespondDecisionTaskCompleted)
-            
+
+    // Wait
+    member this.Bind(action:WaitAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
+        Wait()
+
     // Schedule Activity Task
     member this.Bind(action:ScheduleActivityTaskAction, f:(ScheduleActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action

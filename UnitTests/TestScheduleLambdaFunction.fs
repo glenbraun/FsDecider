@@ -108,7 +108,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> return ()
+            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> do! FlowSharp.Wait()
             | ScheduleLambdaFunctionResult.Scheduled(attr) when
                 attr.Id = lambdaId &&
                 attr.Name = TestConfiguration.TestLambdaName &&
@@ -193,7 +193,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> return ()
+            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> do! FlowSharp.Wait()
             | ScheduleLambdaFunctionResult.Started(_, scheduled) when
                 scheduled.Id = lambdaId &&
                 scheduled.Name = TestConfiguration.TestLambdaName &&
@@ -281,7 +281,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> return ()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleLambdaFunctionResult.Completed(attr) when attr.Result = TestConfiguration.TestLambdaResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
@@ -367,7 +367,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> return ()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleLambdaFunctionResult.TimedOut(attr) when attr.TimeoutType = timeoutType -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
@@ -452,7 +452,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> return ()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleLambdaFunctionResult.Failed(attr) -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
@@ -538,7 +538,7 @@ module TestScheduleLambdaFunction =
 
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> return ()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleLambdaFunctionResult.ScheduleFailed(attr) 
                 when attr.Id = lambdaId &&
                      attr.Name = TestConfiguration.TestLambdaName &&
@@ -623,7 +623,7 @@ module TestScheduleLambdaFunction =
 
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> return ()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleLambdaFunctionResult.StartFailed(attr) 
                 when attr.Cause = cause -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        

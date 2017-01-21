@@ -27,6 +27,9 @@ type FlowSharp =
     static member SetExecutionContext(executionContext:string) =
         SetExecutionContextAction.Attributes(executionContext)
 
+    static member Wait() =
+        WaitAction.Attributes()
+
     static member RemoveFromContext(action:ScheduleActivityTaskAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.ScheduleActivityTask(attr)

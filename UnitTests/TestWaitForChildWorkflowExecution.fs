@@ -619,7 +619,7 @@ module TestWaitForChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
                 childRunId := start.WorkflowExecution.RunId
@@ -759,7 +759,7 @@ module TestWaitForChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) -> 
-                return ()
+                do! FlowSharp.Wait()
 
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
                     attr.WorkflowId = childWorkflowId &&

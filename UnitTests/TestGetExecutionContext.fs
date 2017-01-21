@@ -82,7 +82,7 @@ module TestGetExecutionContext =
             match context with
             | null ->
                 do! FlowSharp.SetExecutionContext(executionContext)
-                return ()
+                do! FlowSharp.Wait()
             | _ when context = executionContext ->
                 return "TEST PASS"
             | _ -> 

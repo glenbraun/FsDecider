@@ -64,7 +64,7 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
@@ -177,14 +177,14 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
                 | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
-                    return ()
+                    do! FlowSharp.Wait()
 
                 | RequestCancelExternalWorkflowExecutionResult.Initiated(ia) when
                         ia.WorkflowId = start.WorkflowExecution.WorkflowId &&
@@ -305,14 +305,14 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
                 let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
                 | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
-                    return ()
+                    do! FlowSharp.Wait()
 
                 | RequestCancelExternalWorkflowExecutionResult.Delivered(da) when
                         da.WorkflowExecution.WorkflowId = da.WorkflowExecution.WorkflowId &&
@@ -421,7 +421,7 @@ module TestRequestCancelExternalWorkflowExecution =
                 
             match request with
             | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
-                return ()
+                do! FlowSharp.Wait()
 
             | RequestCancelExternalWorkflowExecutionResult.Failed(attr) when
                         attr.Cause = cause &&

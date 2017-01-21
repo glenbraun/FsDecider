@@ -114,7 +114,7 @@ module TestWaitForTimer =
 
             | StartTimerResult.Started(_) ->
                 let! cancel = FlowSharp.CancelTimer(timer1)
-                return ()
+                do! FlowSharp.Wait()
                 
             | StartTimerResult.Canceled(attr) when attr.TimerId = timerId -> return "TEST PASS"
 
@@ -211,7 +211,7 @@ module TestWaitForTimer =
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
                 do! FlowSharp.WaitForTimer(timer1)

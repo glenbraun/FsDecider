@@ -310,7 +310,7 @@ module TestScheduleActivityTask =
                         )
 
             match result with
-            | ScheduleActivityTaskResult.Scheduling(_) -> return ()
+            | ScheduleActivityTaskResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleActivityTaskResult.Completed(attr) 
                 when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -400,7 +400,7 @@ module TestScheduleActivityTask =
 
 
             match result with
-            | ScheduleActivityTaskResult.Scheduling(_) -> return ()
+            | ScheduleActivityTaskResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleActivityTaskResult.Canceled(attr) 
                 when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -490,7 +490,7 @@ module TestScheduleActivityTask =
 
 
             match result with
-            | ScheduleActivityTaskResult.Scheduling(_) -> return ()
+            | ScheduleActivityTaskResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleActivityTaskResult.TimedOut(attr) 
                 when attr.TimeoutType = activityTimeoutType -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -579,7 +579,7 @@ module TestScheduleActivityTask =
 
 
             match result with
-            | ScheduleActivityTaskResult.Scheduling(_) -> return ()
+            | ScheduleActivityTaskResult.Scheduling(_) -> do! FlowSharp.Wait()
             | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"
 
@@ -669,7 +669,7 @@ module TestScheduleActivityTask =
 
             match result with
             | ScheduleActivityTaskResult.Scheduling(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | ScheduleActivityTaskResult.ScheduleFailed(attr) 
                 when attr.Cause = activityCause &&

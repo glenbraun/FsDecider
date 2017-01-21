@@ -38,14 +38,14 @@ module TestCancelTimer =
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId -> 
                 let! wait = FlowSharp.CancelTimer(timer1)
 
                 match wait with
                 | CancelTimerResult.Canceling(_) ->
-                    return ()
+                    do! FlowSharp.Wait()
 
                 | _ -> return "TEST FAIL" 
 
@@ -143,7 +143,7 @@ module TestCancelTimer =
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 
                 let! cancel = FlowSharp.CancelTimer(timer1)
@@ -303,7 +303,7 @@ module TestCancelTimer =
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
                 let! cancel = FlowSharp.CancelTimer(timer1)
@@ -380,7 +380,7 @@ module TestCancelTimer =
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId && attr.StartToFireTimeout = (startToFireTimeout.ToString()) -> 
                 let! cancel = FlowSharp.CancelTimer(timer1)

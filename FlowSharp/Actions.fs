@@ -31,6 +31,9 @@ type RemoveFromContextAction =
     | RecordMarker                      of RecordMarkerDecisionAttributes
     | MarkerRecorded                    of string
     
+type WaitAction =
+    | Attributes of unit
+
 type ReturnResult = 
     | RespondDecisionTaskCompleted
     | CompleteWorkflowExecution         of Result:string

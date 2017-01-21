@@ -57,9 +57,9 @@ module TestWorkflowExecutionCancelRequested =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Started(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -77,7 +77,7 @@ module TestWorkflowExecutionCancelRequested =
                 
             match cancel with
             | WorkflowExecutionCancelRequestedResult.NotRequested ->
-                return ()
+                do! FlowSharp.Wait()
 
             | WorkflowExecutionCancelRequestedResult.CancelRequested(attr) when
                 attr.Cause = cause &&

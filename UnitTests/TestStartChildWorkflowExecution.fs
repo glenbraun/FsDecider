@@ -133,7 +133,7 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-               return ()
+               do! FlowSharp.Wait()
                                
             | StartChildWorkflowExecutionResult.Initiated(attr) when
                     attr.ChildPolicy = ChildPolicy.TERMINATE &&
@@ -237,9 +237,9 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Started(start) when 
                 start.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 start.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -356,11 +356,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Completed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -501,11 +501,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Canceled(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -647,11 +647,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Failed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -797,11 +797,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.TimedOut(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -925,12 +925,12 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Started(start) ->
                 childRunId := start.WorkflowExecution.RunId
-                return ()
+                do! FlowSharp.Wait()
             | StartChildWorkflowExecutionResult.Terminated(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.TestWorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.TestWorkflowType.Version &&
@@ -1060,7 +1060,7 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) -> 
-                return ()
+                do! FlowSharp.Wait()
 
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
                     attr.WorkflowId = childWorkflowId &&
