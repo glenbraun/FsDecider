@@ -92,9 +92,9 @@ let tests =
             ]
             
             testList "ScheduleLambdaFunction" [
-                // TODO Scheduling
-                // TODO Scheduled
-                // TODO Started
+                testCase "Scheduling"           <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Scheduling``
+                testCase "Scheduled"            <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Scheduled``
+                testCase "Started"              <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Started``
                 testCase "Completed"            <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Completed``
                 testCase "Failed"               <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Failed``
                 testCase "TimedOut"             <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of TimedOut``
@@ -103,11 +103,11 @@ let tests =
             ]
 
             testList "WaitForLambdaFunction" [
-                // TODO testCase "Completed"            <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Completed Lambda Function``
-                // TODO testCase "Failed"               <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Failed Lambda Function``
-                // TODO testCase "TimedOut"             <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Timed Out Lambda Function``
-                // TODO testCase "StartFailed"          <| TestWaitForLambdaFunction.``Wait For Lambda Function with Lambda Function Start Failure``
-                // TODO testCase "ScheduleFailed"       <| TestWaitForLambdaFunction.``Wait For Lambda Function with Lambda Function Schedule Failure``
+                testCase "Completed"            <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Completed Lambda Function``
+                testCase "Failed"               <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Failed Lambda Function``
+                testCase "TimedOut"             <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Timed Out Lambda Function``
+                testCase "StartFailed"          <| TestWaitForLambdaFunction.``Wait For Lambda Function with Lambda Function Start Failure``
+                testCase "ScheduleFailed"       <| TestWaitForLambdaFunction.``Wait For Lambda Function with Lambda Function Schedule Failure``
             ]
             
             testList "WaitForAnyLambdaFunction" [
@@ -304,7 +304,7 @@ let main argv =
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    //let tests = testCase "ScheduleActivityTaskAction"               <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleActivityTaskAction``
+    //let tests = testCase "Started"            <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Started``
     
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
