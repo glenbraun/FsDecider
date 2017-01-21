@@ -794,6 +794,12 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         response.ExecutionContext <- context
         f()
 
+    // Remove From Context
+    member this.Bind(action:RemoveFromContextAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        if ContextManager.IsSome then ContextManager.Value.Remove(action)
+        f()
+
+    // For Loop
     member this.For(enumeration:seq<'T>, f:(_ -> RespondDecisionTaskCompletedRequest)) =
 
         let processForBlock x = 
@@ -804,21 +810,25 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         Seq.takeWhile processForBlock |>
         Seq.iter (fun x -> ())
 
+    // While Loop
     member this.While(condition:(unit -> bool), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         while (not blockFlag) && condition() do
             f() |> ignore
 
+    // Combine
     member this.Combine(exprBefore, fAfter) =
         // We assume the exprBefore decisions have been added to the response already
         // Just need to run the expression after this, which will add their decisions while executing
         if blockFlag then response else fAfter()
 
+    // Try Finally
     member this.TryFinally(exprInside:(unit -> RespondDecisionTaskCompletedRequest), exprFinally:(unit -> unit)) =
         try 
             exprInside()
         finally
             if not blockFlag then exprFinally()
 
+    // Try With
     member this.TryWith(exprInside:(unit -> RespondDecisionTaskCompletedRequest), exprWith:(Exception -> RespondDecisionTaskCompletedRequest)) =
         try
             exprInside()

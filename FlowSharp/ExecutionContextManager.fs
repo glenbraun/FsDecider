@@ -33,6 +33,9 @@ type IContextManager =
         abstract member Pull : SignalExternalWorkflowExecutionAction    -> SignalExternalWorkflowExecutionAction
         abstract member Pull : RecordMarkerAction                       -> RecordMarkerAction
         abstract member Pull : MarkerRecordedAction                     -> MarkerRecordedAction
+
+        abstract member Remove : RemoveFromContextAction                -> unit
+
     end
             
 
@@ -40,9 +43,16 @@ type ExecutionContextManager() =
     let mutable actionToResultMap = Map.empty<ObjectInitialization, ObjectInitialization>
     let mutable actionToResultKeys = List.empty<ObjectInitialization>
 
-    let AddMapping (key:ObjectInitialization) (result:ObjectInitialization) =
+    let AddMapping key result  =
         actionToResultMap <- Map.add key result actionToResultMap
         actionToResultKeys <- key :: actionToResultKeys
+
+    let RemoveMapping key =
+        match (actionToResultMap.ContainsKey key) with
+        | true ->
+            actionToResultMap <- Map.remove key actionToResultMap
+            actionToResultKeys <- List.filter ((<>) key) actionToResultKeys
+        | false -> failwith "error"
     
     member private this.ReadActionToResultMapping (ActionToResultMapping.ActionAndResult(action, result)) =
         match action with
@@ -88,7 +98,7 @@ type ExecutionContextManager() =
                 let markerResult = MarkerRecordedResult.CreateFromExpression(result)
                 this.Push(markerName, markerResult)
 
-            | _ -> ()
+            | _ -> failwith "error"
 
     member this.Read(executionContext:string) : unit =
         let parser = Parser()
@@ -105,6 +115,40 @@ type ExecutionContextManager() =
             
         let writer = Writer()
         writer.Write(ContextExpression.Mappings(mappings))    
+
+    member this.Remove(action:RemoveFromContextAction) : unit = 
+        match action with
+        | RemoveFromContextAction.ScheduleActivityTask(attr) ->
+            let key = attr.GetExpression()
+            RemoveMapping key
+
+        | RemoveFromContextAction.ScheduleLambdaFunction(attr) ->
+            let key = attr.GetExpression()
+            RemoveMapping key
+
+        | RemoveFromContextAction.StartChildWorkflowExecution(attr) ->
+            let key = attr.GetExpression()
+            RemoveMapping key
+
+        | RemoveFromContextAction.StartTimer(attr) ->
+            let key = attr.GetExpression()
+            RemoveMapping key
+
+        | RemoveFromContextAction.WorkflowExecutionSignaled(signalName) ->
+            let key = ObjectInitialization.NameAndParameters(Name=Label.Text("WorkflowExecutionSignaled"), Parameters=[PSV "SignalName" signalName])
+            RemoveMapping key
+
+        | RemoveFromContextAction.SignalExternalWorkflowExecution(attr) ->
+            let key = attr.GetExpression()
+            RemoveMapping key
+
+        | RemoveFromContextAction.RecordMarker(attr) ->
+            let key = attr.GetExpression()
+            RemoveMapping key
+
+        | RemoveFromContextAction.MarkerRecorded(markerName) ->
+            let key = ObjectInitialization.NameAndParameters(Name=Label.Text("MarkerRecorded"), Parameters=[PSV "MarkerName" markerName])
+            RemoveMapping key
 
     member this.Push(attr:ScheduleActivityTaskDecisionAttributes, result:ScheduleActivityTaskResult) : unit = 
         let key = attr.GetExpression()
@@ -127,7 +171,6 @@ type ExecutionContextManager() =
         match result with
         | None -> action
         | Some(r) -> ScheduleAndWaitForActivityTaskAction.ResultFromContext(attr, ScheduleActivityTaskResult.CreateFromExpression(r))
-
 
     member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleAndWaitForLambdaFunctionResult) : unit = 
         let key = attr.GetExpression()
@@ -256,5 +299,9 @@ type ExecutionContextManager() =
         member this.Push(markerName:string, result:MarkerRecordedResult) : unit = this.Push(markerName, result)
         member this.Pull(action:MarkerRecordedAction) : MarkerRecordedAction = this.Pull(action)
 
+        member this.Remove(action:RemoveFromContextAction) : unit = this.Remove(action)
         member this.Read(executionContext:string) : unit = this.Read(executionContext)
         member this.Write() = this.Write()
+
+
+

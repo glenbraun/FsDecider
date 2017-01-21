@@ -27,6 +27,43 @@ type FlowSharp =
     static member SetExecutionContext(executionContext:string) =
         SetExecutionContextAction.Attributes(executionContext)
 
+    static member RemoveFromContext(action:ScheduleActivityTaskAction) =
+        let attr = action.GetAttributes()
+        RemoveFromContextAction.ScheduleActivityTask(attr)
+
+    static member RemoveFromContext(action:ScheduleAndWaitForActivityTaskAction) =
+        let attr = action.GetAttributes()
+        RemoveFromContextAction.ScheduleActivityTask(attr)
+
+    static member RemoveFromContext(action:ScheduleAndWaitForLambdaFunctionAction) =
+        let attr = action.GetAttributes()
+        RemoveFromContextAction.ScheduleLambdaFunction(attr)
+
+    static member RemoveFromContext(action:StartChildWorkflowExecutionAction) =
+        let attr = action.GetAttributes()
+        RemoveFromContextAction.StartChildWorkflowExecution(attr)
+
+    static member RemoveFromContext(action:StartTimerAction) =
+        let attr = action.GetAttributes()
+        RemoveFromContextAction.StartTimer(attr)
+
+    static member RemoveFromContext(action:WorkflowExecutionSignaledAction) =
+        let signalName = action.GetAttributes()
+        RemoveFromContextAction.WorkflowExecutionSignaled(signalName)
+
+    static member RemoveFromContext(action:SignalExternalWorkflowExecutionAction) =
+        let attr = action.GetAttributes()
+        RemoveFromContextAction.SignalExternalWorkflowExecution(attr)
+        
+    static member RemoveFromContext(action:RecordMarkerAction) =
+        let attr = action.GetAttributes()
+        RemoveFromContextAction.RecordMarker(attr)
+
+    static member RemoveFromContext(action:MarkerRecordedAction) =
+        let markerName = action.GetAttributes()
+        RemoveFromContextAction.MarkerRecorded(markerName)
+
+
     /// <summary>Schedules an Activity Task but does not block further progress.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
     /// <param name="activityId">Required. The activityId of the activity task.

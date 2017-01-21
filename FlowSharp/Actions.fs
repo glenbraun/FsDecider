@@ -21,6 +21,16 @@ type GetExecutionContextAction =
 type SetExecutionContextAction =
     | Attributes of ExecutionContext:string
 
+type RemoveFromContextAction =
+    | ScheduleActivityTask              of ScheduleActivityTaskDecisionAttributes
+    | ScheduleLambdaFunction            of ScheduleLambdaFunctionDecisionAttributes
+    | StartChildWorkflowExecution       of StartChildWorkflowExecutionDecisionAttributes
+    | StartTimer                        of StartTimerDecisionAttributes
+    | WorkflowExecutionSignaled         of string
+    | SignalExternalWorkflowExecution   of SignalExternalWorkflowExecutionDecisionAttributes
+    | RecordMarker                      of RecordMarkerDecisionAttributes
+    | MarkerRecorded                    of string
+    
 type ReturnResult = 
     | RespondDecisionTaskCompleted
     | CompleteWorkflowExecution         of Result:string
@@ -57,9 +67,19 @@ type ScheduleActivityTaskAction =
     | Attributes        of ScheduleActivityTaskDecisionAttributes * bool
     | ResultFromContext of ScheduleActivityTaskDecisionAttributes * ScheduleActivityTaskResult
 
+    member this.GetAttributes() =
+            match this with
+            | ScheduleActivityTaskAction.ResultFromContext(attr, _) -> attr
+            | ScheduleActivityTaskAction.Attributes(attr, _) -> attr
+
 type ScheduleAndWaitForActivityTaskAction =
     | Attributes of ScheduleActivityTaskDecisionAttributes * bool
     | ResultFromContext of ScheduleActivityTaskDecisionAttributes * ScheduleActivityTaskResult
+
+    member this.GetAttributes() =
+        match this with
+        | ScheduleAndWaitForActivityTaskAction.ResultFromContext(attr, _) -> attr
+        | ScheduleAndWaitForActivityTaskAction.Attributes(attr, _) -> attr
 
 type WaitForActivityTaskAction =
     | ScheduleResult of ScheduleActivityTaskResult
@@ -90,6 +110,11 @@ type ScheduleAndWaitForLambdaFunctionAction =
     | Attributes        of ScheduleLambdaFunctionDecisionAttributes * bool
     | ResultFromContext of ScheduleLambdaFunctionDecisionAttributes * ScheduleAndWaitForLambdaFunctionResult
 
+    member this.GetAttributes() =
+        match this with
+        | ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(attr, _) -> attr
+        | ScheduleAndWaitForLambdaFunctionAction.Attributes(attr, _) -> attr
+
 type StartChildWorkflowExecutionResult =
     | Starting          of StartChildWorkflowExecutionDecisionAttributes
     | Initiated         of StartChildWorkflowExecutionInitiatedEventAttributes
@@ -114,6 +139,11 @@ type StartChildWorkflowExecutionResult =
 type StartChildWorkflowExecutionAction =
     | Attributes        of StartChildWorkflowExecutionDecisionAttributes * bool
     | ResultFromContext of StartChildWorkflowExecutionDecisionAttributes * StartChildWorkflowExecutionResult
+
+    member this.GetAttributes() =
+        match this with
+        | StartChildWorkflowExecutionAction.ResultFromContext(attr, _) -> attr
+        | StartChildWorkflowExecutionAction.Attributes(attr, _) -> attr
 
 type WaitForChildWorkflowExecutionAction =
     | StartResult of StartChildWorkflowExecutionResult
@@ -144,6 +174,11 @@ type StartTimerAction =
     | Attributes        of StartTimerDecisionAttributes * bool
     | ResultFromContext of StartTimerDecisionAttributes * StartTimerResult
 
+    member this.GetAttributes() =
+        match this with
+        | StartTimerAction.ResultFromContext(attr, _) -> attr
+        | StartTimerAction.Attributes(attr, _) -> attr
+
 type WaitForTimerAction =
     | StartResult of StartTimerResult
 
@@ -165,9 +200,19 @@ type WorkflowExecutionSignaledAction =
     | Attributes        of string * bool
     | ResultFromContext of string * WorkflowExecutionSignaledResult
 
+    member this.GetAttributes() =
+        match this with
+        | WorkflowExecutionSignaledAction.ResultFromContext(signalName, _) -> signalName
+        | WorkflowExecutionSignaledAction.Attributes(signalName, _) -> signalName
+
 type WaitForWorkflowExecutionSignaledAction =
     | Attributes of SignalName:string * bool
     | ResultFromContext of string * WorkflowExecutionSignaledResult
+
+    member this.GetAttributes() =
+        match this with
+        | WaitForWorkflowExecutionSignaledAction.ResultFromContext(signalName, _) -> signalName
+        | WaitForWorkflowExecutionSignaledAction.Attributes(signalName, _) -> signalName
 
 type SignalExternalWorkflowExecutionResult = 
     | Signaling
@@ -179,6 +224,11 @@ type SignalExternalWorkflowExecutionAction =
     | Attributes        of SignalExternalWorkflowExecutionDecisionAttributes * bool
     | ResultFromContext of SignalExternalWorkflowExecutionDecisionAttributes * SignalExternalWorkflowExecutionResult
 
+    member this.GetAttributes() =
+        match this with
+        | SignalExternalWorkflowExecutionAction.ResultFromContext(attr, _) -> attr
+        | SignalExternalWorkflowExecutionAction.Attributes(attr, _) -> attr
+
 type RecordMarkerResult = 
     | Recording
     | Recorded              of MarkerRecordedEventAttributes
@@ -188,6 +238,11 @@ type RecordMarkerAction =
     | Attributes        of RecordMarkerDecisionAttributes * bool
     | ResultFromContext of RecordMarkerDecisionAttributes * RecordMarkerResult
 
+    member this.GetAttributes() =
+        match this with
+        | RecordMarkerAction.ResultFromContext(attr, _) -> attr
+        | RecordMarkerAction.Attributes(attr, _) -> attr
+
 type MarkerRecordedResult = 
     | NotRecorded
     | Recorded              of MarkerRecordedEventAttributes
@@ -196,3 +251,12 @@ type MarkerRecordedResult =
 type MarkerRecordedAction = 
     | Attributes        of string * bool
     | ResultFromContext of string * MarkerRecordedResult
+
+    member this.GetAttributes() =
+        match this with
+        | MarkerRecordedAction.ResultFromContext(markerName, _) -> markerName
+        | MarkerRecordedAction.Attributes(markerName, _) -> markerName
+        
+
+
+        

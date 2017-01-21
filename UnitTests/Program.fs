@@ -268,6 +268,18 @@ let tests =
                 testCase "Recorded"                                 <| TestExecutionContextManager.``Test context for MarkerRecorded with Recorded result``
                 testCase "RecordMarkerFailed"                       <| TestExecutionContextManager.``Test context for MarkerRecorded with RecordMarkerFailed result``
             ]
+
+            testList "RemoveFromContext" [
+                testCase "ScheduleActivityTaskAction"               <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleActivityTaskAction``
+                // TODO testCase "ScheduleAndWaitForActivityTaskAction"     <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleAndWaitForActivityTaskAction``
+                // TODO testCase "ScheduleAndWaitForLambdaFunctionAction"   <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleAndWaitForLambdaFunctionAction``
+                // TODO testCase "StartChildWorkflowExecutionAction"        <| TestRemoveFromContext.``Test context for RemoveFromContext using StartChildWorkflowExecutionAction``
+                // TODO testCase "StartTimerAction"                         <| TestRemoveFromContext.``Test context for RemoveFromContext using StartTimerAction``
+                // TODO testCase "WorkflowExecutionSignaledAction"          <| TestRemoveFromContext.``Test context for RemoveFromContext using WorkflowExecutionSignaledAction``
+                // TODO testCase "SignalExternalWorkflowExecutionAction"    <| TestRemoveFromContext.``Test context for RemoveFromContext using SignalExternalWorkflowExecutionAction``
+                // TODO testCase "RecordMarkerAction"                       <| TestRemoveFromContext.``Test context for RemoveFromContext using RecordMarkerAction``
+                // TODO testCase "MarkerRecordedAction"                     <| TestRemoveFromContext.``Test context for RemoveFromContext using MarkerRecordedAction``
+            ]
         ]
         
     ]
@@ -278,7 +290,7 @@ let main argv =
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    //let tests = testCase "RecordMarkerFailed"                       <| TestExecutionContextManager.``Test context for MarkerRecorded with RecordMarkerFailed result``
+    //let tests = testCase "ScheduleActivityTaskAction"               <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleActivityTaskAction``
     
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

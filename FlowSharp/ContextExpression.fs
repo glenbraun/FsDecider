@@ -42,7 +42,7 @@ let rec ReadParameterActivityTypeValue (parameters:Parameter list) : ActivityTyp
     | Some(Parameter.NameAndValue(_, ParameterValue.ObjectValue(ObjectInitialization.NameAndParameters(_, atParameters)))) -> 
         activityType.Name <- ReadParameterStringValue "Name" atParameters
         activityType.Version <- ReadParameterStringValue "Version" atParameters
-    | _ -> ()
+    | _ -> failwith "error"
 
     activityType
 
@@ -54,7 +54,7 @@ and ReadParameterWorkflowTypeValue (parameters:Parameter list) : WorkflowType =
     | Some(Parameter.NameAndValue(_, ParameterValue.ObjectValue(ObjectInitialization.NameAndParameters(_, atParameters)))) -> 
         workflowType.Name <- ReadParameterStringValue "Name" atParameters
         workflowType.Version <- ReadParameterStringValue "Version" atParameters
-    | _ -> ()
+    | _ -> failwith "error"
 
     workflowType
 
@@ -66,7 +66,7 @@ and ReadParameterWorkflowExecutionValue (parameters:Parameter list) : WorkflowEx
     | Some(Parameter.NameAndValue(_, ParameterValue.ObjectValue(ObjectInitialization.NameAndParameters(_, atParameters)))) -> 
         workflowExecution.RunId <- ReadParameterStringValue "RunId" atParameters
         workflowExecution.WorkflowId <- ReadParameterStringValue "WorkflowId" atParameters
-    | _ -> ()
+    | _ -> failwith "error"
 
     workflowExecution
 
@@ -449,68 +449,6 @@ module internal Extensions =
                         PSVOrNull "Details" this.Details
                 )
 
-
-    type ScheduleActivityTaskAction with
-        member this.GetAttributes() =
-            match this with
-            | ScheduleActivityTaskAction.ResultFromContext(attr, _) -> attr
-            | ScheduleActivityTaskAction.Attributes(attr, _) -> attr
-
-    type ScheduleAndWaitForActivityTaskAction with
-        member this.GetAttributes() =
-            match this with
-            | ScheduleAndWaitForActivityTaskAction.ResultFromContext(attr, _) -> attr
-            | ScheduleAndWaitForActivityTaskAction.Attributes(attr, _) -> attr
-
-    type ScheduleAndWaitForLambdaFunctionAction with
-        member this.GetAttributes() =
-            match this with
-            | ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(attr, _) -> attr
-            | ScheduleAndWaitForLambdaFunctionAction.Attributes(attr, _) -> attr
-
-    type StartChildWorkflowExecutionAction with
-        member this.GetAttributes() =
-            match this with
-            | StartChildWorkflowExecutionAction.ResultFromContext(attr, _) -> attr
-            | StartChildWorkflowExecutionAction.Attributes(attr, _) -> attr
-        
-    type StartTimerAction with
-        member this.GetAttributes() =
-            match this with
-            | StartTimerAction.ResultFromContext(attr, _) -> attr
-            | StartTimerAction.Attributes(attr, _) -> attr
-
-    type SignalExternalWorkflowExecutionAction with
-        member this.GetAttributes() =
-            match this with
-            | SignalExternalWorkflowExecutionAction.ResultFromContext(attr, _) -> attr
-            | SignalExternalWorkflowExecutionAction.Attributes(attr, _) -> attr
-        
-    type RecordMarkerAction with
-        member this.GetAttributes() =
-            match this with
-            | RecordMarkerAction.ResultFromContext(attr, _) -> attr
-            | RecordMarkerAction.Attributes(attr, _) -> attr
-
-    type WorkflowExecutionSignaledAction with
-        member this.GetAttributes() =
-            match this with
-            | WorkflowExecutionSignaledAction.ResultFromContext(signalName, _) -> signalName
-            | WorkflowExecutionSignaledAction.Attributes(signalName, _) -> signalName
-
-    type WaitForWorkflowExecutionSignaledAction with
-        member this.GetAttributes() =
-            match this with
-            | WaitForWorkflowExecutionSignaledAction.ResultFromContext(signalName, _) -> signalName
-            | WaitForWorkflowExecutionSignaledAction.Attributes(signalName, _) -> signalName
-        
-    type MarkerRecordedAction with
-        member this.GetAttributes() =
-            match this with
-            | MarkerRecordedAction.ResultFromContext(markerName, _) -> markerName
-            | MarkerRecordedAction.Attributes(markerName, _) -> markerName
-        
-
     type ScheduleActivityTaskResult with
         static member CreateFromExpression(result:ObjectInitialization) =
             match result with
@@ -568,6 +506,7 @@ module internal Extensions =
                             PSV "Cause" attr.Cause.Value
                         ]
                     )
+
             | _ -> failwith "error"
 
     type ScheduleAndWaitForLambdaFunctionResult with
@@ -601,6 +540,7 @@ module internal Extensions =
                 attr.Id <- ReadParameterStringValue "Id" parameters
                 attr.Name <- ReadParameterStringValue "Name" parameters
                 ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(attr)
+
             | _ -> failwith "error"
 
         member this.GetExpression() =

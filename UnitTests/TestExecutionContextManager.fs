@@ -15,7 +15,7 @@ open NUnit.Framework
 open FsUnit
 
 module TestExecutionContextManager =
-    let OfflinePollAndDecid deciderFunc =
+    let OfflinePollAndDecide deciderFunc =
         if TestConfiguration.IsConnected then
             // Only offline mode is supported
             ()
@@ -39,7 +39,6 @@ module TestExecutionContextManager =
                     resp.Decisions.[0].CompleteWorkflowExecutionDecisionAttributes.Result
                                                             |> should equal "TEST PASS"
                 | _ -> ()
-        
 
     let ScheduleActivityTask = 
         let decision = ScheduleActivityTaskDecisionAttributes()
@@ -72,7 +71,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
   
     let ``Test context for ScheduleActivityTask with Canceled result``() =
         let event = ActivityTaskCanceledEventAttributes()
@@ -96,7 +95,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
   
     let ``Test context for ScheduleActivityTask with TimedOut result``() =
         let event = ActivityTaskTimedOutEventAttributes()
@@ -122,7 +121,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
             
 
     let ``Test context for ScheduleActivityTask with Failed result``() =
@@ -149,7 +148,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
             
     let ``Test context for ScheduleActivityTask with ScheduleFailed result``() =
         let event = ScheduleActivityTaskFailedEventAttributes()
@@ -179,7 +178,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ScheduleLambdaFunction = 
         let decision = ScheduleLambdaFunctionDecisionAttributes()
@@ -210,7 +209,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for ScheduleLambdaFunction with Failed result``() =
         let event = LambdaFunctionFailedEventAttributes()
@@ -236,7 +235,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for ScheduleLambdaFunction with TimedOut result``() =
         let event = LambdaFunctionTimedOutEventAttributes()
@@ -260,7 +259,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for ScheduleLambdaFunction with StartFailed result``() =
         let event = StartLambdaFunctionFailedEventAttributes()
@@ -286,7 +285,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for ScheduleLambdaFunction with ScheduleFailed result``() =
         let event = ScheduleLambdaFunctionFailedEventAttributes()
@@ -314,7 +313,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let StartChildWorkflowExecution = 
         let decision = StartChildWorkflowExecutionDecisionAttributes()
@@ -354,7 +353,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for StartChildWorkflowExecution with Canceled result``() =
         let event = ChildWorkflowExecutionCanceledEventAttributes()
@@ -384,7 +383,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for StartChildWorkflowExecution with Failed result``() =
         let event = ChildWorkflowExecutionFailedEventAttributes()
@@ -416,7 +415,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for StartChildWorkflowExecution with TimedOut result``() =
         let event = ChildWorkflowExecutionTimedOutEventAttributes()
@@ -446,7 +445,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for StartChildWorkflowExecution with Terminated result``() =
         let event = ChildWorkflowExecutionTerminatedEventAttributes()
@@ -474,7 +473,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for StartChildWorkflowExecution with StartFailed result``() =
         let event = StartChildWorkflowExecutionFailedEventAttributes()
@@ -505,7 +504,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let StartTimer = 
         let decision = StartTimerDecisionAttributes()
@@ -535,7 +534,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for StartTimer with Canceled result``() =
         let event = TimerCanceledEventAttributes()
@@ -559,7 +558,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for StartTimer with StartTimerFailed result``() =
         let event = StartTimerFailedEventAttributes()
@@ -585,7 +584,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let WorkflowExecutionSignaled = 
         let signalName = "Test Signal"
@@ -615,7 +614,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let SignalExternalWorkflowExecution = 
         let decision = SignalExternalWorkflowExecutionDecisionAttributes()
@@ -649,7 +648,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for SignalExternalWorkflowExecution with Failed result``() =
         let event = SignalExternalWorkflowExecutionFailedEventAttributes()
@@ -679,7 +678,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let RecordMarker = 
         let decision = RecordMarkerDecisionAttributes()
@@ -711,7 +710,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for RecordMarker with RecordMarkerFailed result``() =
         let event = RecordMarkerFailedEventAttributes()
@@ -737,7 +736,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let MarkerRecorded = 
         let markerName = "Test Marner"
@@ -767,7 +766,7 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
     let ``Test context for MarkerRecorded with RecordMarkerFailed result``() =
         let event = RecordMarkerFailedEventAttributes()
@@ -793,5 +792,5 @@ module TestExecutionContextManager =
             | _ -> return "TEST FAIL"
         }
 
-        OfflinePollAndDecid deciderFunc
+         OfflinePollAndDecide deciderFunc
 
