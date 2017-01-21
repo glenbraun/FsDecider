@@ -111,15 +111,15 @@ let tests =
             ]
             
             testList "WaitForAnyLambdaFunction" [
-                // TODO testCase "AllCompleted"         <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with All Completed Lambda Functions``
-                // TODO testCase "OneCompleted"         <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with One Completed Lambda Functions``
-                // TODO testCase "NoneCompleted"        <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with No Completed Lambda Functions``
+                testCase "AllCompleted"         <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with All Completed Lambda Functions``
+                testCase "OneCompleted"         <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with One Completed Lambda Function``
+                testCase "NoneCompleted"        <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with No Completed Lambda Functions``
             ]
             
             testList "WaitForAllLambdaFunction" [
-                // TODO testCase "AllCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with All Completed Lambda Functions``
-                // TODO testCase "OneCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with One Completed Lambda Functions``
-                // TODO testCase "NoneCompleted"        <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with No Completed Lambda Functions``
+                testCase "AllCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with All Completed Lambda Functions``
+                testCase "OneCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with One Completed Lambda Function``
+                testCase "NoneCompleted"        <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with No Completed Lambda Functions``
             ]
 
             testList "StartTimer" [
@@ -304,7 +304,7 @@ let main argv =
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 
-    //let tests = testCase "Started"            <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Started``
+    let tests = testCase "AllCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with One Completed Lambda Function``
     
     //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore

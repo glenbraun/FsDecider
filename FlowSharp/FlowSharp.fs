@@ -144,7 +144,7 @@ type FlowSharp =
     /// <summary>Waits for a list of Lambda Functions and blocks further progress until any Lambda Functions has been Completed, Canceled, TimedOut, or Failed.</summary>
     /// <param name="scheduledList">Required. A list of results from previous StartLambdaFunction calls.</param>
     /// <returns>A list of ScheduleLambdaFunctionResult with atleast one of Completed, Canceled, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
-    static member WaitForAnyActivityTask(scheduledList:ScheduleLambdaFunctionResult list) =
+    static member WaitForAnyLambdaFunction(scheduledList:ScheduleLambdaFunctionResult list) =
         WaitForAnyLambdaFunctionAction.ScheduleResults(scheduledList)
 
     /// <summary>Waits for a list of Lambda Functions and blocks further progress until all Lambda Functions have been Completed, Canceled, TimedOut, or Failed.</summary>
