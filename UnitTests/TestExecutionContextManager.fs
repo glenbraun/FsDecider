@@ -192,7 +192,7 @@ module TestExecutionContextManager =
         event.Result <- "Lambda Result"
             
         let context = ExecutionContextManager()
-        context.Push(ScheduleLambdaFunction, ScheduleAndWaitForLambdaFunctionResult.Completed(event))
+        context.Push(ScheduleLambdaFunction, ScheduleLambdaFunctionResult.Completed(event))
         let contextString = context.Write()
 
         let context = ExecutionContextManager()
@@ -201,10 +201,10 @@ module TestExecutionContextManager =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
-            let! result = ScheduleAndWaitForLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
+            let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
             match result with
-            | ScheduleAndWaitForLambdaFunctionResult.Completed(hev) 
+            | ScheduleLambdaFunctionResult.Completed(hev) 
                 when hev.Result = event.Result -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -217,7 +217,7 @@ module TestExecutionContextManager =
         event.Reason <- "Failed Reason"        
             
         let context = ExecutionContextManager()
-        context.Push(ScheduleLambdaFunction, ScheduleAndWaitForLambdaFunctionResult.Failed(event))
+        context.Push(ScheduleLambdaFunction, ScheduleLambdaFunctionResult.Failed(event))
         let contextString = context.Write()
 
         let context = ExecutionContextManager()
@@ -226,10 +226,10 @@ module TestExecutionContextManager =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
-            let! result = ScheduleAndWaitForLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
+            let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
             match result with
-            | ScheduleAndWaitForLambdaFunctionResult.Failed(hev) 
+            | ScheduleLambdaFunctionResult.Failed(hev) 
                 when hev.Details = event.Details &&
                      hev.Reason = event.Reason  -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -242,7 +242,7 @@ module TestExecutionContextManager =
         event.TimeoutType <- LambdaFunctionTimeoutType.START_TO_CLOSE
             
         let context = ExecutionContextManager()
-        context.Push(ScheduleLambdaFunction, ScheduleAndWaitForLambdaFunctionResult.TimedOut(event))
+        context.Push(ScheduleLambdaFunction, ScheduleLambdaFunctionResult.TimedOut(event))
         let contextString = context.Write()
 
         let context = ExecutionContextManager()
@@ -251,10 +251,10 @@ module TestExecutionContextManager =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
-            let! result = ScheduleAndWaitForLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
+            let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
             match result with
-            | ScheduleAndWaitForLambdaFunctionResult.TimedOut(hev) 
+            | ScheduleLambdaFunctionResult.TimedOut(hev) 
                 when hev.TimeoutType = event.TimeoutType -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -267,7 +267,7 @@ module TestExecutionContextManager =
         event.Message <- "Start Failed Message"
             
         let context = ExecutionContextManager()
-        context.Push(ScheduleLambdaFunction, ScheduleAndWaitForLambdaFunctionResult.StartFailed(event))
+        context.Push(ScheduleLambdaFunction, ScheduleLambdaFunctionResult.StartFailed(event))
         let contextString = context.Write()
 
         let context = ExecutionContextManager()
@@ -276,10 +276,10 @@ module TestExecutionContextManager =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
-            let! result = ScheduleAndWaitForLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
+            let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
             match result with
-            | ScheduleAndWaitForLambdaFunctionResult.StartFailed(hev) 
+            | ScheduleLambdaFunctionResult.StartFailed(hev) 
                 when hev.Cause = event.Cause &&
                      hev.Message = event.Message -> return "TEST PASS"
             | _ -> return "TEST FAIL"
@@ -294,7 +294,7 @@ module TestExecutionContextManager =
         event.Name <- ScheduleLambdaFunction.Name
             
         let context = ExecutionContextManager()
-        context.Push(ScheduleLambdaFunction, ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(event))
+        context.Push(ScheduleLambdaFunction, ScheduleLambdaFunctionResult.ScheduleFailed(event))
         let contextString = context.Write()
 
         let context = ExecutionContextManager()
@@ -303,10 +303,10 @@ module TestExecutionContextManager =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
-            let! result = ScheduleAndWaitForLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
+            let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
             match result with
-            | ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(hev) 
+            | ScheduleLambdaFunctionResult.ScheduleFailed(hev) 
                 when hev.Cause = event.Cause &&
                      hev.Id = event.Id &&
                      hev.Name = event.Name -> return "TEST PASS"

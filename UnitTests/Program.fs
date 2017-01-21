@@ -91,14 +91,37 @@ let tests =
                 testCase "Failed"               <| TestRequestCancelExternalWorkflowExecution.``Request Cancel External Workflow Execution with result of Failed``
             ]
             
-            testList "ScheduleAndWaitForLambdaFunction" [
-                testCase "ScheduleFailed"       <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of ScheduleFailed``
-                testCase "StartFailed"          <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of StartFailed``
-                testCase "Completed"            <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of Completed``
-                testCase "Failed"               <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of Failed``
-                testCase "TimedOut"             <| TestScheduleAndWaitForLambdaFunction.``Schedule and wait for Lambda Function with result of TimedOut``
+            testList "ScheduleLambdaFunction" [
+                // TODO Scheduling
+                // TODO Scheduled
+                // TODO Started
+                testCase "Completed"            <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Completed``
+                testCase "Failed"               <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of Failed``
+                testCase "TimedOut"             <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of TimedOut``
+                testCase "StartFailed"          <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of StartFailed``
+                testCase "ScheduleFailed"       <| TestScheduleLambdaFunction.``Schedule Lambda Function with result of ScheduleFailed``
+            ]
+
+            testList "WaitForLambdaFunction" [
+                // TODO testCase "Completed"            <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Completed Lambda Function``
+                // TODO testCase "Failed"               <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Failed Lambda Function``
+                // TODO testCase "TimedOut"             <| TestWaitForLambdaFunction.``Wait For Lambda Function with One Timed Out Lambda Function``
+                // TODO testCase "StartFailed"          <| TestWaitForLambdaFunction.``Wait For Lambda Function with Lambda Function Start Failure``
+                // TODO testCase "ScheduleFailed"       <| TestWaitForLambdaFunction.``Wait For Lambda Function with Lambda Function Schedule Failure``
             ]
             
+            testList "WaitForAnyLambdaFunction" [
+                // TODO testCase "AllCompleted"         <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with All Completed Lambda Functions``
+                // TODO testCase "OneCompleted"         <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with One Completed Lambda Functions``
+                // TODO testCase "NoneCompleted"        <| TestWaitForAnyLambdaFunction.``Wait For Any Lambda Function with No Completed Lambda Functions``
+            ]
+            
+            testList "WaitForAllLambdaFunction" [
+                // TODO testCase "AllCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with All Completed Lambda Functions``
+                // TODO testCase "OneCompleted"         <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with One Completed Lambda Functions``
+                // TODO testCase "NoneCompleted"        <| TestWaitForAllLambdaFunction.``Wait For All Lambda Function with No Completed Lambda Functions``
+            ]
+
             testList "StartTimer" [
                 testCase "Starting"             <| TestStartTimer.``Start Timer with result of Starting``
                 testCase "Started"              <| TestStartTimer.``Start Timer with result of Started``
@@ -263,7 +286,7 @@ let tests =
 
             testList "RemoveFromContext" [
                 testCase "ScheduleActivityTaskAction"               <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleActivityTaskAction``
-                // TODO testCase "ScheduleAndWaitForLambdaFunctionAction"   <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleAndWaitForLambdaFunctionAction``
+                // TODO testCase "ScheduleLambdaFunctionAction"   <| TestRemoveFromContext.``Test context for RemoveFromContext using ScheduleLambdaFunctionAction``
                 // TODO testCase "StartChildWorkflowExecutionAction"        <| TestRemoveFromContext.``Test context for RemoveFromContext using StartChildWorkflowExecutionAction``
                 // TODO testCase "StartTimerAction"                         <| TestRemoveFromContext.``Test context for RemoveFromContext using StartTimerAction``
                 // TODO testCase "WorkflowExecutionSignaledAction"          <| TestRemoveFromContext.``Test context for RemoveFromContext using WorkflowExecutionSignaledAction``
@@ -277,7 +300,7 @@ let tests =
 
 [<EntryPoint>]
 let main argv = 
-    TestConfiguration.ReverseOrder <- true
+    TestConfiguration.ReverseOrder <- false
     TestConfiguration.GenerateOfflineHistory <- true
     TestConfiguration.IsConnected <- false
 

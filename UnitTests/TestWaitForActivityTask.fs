@@ -54,7 +54,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.Completed(Completed=attr) when attr.Result = activityResult -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -141,7 +141,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.Canceled(Canceled=attr) when attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -229,7 +229,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.Failed(Failed=attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
 
@@ -315,7 +315,7 @@ module TestWaitForActivityTask =
             do! FlowSharp.WaitForActivityTask(activity)
 
             match activity with
-            | ScheduleActivityTaskResult.TimedOut(TimedOut=attr) 
+            | ScheduleActivityTaskResult.TimedOut(attr) 
                 when attr.TimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START &&
                      attr.Details = null -> return "TEST PASS"
             | _ -> return "TEST FAIL"

@@ -15,7 +15,7 @@ type IContextManager =
         abstract member Write: unit     -> string
 
         abstract member Push : ScheduleActivityTaskDecisionAttributes * ScheduleActivityTaskResult                          -> unit
-        abstract member Push : ScheduleLambdaFunctionDecisionAttributes * ScheduleAndWaitForLambdaFunctionResult            -> unit
+        abstract member Push : ScheduleLambdaFunctionDecisionAttributes * ScheduleLambdaFunctionResult                      -> unit
         abstract member Push : StartChildWorkflowExecutionDecisionAttributes * StartChildWorkflowExecutionResult            -> unit
         abstract member Push : StartTimerDecisionAttributes * StartTimerResult                                              -> unit
         abstract member Push : string * WorkflowExecutionSignaledResult                                                     -> unit
@@ -24,7 +24,7 @@ type IContextManager =
         abstract member Push : string * MarkerRecordedResult                                                                -> unit
 
         abstract member Pull : ScheduleActivityTaskAction               -> ScheduleActivityTaskAction
-        abstract member Pull : ScheduleAndWaitForLambdaFunctionAction   -> ScheduleAndWaitForLambdaFunctionAction
+        abstract member Pull : ScheduleLambdaFunctionAction             -> ScheduleLambdaFunctionAction
         abstract member Pull : StartChildWorkflowExecutionAction        -> StartChildWorkflowExecutionAction
         abstract member Pull : StartTimerAction                         -> StartTimerAction
         abstract member Pull : WorkflowExecutionSignaledAction          -> WorkflowExecutionSignaledAction
@@ -64,7 +64,7 @@ type ExecutionContextManager() =
                 
             | Label.Text("ScheduleLambdaFunction") ->
                 let attr = ScheduleLambdaFunctionDecisionAttributes.CreateFromExpression(action)
-                let scheduleResult = ScheduleAndWaitForLambdaFunctionResult.CreateFromExpression(result)
+                let scheduleResult = ScheduleLambdaFunctionResult.CreateFromExpression(result)
                 this.Push(attr, scheduleResult)
 
             | Label.Text("StartChildWorkflowExecution") ->
@@ -162,18 +162,18 @@ type ExecutionContextManager() =
         | None -> action
         | Some(r) -> ScheduleActivityTaskAction.ResultFromContext(attr, ScheduleActivityTaskResult.CreateFromExpression(r))
 
-    member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleAndWaitForLambdaFunctionResult) : unit = 
+    member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleLambdaFunctionResult) : unit = 
         let key = attr.GetExpression()
         AddMapping key (result.GetExpression())
 
-    member this.Pull(action:ScheduleAndWaitForLambdaFunctionAction) : ScheduleAndWaitForLambdaFunctionAction = 
+    member this.Pull(action:ScheduleLambdaFunctionAction) : ScheduleLambdaFunctionAction = 
         let attr = action.GetAttributes()
         let key = attr.GetExpression()
         let result = actionToResultMap.TryFind key
 
         match result with
         | None -> action
-        | Some(r) -> ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(attr, ScheduleAndWaitForLambdaFunctionResult.CreateFromExpression(r))
+        | Some(r) -> ScheduleLambdaFunctionAction.ResultFromContext(attr, ScheduleLambdaFunctionResult.CreateFromExpression(r))
 
     member this.Push(attr:StartChildWorkflowExecutionDecisionAttributes, result:StartChildWorkflowExecutionResult) : unit = 
         let key = attr.GetExpression()
@@ -266,8 +266,8 @@ type ExecutionContextManager() =
         member this.Push(attr:ScheduleActivityTaskDecisionAttributes, result:ScheduleActivityTaskResult) : unit = this.Push(attr, result)
         member this.Pull(action:ScheduleActivityTaskAction) : ScheduleActivityTaskAction = this.Pull(action)
 
-        member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleAndWaitForLambdaFunctionResult) : unit = this.Push(attr, result)
-        member this.Pull(action:ScheduleAndWaitForLambdaFunctionAction) : ScheduleAndWaitForLambdaFunctionAction = this.Pull(action)
+        member this.Push(attr:ScheduleLambdaFunctionDecisionAttributes, result:ScheduleLambdaFunctionResult) : unit = this.Push(attr, result)
+        member this.Pull(action:ScheduleLambdaFunctionAction) : ScheduleLambdaFunctionAction = this.Pull(action)
 
         member this.Push(attr:StartChildWorkflowExecutionDecisionAttributes, result:StartChildWorkflowExecutionResult) : unit = this.Push(attr, result)
         member this.Pull(action:StartChildWorkflowExecutionAction) : StartChildWorkflowExecutionAction = this.Pull(action)

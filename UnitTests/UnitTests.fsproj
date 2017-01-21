@@ -64,7 +64,7 @@
     <Compile Include="TestWaitForAnyActivityTask.fs" />
     <Compile Include="TestWaitForAllActivityTask.fs" />
     <Compile Include="TestRequestCancelActivityTask.fs" />
-    <Compile Include="TestScheduleAndWaitForLambdaFunction.fs" />
+    <Compile Include="TestScheduleLambdaFunction.fs" />
     <Compile Include="TestStartTimer.fs" />
     <Compile Include="TestWaitForTimer.fs" />
     <Compile Include="TestCancelTimer.fs" />

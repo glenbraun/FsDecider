@@ -509,56 +509,58 @@ module internal Extensions =
 
             | _ -> failwith "error"
 
-    type ScheduleAndWaitForLambdaFunctionResult with
+    type ScheduleLambdaFunctionResult with
         static member CreateFromExpression(result:ObjectInitialization) =
             match result with
             | ObjectInitialization.NameAndParameters(Label.Text("Completed"), parameters) -> 
                 let attr = LambdaFunctionCompletedEventAttributes()
                 attr.Result <- ReadParameterStringValue "Result" parameters
-                ScheduleAndWaitForLambdaFunctionResult.Completed(attr)
+                ScheduleLambdaFunctionResult.Completed(attr)
 
             | ObjectInitialization.NameAndParameters(Label.Text("Failed"), parameters) -> 
                 let attr = LambdaFunctionFailedEventAttributes()
                 attr.Reason <- ReadParameterStringValue "Reason" parameters
                 attr.Details <- ReadParameterStringValue "Details" parameters
-                ScheduleAndWaitForLambdaFunctionResult.Failed(attr)
+                ScheduleLambdaFunctionResult.Failed(attr)
 
             | ObjectInitialization.NameAndParameters(Label.Text("TimedOut"), parameters) -> 
                 let attr = LambdaFunctionTimedOutEventAttributes()
                 attr.TimeoutType <- LambdaFunctionTimeoutType.FindValue(ReadParameterStringValue "TimeoutType" parameters)
-                ScheduleAndWaitForLambdaFunctionResult.TimedOut(attr)
+                ScheduleLambdaFunctionResult.TimedOut(attr)
 
             | ObjectInitialization.NameAndParameters(Label.Text("StartFailed"), parameters) -> 
                 let attr = StartLambdaFunctionFailedEventAttributes()
                 attr.Cause <- StartLambdaFunctionFailedCause.FindValue(ReadParameterStringValue "Cause" parameters)
                 attr.Message <- ReadParameterStringValue "Message" parameters
-                ScheduleAndWaitForLambdaFunctionResult.StartFailed(attr)
+                ScheduleLambdaFunctionResult.StartFailed(attr)
 
             | ObjectInitialization.NameAndParameters(Label.Text("ScheduleFailed"), parameters) -> 
                 let attr = ScheduleLambdaFunctionFailedEventAttributes()
                 attr.Cause <- ScheduleLambdaFunctionFailedCause.FindValue(ReadParameterStringValue "Cause" parameters)
                 attr.Id <- ReadParameterStringValue "Id" parameters
                 attr.Name <- ReadParameterStringValue "Name" parameters
-                ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(attr)
+                ScheduleLambdaFunctionResult.ScheduleFailed(attr)
 
             | _ -> failwith "error"
 
         member this.GetExpression() =
             match this with
-            | ScheduleAndWaitForLambdaFunctionResult.Completed(attr) ->
+            | ScheduleLambdaFunctionResult.Completed(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("Completed"), Parameters=PSVOrNull "Result" attr.Result)
 
-            | ScheduleAndWaitForLambdaFunctionResult.Failed(attr) ->
+            | ScheduleLambdaFunctionResult.Failed(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("Failed"), Parameters=(PSVOrNull "Reason" attr.Reason) @ (PSVOrNull "Details" attr.Details))
 
-            | ScheduleAndWaitForLambdaFunctionResult.TimedOut(attr) ->
+            | ScheduleLambdaFunctionResult.TimedOut(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("TimedOut"), Parameters=(PSVOrNull "TimeoutType" attr.TimeoutType.Value))
 
-            | ScheduleAndWaitForLambdaFunctionResult.StartFailed(attr) ->
+            | ScheduleLambdaFunctionResult.StartFailed(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("StartFailed"), Parameters=(PSVOrNull "Cause" attr.Cause.Value) @ (PSVOrNull "Message" attr.Message))
 
-            | ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(attr) ->
+            | ScheduleLambdaFunctionResult.ScheduleFailed(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("ScheduleFailed"), Parameters=[PSV "Cause" attr.Cause.Value; PSV "Id" attr.Id; PSV "Name" attr.Name])
+
+            | _ -> failwith "error"
 
     type StartChildWorkflowExecutionResult with
         static member CreateFromExpression(result:ObjectInitialization) =

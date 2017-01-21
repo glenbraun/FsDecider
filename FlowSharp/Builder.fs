@@ -401,11 +401,11 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
         | _ -> failwith "error"
 
-    // Start and Wait for Lambda Function
-    member this.Bind(action:ScheduleAndWaitForLambdaFunctionAction, f:(ScheduleAndWaitForLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
+    // Schedule Lambda Function
+    member this.Bind(action:ScheduleLambdaFunctionAction, f:(ScheduleLambdaFunctionResult -> RespondDecisionTaskCompletedRequest)) = 
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
         match action with
-        | ScheduleAndWaitForLambdaFunctionAction.Attributes(attr, pushToContext) ->
+        | ScheduleLambdaFunctionAction.Attributes(attr, pushToContext) ->
             let combinedHistory = walker.FindLambdaFunction(attr)
         
             match (combinedHistory) with
@@ -415,42 +415,77 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.DecisionType <- DecisionType.ScheduleLambdaFunction
                 d.ScheduleLambdaFunctionDecisionAttributes <- attr
                 response.Decisions.Add(d)
-                Wait()
+                
+                f(ScheduleLambdaFunctionResult.Scheduling(attr))
 
             // Lambda Function Completed
             | SomeEventOfType(EventType.LambdaFunctionCompleted) hev -> 
-                let result = ScheduleAndWaitForLambdaFunctionResult.Completed(hev.LambdaFunctionCompletedEventAttributes)
+                let result = ScheduleLambdaFunctionResult.Completed(hev.LambdaFunctionCompletedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Lambda Function Failed
             | SomeEventOfType(EventType.LambdaFunctionFailed) hev -> 
-                let result = ScheduleAndWaitForLambdaFunctionResult.Failed(hev.LambdaFunctionFailedEventAttributes)
+                let result = ScheduleLambdaFunctionResult.Failed(hev.LambdaFunctionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // Lambda Function TimedOut
             | SomeEventOfType(EventType.LambdaFunctionTimedOut) hev -> 
-                let result = ScheduleAndWaitForLambdaFunctionResult.TimedOut(hev.LambdaFunctionTimedOutEventAttributes)
+                let result = ScheduleLambdaFunctionResult.TimedOut(hev.LambdaFunctionTimedOutEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // StartLambdaFunctionFailed
             | SomeEventOfType(EventType.StartLambdaFunctionFailed) hev -> 
-                let result = ScheduleAndWaitForLambdaFunctionResult.StartFailed(hev.StartLambdaFunctionFailedEventAttributes)
+                let result = ScheduleLambdaFunctionResult.StartFailed(hev.StartLambdaFunctionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
             // ScheduleLambdaFunctionFailed
             | SomeEventOfType(EventType.ScheduleLambdaFunctionFailed) hev -> 
-                f(ScheduleAndWaitForLambdaFunctionResult.ScheduleFailed(hev.ScheduleLambdaFunctionFailedEventAttributes))
+                let result = ScheduleLambdaFunctionResult.ScheduleFailed(hev.ScheduleLambdaFunctionFailedEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                f(result)
 
-            | _ -> 
-                // This lambda function is still running, continue blocking
-                Wait()
+            // LambdaFunctionStarted
+            | SomeEventOfType(EventType.LambdaFunctionStarted) hev ->
+                f(ScheduleLambdaFunctionResult.Started(hev.LambdaFunctionStartedEventAttributes, hev.LambdaFunctionScheduledEventAttributes))
 
-        | ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(_, result) ->
+            // LambdaFunctionScheduled
+            | SomeEventOfType(EventType.LambdaFunctionScheduled) hev ->
+                f(ScheduleLambdaFunctionResult.Scheduled(hev.LambdaFunctionScheduledEventAttributes))
+
+            | _ -> failwith "error"
+
+        | ScheduleLambdaFunctionAction.ResultFromContext(_, result) ->
             f(result)
+
+    // Wait For Lambda Function
+    member this.Bind(WaitForLambdaFunctionAction.ScheduleResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        match (result.IsFinished()) with 
+        | true  -> f()
+        | false -> Wait() 
+
+    // Wait For Any Lambda Function
+    member this.Bind(WaitForAnyLambdaFunctionAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let anyFinished = 
+            results
+            |> List.exists (fun r -> r.IsFinished())
+
+        match anyFinished with
+        | true  -> f()
+        | false -> Wait()
+
+    // Wait For All Lambda Function
+    member this.Bind(WaitForAllLambdaFunctionAction.ScheduleResults(results), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let allFinished = 
+            results
+            |> List.forall (fun r -> r.IsFinished())
+
+        match allFinished with
+        | true  -> f()
+        | false -> Wait()
 
     // Start Timer
     member this.Bind(action:StartTimerAction, f:(StartTimerResult -> RespondDecisionTaskCompletedRequest)) = 

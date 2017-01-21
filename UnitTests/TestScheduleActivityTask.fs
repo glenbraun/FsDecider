@@ -580,7 +580,7 @@ module TestScheduleActivityTask =
 
             match result with
             | ScheduleActivityTaskResult.Scheduling(_) -> return ()
-            | ScheduleActivityTaskResult.Failed(Failed=attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
+            | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"
 
         }

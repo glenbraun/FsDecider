@@ -45,14 +45,14 @@ exception ContinueAsNewWorkflowExecutionFailedException of ContinueAsNewWorkflow
 
 type ScheduleActivityTaskResult =
     | Scheduling        of ScheduleActivityTaskDecisionAttributes
-    | Scheduled         of Scheduled:       ActivityTaskScheduledEventAttributes
+    | Scheduled         of ActivityTaskScheduledEventAttributes
     | Started           of Started:         ActivityTaskStartedEventAttributes *
                            Scheduled:       ActivityTaskScheduledEventAttributes
-    | Completed         of Completed:       ActivityTaskCompletedEventAttributes
-    | Canceled          of Canceled:        ActivityTaskCanceledEventAttributes
-    | Failed            of Failed:          ActivityTaskFailedEventAttributes
-    | TimedOut          of TimedOut:        ActivityTaskTimedOutEventAttributes
-    | ScheduleFailed    of ScheduleFailed:  ScheduleActivityTaskFailedEventAttributes
+    | Completed         of ActivityTaskCompletedEventAttributes
+    | Canceled          of ActivityTaskCanceledEventAttributes
+    | Failed            of ActivityTaskFailedEventAttributes
+    | TimedOut          of ActivityTaskTimedOutEventAttributes
+    | ScheduleFailed    of ScheduleActivityTaskFailedEventAttributes
 
     member this.IsFinished() =
         match this with
@@ -90,21 +90,43 @@ type RequestCancelActivityTaskResult =
     | ActivityFinished
     | ActivityScheduleFailed
 
-type ScheduleAndWaitForLambdaFunctionResult =
+type ScheduleLambdaFunctionResult =
+    | Scheduling        of ScheduleLambdaFunctionDecisionAttributes
+    | Scheduled         of LambdaFunctionScheduledEventAttributes
+    | Started           of LambdaFunctionStartedEventAttributes *
+                           LambdaFunctionScheduledEventAttributes
     | Completed         of LambdaFunctionCompletedEventAttributes
     | Failed            of LambdaFunctionFailedEventAttributes
     | TimedOut          of LambdaFunctionTimedOutEventAttributes
     | StartFailed       of StartLambdaFunctionFailedEventAttributes
     | ScheduleFailed    of ScheduleLambdaFunctionFailedEventAttributes
 
-type ScheduleAndWaitForLambdaFunctionAction =
+    member this.IsFinished() =
+        match this with
+        | Completed(_) -> true
+        | Failed(_) -> true
+        | TimedOut(_) -> true
+        | StartFailed(_) -> true
+        | ScheduleFailed(_) -> true
+        | _ -> false
+
+type ScheduleLambdaFunctionAction =
     | Attributes        of ScheduleLambdaFunctionDecisionAttributes * bool
-    | ResultFromContext of ScheduleLambdaFunctionDecisionAttributes * ScheduleAndWaitForLambdaFunctionResult
+    | ResultFromContext of ScheduleLambdaFunctionDecisionAttributes * ScheduleLambdaFunctionResult
 
     member this.GetAttributes() =
         match this with
-        | ScheduleAndWaitForLambdaFunctionAction.ResultFromContext(attr, _) -> attr
-        | ScheduleAndWaitForLambdaFunctionAction.Attributes(attr, _) -> attr
+        | ScheduleLambdaFunctionAction.ResultFromContext(attr, _) -> attr
+        | ScheduleLambdaFunctionAction.Attributes(attr, _) -> attr
+
+type WaitForLambdaFunctionAction =
+    | ScheduleResult   of ScheduleLambdaFunctionResult
+
+type WaitForAnyLambdaFunctionAction =
+    | ScheduleResults of ScheduleLambdaFunctionResult list
+
+type WaitForAllLambdaFunctionAction =
+    | ScheduleResults of ScheduleLambdaFunctionResult list
 
 type StartChildWorkflowExecutionResult =
     | Starting          of StartChildWorkflowExecutionDecisionAttributes

@@ -31,7 +31,7 @@ type FlowSharp =
         let attr = action.GetAttributes()
         RemoveFromContextAction.ScheduleActivityTask(attr)
 
-    static member RemoveFromContext(action:ScheduleAndWaitForLambdaFunctionAction) =
+    static member RemoveFromContext(action:ScheduleLambdaFunctionAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.ScheduleLambdaFunction(attr)
 
@@ -119,21 +119,39 @@ type FlowSharp =
     static member RequestCancelActivityTask(schedule:ScheduleActivityTaskResult) =
         RequestCancelActivityTaskAction.ScheduleResult(schedule)
 
-    /// <summary>Schedules an AWS Lambda Function and blocks further progress until the Lambda Function has Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</summary>
+    /// <summary>Schedules an AWS Lambda Function.</summary>
     /// <param name="id">Required. The SWF id of the AWS Lambda task.
     ///                  The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal string quotarnquot.</param>
     /// <param name="name">Required. The name of the AWS Lambda function to invoke.</param>
     /// <param name="input">The input provided to the AWS Lambda function.</param>
     /// <param name="startToCloseTimeout">If set, specifies the maximum duration the function may take to execute.</param>
-    /// <returns>A ScheduleAndWaitForLambdaFunctionResult of Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
-    static member ScheduleAndWaitForLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:string, ?pushToContext:bool) =
+    /// <returns>A ScheduleLambdaFunctionResult of Scheduling, Scheduled, Started, Completed, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
+    static member ScheduleLambdaFunction(id:string, name:string, ?input:string, ?startToCloseTimeout:string, ?pushToContext:bool) =
         let attr = new ScheduleLambdaFunctionDecisionAttributes()
         attr.Id <- id
         attr.Input <- if input.IsSome then input.Value else null
         attr.StartToCloseTimeout <- if startToCloseTimeout.IsSome then startToCloseTimeout.Value else null
         attr.Name <- name
 
-        ScheduleAndWaitForLambdaFunctionAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
+        ScheduleLambdaFunctionAction.Attributes(attr, (pushToContext.IsSome && pushToContext.Value))
+
+    /// <summary>Waits for a Lambda Function and blocks further progress until the Lambda Function has been Completed, Canceled, TimedOut, Failed, StartFailed, or ScheduleFailed.</summary>
+    /// <param name="schedule">Required. The result of a previous StartActivityTask call.</param>
+    /// <returns>A ScheduleLambdaFunctionResult of Completed, Canceled, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
+    static member WaitForLambdaFunction(schedule:ScheduleLambdaFunctionResult) =
+        WaitForLambdaFunctionAction.ScheduleResult(schedule)
+
+    /// <summary>Waits for a list of Lambda Functions and blocks further progress until any Lambda Functions has been Completed, Canceled, TimedOut, or Failed.</summary>
+    /// <param name="scheduledList">Required. A list of results from previous StartLambdaFunction calls.</param>
+    /// <returns>A list of ScheduleLambdaFunctionResult with atleast one of Completed, Canceled, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
+    static member WaitForAnyActivityTask(scheduledList:ScheduleLambdaFunctionResult list) =
+        WaitForAnyLambdaFunctionAction.ScheduleResults(scheduledList)
+
+    /// <summary>Waits for a list of Lambda Functions and blocks further progress until all Lambda Functions have been Completed, Canceled, TimedOut, or Failed.</summary>
+    /// <param name="scheduledList">Required. A list of results from previous StartLambdaFunction calls.</param>
+    /// <returns>A list of ScheduleLambdaFunctionResult with all of Completed, Canceled, TimedOut, Failed, StartFailed, or ScheduleFailed.</returns>
+    static member WaitForAllLambdaFunction(scheduledList:ScheduleLambdaFunctionResult list) =
+        WaitForAllLambdaFunctionAction.ScheduleResults(scheduledList)
 
     /// <summary>Requests that a child workflow execution be started and records a StartChildWorkflowExecutionInitiated event in the history. The child workflow execution is a separate workflow execution with its own history.</summary>
     /// <param name="workflowType">Required. The type of the workflow execution to be started.</param>
