@@ -7,7 +7,7 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-module AsyncHost =
+module AsyncDeciderActor =
 
     let CreatePollForDecisionTaskAsync (swf:(unit -> IAmazonSimpleWorkflow), pollRequest:PollForDecisionTaskRequest, filterByPreviousStartedEventId:bool) =
         let Between a b x =
