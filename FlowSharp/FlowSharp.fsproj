@@ -62,6 +62,7 @@
     <Compile Include="ContextExpression.fs" />
     <Compile Include="ExecutionContextManager.fs" />
     <Compile Include="Builder.fs" />
+    <Compile Include="AsyncHost.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
