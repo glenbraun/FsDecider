@@ -10,6 +10,8 @@ open FlowSharp.HistoryWalker
 open FlowSharp.EventPatterns
 open FlowSharp.ExecutionContext
 
+exception FlowSharpBuilderException of HistoryEvent option * string
+
 type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
     let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
     let walker = HistoryWalker(DecisionTask.Events, ReverseOrder)
@@ -87,7 +89,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 AddExceptionEventId (hev.EventId)
                 raise (CompleteWorkflowExecutionFailedException(hev.CompleteWorkflowExecutionFailedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of CompleteWorkflowExecution during return operation."))
 
         | ReturnResult.CancelWorkflowExecution(details) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.CancelWorkflowExecutionFailed, exceptionEvents)
@@ -107,7 +109,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 AddExceptionEventId (hev.EventId)
                 raise (CancelWorkflowExecutionFailedException(hev.CancelWorkflowExecutionFailedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of CancelWorkflowExecution during return operation."))
 
         | ReturnResult.FailWorkflowExecution(reason, details) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.FailWorkflowExecutionFailed, exceptionEvents)
@@ -128,7 +130,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 AddExceptionEventId (hev.EventId)
                 raise (FailWorkflowExecutionFailedException(hev.FailWorkflowExecutionFailedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of FailWorkflowExecution during return operation."))
 
         | ReturnResult.ContinueAsNewWorkflowExecution(attr) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.ContinueAsNewWorkflowExecutionFailed, exceptionEvents)
@@ -147,7 +149,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 AddExceptionEventId (hev.EventId)
                 raise (ContinueAsNewWorkflowExecutionFailedException(hev.ContinueAsNewWorkflowExecutionFailedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of ContinueAsNewWorkflowExecution during return operation."))
 
         response
 
@@ -220,7 +222,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             | SomeEventOfType(EventType.ActivityTaskScheduled) hev ->
                 f(ScheduleActivityTaskResult.Scheduled(hev.ActivityTaskScheduledEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of ScheduleActivityTaskAction."))
 
         | ScheduleActivityTaskAction.ResultFromContext(_, result) ->
             f(result)
@@ -276,7 +278,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                     match schedule with
                     | ScheduleActivityTaskResult.Scheduled(sched)  -> sched.ActivityId
                     | ScheduleActivityTaskResult.Started(_, sched) -> sched.ActivityId
-                    | _ -> failwith "error"
+                    | _ -> raise (Exception("Unable to determine activity id"))
 
                 let cancelHistory = walker.FindRequestCancelActivityTask(activityId)
                 
@@ -296,7 +298,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 | SomeEventOfType(EventType.RequestCancelActivityTaskFailed) hev ->
                     f(RequestCancelActivityTaskResult.RequestCancelFailed(hev.RequestCancelActivityTaskFailedEventAttributes))
 
-                | _ -> failwith "error"
+                | _ -> raise (FlowSharpBuilderException(cancelHistory, "Unexpected event history of RequestCancelActivityTaskAction."))
 
     // Start Child Workflow Execution (do!)
     member this.Bind(action:StartChildWorkflowExecutionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
@@ -366,7 +368,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             | SomeEventOfType(EventType.StartChildWorkflowExecutionInitiated) hev ->
                 f(StartChildWorkflowExecutionResult.Initiated(hev.StartChildWorkflowExecutionInitiatedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of StartChildWorkflowExecutionAction."))
 
         | StartChildWorkflowExecutionAction.ResultFromContext(_, result) ->
             f(result)
@@ -429,7 +431,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | SomeEventOfType(EventType.RequestCancelExternalWorkflowExecutionInitiated) hev ->
             f(RequestCancelExternalWorkflowExecutionResult.Initiated(hev.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes))
 
-        | _ -> failwith "error"
+        | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of RequestCancelExternalWorkflowExecutionAction."))
 
     // Schedule Lambda Function (do!)
     member this.Bind(action:ScheduleLambdaFunctionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
@@ -493,7 +495,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             | SomeEventOfType(EventType.LambdaFunctionScheduled) hev ->
                 f(ScheduleLambdaFunctionResult.Scheduled(hev.LambdaFunctionScheduledEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of ScheduleLambdaFunctionAction."))
 
         | ScheduleLambdaFunctionAction.ResultFromContext(_, result) ->
             f(result)
@@ -570,7 +572,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             | SomeEventOfType(EventType.TimerStarted) hev ->
                 f(StartTimerResult.Started(hev.TimerStartedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of StartTimerAction."))
 
         | StartTimerAction.ResultFromContext(_, result) -> 
             f(result)
@@ -629,7 +631,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             | SomeEventOfType(EventType.CancelTimerFailed) hev ->
                 f(CancelTimerResult.CancelTimerFailed(hev.CancelTimerFailedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of CancelTimerAction."))
 
     // Marker Recorded (let!)
     member this.Bind(action:MarkerRecordedAction, f:(MarkerRecordedResult -> RespondDecisionTaskCompletedRequest)) =
@@ -655,7 +657,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(markerName, result)
                 f(result)
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of MarkerRecordedAction."))
 
         | MarkerRecordedAction.ResultFromContext(_, result) ->
             f(result)
@@ -696,7 +698,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
                 f(result)
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of RecordMarkerAction."))
+
         | RecordMarkerAction.ResultFromContext(_, result) ->
             f(result)
 
@@ -740,7 +743,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             | SomeEventOfType(EventType.SignalExternalWorkflowExecutionInitiated) hev ->
                 f(SignalExternalWorkflowExecutionResult.Initiated(hev.SignalExternalWorkflowExecutionInitiatedEventAttributes))
 
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of SignalExternalWorkflowExecutionAction."))
+
         | SignalExternalWorkflowExecutionAction.ResultFromContext(_, result) ->
             f(result)
             
@@ -762,7 +766,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
                 f(result)
         
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WorkflowExecutionSignaledAction."))
 
         | WorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             f(result)
@@ -785,7 +789,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
                 f(result)
         
-            | _ -> failwith "error"
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WaitForWorkflowExecutionSignaledAction."))
 
         | WaitForWorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             f(result)
@@ -803,7 +807,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | SomeEventOfType(EventType.WorkflowExecutionCancelRequested) hev ->
             f(WorkflowExecutionCancelRequestedResult.CancelRequested(hev.WorkflowExecutionCancelRequestedEventAttributes))
             
-        | _ -> failwith "error"
+        | _ -> raise (FlowSharpBuilderException(cancelRequestedEvent, "Unexpected event history of WorkflowExecutionCancelRequestedAction."))
 
     // Get Workflow Execution Input (let!)
     member this.Bind(GetWorkflowExecutionInputAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
@@ -817,7 +821,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | SomeEventOfType(EventType.WorkflowExecutionStarted) hev ->
             f(hev.WorkflowExecutionStartedEventAttributes.Input)
 
-        | _ -> failwith "error"
+        | _ -> raise (FlowSharpBuilderException(startedEvent, "Unexpected event history of GetWorkflowExecutionInputAction."))
 
     // Get Execution Context (let!)
     member this.Bind(GetExecutionContextAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
@@ -831,7 +835,7 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | SomeEventOfType(EventType.DecisionTaskCompleted) hev ->
             f(hev.DecisionTaskCompletedEventAttributes.ExecutionContext)
 
-        | _ -> failwith "error"
+        | _ -> raise (FlowSharpBuilderException(completedEvent, "Unexpected event history of GetExecutionContextAction."))
 
     // Set Execution Context (do!)
     member this.Bind(SetExecutionContextAction.Attributes(context), f:(unit -> RespondDecisionTaskCompletedRequest)) =

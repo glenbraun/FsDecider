@@ -36,7 +36,8 @@ type IContextManager =
         abstract member Remove : RemoveFromContextAction                -> unit
 
     end
-            
+        
+exception ExecutionContextManagerException of string            
 
 type ExecutionContextManager() =
     let mutable actionToResultMap = Map.empty<ObjectInitialization, ObjectInitialization>
@@ -51,7 +52,7 @@ type ExecutionContextManager() =
         | true ->
             actionToResultMap <- Map.remove key actionToResultMap
             actionToResultKeys <- List.filter ((<>) key) actionToResultKeys
-        | false -> failwith "error"
+        | false -> raise (ExecutionContextManagerException("Unable to remove item from context. Key not found."))
     
     member private this.ReadActionToResultMapping (ActionToResultMapping.ActionAndResult(action, result)) =
         match action with
@@ -97,7 +98,7 @@ type ExecutionContextManager() =
                 let markerResult = MarkerRecordedResult.CreateFromExpression(result)
                 this.Push(markerName, markerResult)
 
-            | _ -> failwith "error"
+            | _ -> raise (ExecutionContextManagerException("Unexpected action to result mapping encountered while reading context."))
 
     member this.Read(executionContext:string) : unit =
         let parser = Parser()

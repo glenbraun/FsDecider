@@ -24,6 +24,7 @@ and ParameterValue =
     | IntValue of int
     | ObjectValue of ObjectInitialization
 
+exception ContextExpressionReadException of string
 
 let FindParameter (name:string) (parameters:Parameter list) : Parameter option =
     let Find (name:string) (Parameter.NameAndValue(label, _)) : bool =
@@ -42,7 +43,7 @@ let rec ReadParameterActivityTypeValue (parameters:Parameter list) : ActivityTyp
     | Some(Parameter.NameAndValue(_, ParameterValue.ObjectValue(ObjectInitialization.NameAndParameters(_, atParameters)))) -> 
         activityType.Name <- ReadParameterStringValue "Name" atParameters
         activityType.Version <- ReadParameterStringValue "Version" atParameters
-    | _ -> failwith "error"
+    | _ -> raise (ContextExpressionReadException("Expected to find ActivityType parameter."))
 
     activityType
 
@@ -54,7 +55,7 @@ and ReadParameterWorkflowTypeValue (parameters:Parameter list) : WorkflowType =
     | Some(Parameter.NameAndValue(_, ParameterValue.ObjectValue(ObjectInitialization.NameAndParameters(_, atParameters)))) -> 
         workflowType.Name <- ReadParameterStringValue "Name" atParameters
         workflowType.Version <- ReadParameterStringValue "Version" atParameters
-    | _ -> failwith "error"
+    | _ -> raise (ContextExpressionReadException("Expected to find WorkflowType parameter."))
 
     workflowType
 
@@ -66,7 +67,7 @@ and ReadParameterWorkflowExecutionValue (parameters:Parameter list) : WorkflowEx
     | Some(Parameter.NameAndValue(_, ParameterValue.ObjectValue(ObjectInitialization.NameAndParameters(_, atParameters)))) -> 
         workflowExecution.RunId <- ReadParameterStringValue "RunId" atParameters
         workflowExecution.WorkflowId <- ReadParameterStringValue "WorkflowId" atParameters
-    | _ -> failwith "error"
+    | _ -> raise (ContextExpressionReadException("Expected to find WorkflowExecution parameter."))
 
     workflowExecution
 
@@ -481,7 +482,7 @@ module internal Extensions =
                 attr.Cause <- ScheduleActivityTaskFailedCause.FindValue(ReadParameterStringValue "Cause" parameters)
                 ScheduleActivityTaskResult.ScheduleFailed(attr)
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create ScheduleActivityTaskResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -507,7 +508,7 @@ module internal Extensions =
                         ]
                     )
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from ScheduleActivityTaskResult."))
 
     type ScheduleLambdaFunctionResult with
         static member CreateFromExpression(result:ObjectInitialization) =
@@ -541,7 +542,7 @@ module internal Extensions =
                 attr.Name <- ReadParameterStringValue "Name" parameters
                 ScheduleLambdaFunctionResult.ScheduleFailed(attr)
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create ScheduleLambdaFunctionResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -560,7 +561,7 @@ module internal Extensions =
             | ScheduleLambdaFunctionResult.ScheduleFailed(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("ScheduleFailed"), Parameters=[PSV "Cause" attr.Cause.Value; PSV "Id" attr.Id; PSV "Name" attr.Name])
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from ScheduleLambdaFunctionResult."))
 
     type StartChildWorkflowExecutionResult with
         static member CreateFromExpression(result:ObjectInitialization) =
@@ -608,7 +609,7 @@ module internal Extensions =
                 attr.WorkflowType <- ReadParameterWorkflowTypeValue parameters
                 StartChildWorkflowExecutionResult.StartFailed(attr)
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create StartChildWorkflowExecutionResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -673,7 +674,7 @@ module internal Extensions =
                         ]
                 )
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from StartChildWorkflowExecutionResult."))
 
     type StartTimerResult with
         static member CreateFromExpression(result:ObjectInitialization) =
@@ -694,7 +695,7 @@ module internal Extensions =
                 attr.TimerId <- ReadParameterStringValue "TimerId" parameters
                 StartTimerResult.StartTimerFailed(attr)
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create StartTimerResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -713,7 +714,7 @@ module internal Extensions =
                         PSVOrNull "Cause" attr.Cause.Value 
                 )
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from StartTimerResult."))
 
     type WorkflowExecutionSignaledResult with
         static member CreateFromExpression(result:ObjectInitialization) =
@@ -724,7 +725,7 @@ module internal Extensions =
                 attr.Input <- ReadParameterStringValue "Input" parameters
                 WorkflowExecutionSignaledResult.Signaled(attr)
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create WorkflowExecutionSignaledResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -737,7 +738,7 @@ module internal Extensions =
                         PSVOrNull "Input" attr.Input 
                 )
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from WorkflowExecutionSignaledResult."))
 
     type MarkerRecordedResult with
         static member CreateFromExpression(result:ObjectInitialization) =
@@ -754,7 +755,7 @@ module internal Extensions =
                 attr.Cause <- RecordMarkerFailedCause.FindValue(ReadParameterStringValue "Cause" parameters)
                 MarkerRecordedResult.RecordMarkerFailed(attr)
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create MarkerRecordedResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -776,7 +777,7 @@ module internal Extensions =
                         PSVOrNull "Cause" attr.Cause.Value 
                 )
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from MarkerRecordedResult."))
 
     type SignalExternalWorkflowExecutionResult with
         static member CreateFromExpression(result:ObjectInitialization) =
@@ -794,7 +795,7 @@ module internal Extensions =
                 attr.WorkflowId <- ReadParameterStringValue "WorkflowId" parameters
                 SignalExternalWorkflowExecutionResult.Failed(attr)
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create SignalExternalWorkflowExecutionResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -812,7 +813,7 @@ module internal Extensions =
                         ]
                 )
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from SignalExternalWorkflowExecutionResult."))
 
     type RecordMarkerResult with
         static member CreateFromExpression(result:ObjectInitialization) =
@@ -829,7 +830,7 @@ module internal Extensions =
                 attr.Cause <- RecordMarkerFailedCause.FindValue(ReadParameterStringValue "Cause" parameters)
                 RecordMarkerResult.RecordMarkerFailed(attr)
             
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create RecordMarkerResult from context expression."))
 
         member this.GetExpression() =
             match this with
@@ -839,4 +840,4 @@ module internal Extensions =
             | RecordMarkerResult.RecordMarkerFailed(attr) ->
                 ObjectInitialization.NameAndParameters(Name=Label.Text("RecordMarkerFailed"),Parameters=[PSV "MarkerName" attr.MarkerName; PSV "Cause" attr.Cause.Value;])
 
-            | _ -> failwith "error"
+            | _ -> raise (ContextExpressionReadException("Unable to create context expression from RecordMarkerResult."))

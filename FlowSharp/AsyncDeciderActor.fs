@@ -8,6 +8,7 @@ open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
 module AsyncDeciderActor =
+    exception AsyncDeciderActorException of PollForDecisionTaskResponse * string
 
     let CreatePollForDecisionTaskAsync (swf:(unit -> IAmazonSimpleWorkflow), pollRequest:PollForDecisionTaskRequest, filterByPreviousStartedEventId:bool) =
         let Between a b x =
@@ -24,7 +25,7 @@ module AsyncDeciderActor =
             while !morepages && not(cancelToken.IsCancellationRequested) do
                 let! pollResponse = Async.AwaitTask(swf.PollForDecisionTaskAsync(pollRequest, cancelToken))
                 if pollResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
-                    failwith ("Error " + pollResponse.HttpStatusCode.ToString())
+                    raise (AsyncDeciderActorException(pollResponse, "PollForDecisionTaskAsync resulted in an HTTP status other than OK."))
 
                 decisionTask := pollResponse.DecisionTask
 
