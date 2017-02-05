@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FlowSharp", "FlowSharp\FlowSharp.fsproj", "{D053EDDF-EF2C-4C7C-8E07-E97A2369E19D}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{0A139C2D-FD75-4784-A0A6-19193D409934}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Examples", "Examples\Examples.fsproj", "{1A30C407-1CFB-48AE-B751-7BBB1CF0A417}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0A139C2D-FD75-4784-A0A6-19193D409934}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A139C2D-FD75-4784-A0A6-19193D409934}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A139C2D-FD75-4784-A0A6-19193D409934}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A30C407-1CFB-48AE-B751-7BBB1CF0A417}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A30C407-1CFB-48AE-B751-7BBB1CF0A417}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A30C407-1CFB-48AE-B751-7BBB1CF0A417}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A30C407-1CFB-48AE-B751-7BBB1CF0A417}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
