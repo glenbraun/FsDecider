@@ -102,6 +102,8 @@ let internal ExecuteOperation op =
 
         CurrentRunId <- startResponse.Run.RunId
 
+        FlowSharp.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input CurrentRunId 
+
     | Operation.DecisionTask(decider, tasklist) ->
         let pollRequest = PollForDecisionTaskRequest()
         pollRequest.Domain <- ExamplesConfiguration.Domain
@@ -136,6 +138,7 @@ let internal ExecuteOperation op =
         if respondResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
             failwith "Error while responding activity task completed."
       
+        FlowSharp.Trace.ActivityCompleted activityType (respondRequest.Result) (pollRequest.TaskList)
 
 let rec public Loop() =
     Console.WriteLine("Enter command.")

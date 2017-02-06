@@ -35,5 +35,8 @@ let RegisterExample1() =
 let main argv = 
     RegisterExample1()
 
+    System.Diagnostics.Trace.Listeners.Clear()
+    System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore
+
     Loop()
     0 // return an integer exit code
