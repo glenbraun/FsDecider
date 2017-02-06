@@ -61,6 +61,7 @@
     <Compile Include="HistoryWalker.fs" />
     <Compile Include="ContextExpression.fs" />
     <Compile Include="ExecutionContextManager.fs" />
+    <Compile Include="Trace.fs" />
     <Compile Include="Builder.fs" />
     <Compile Include="AsyncDeciderActor.fs" />
     <Content Include="packages.config" />

@@ -551,7 +551,7 @@ module TestRemoveFromContext =
 
     let ``Test context for RemoveFromContext using MarkerRecordedAction``() =
         let MarkerRecorded = 
-            let markerName = "Test Marner"
+            let markerName = "Test Marker"
             markerName
 
         let event = MarkerRecordedEventAttributes()

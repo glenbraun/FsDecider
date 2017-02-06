@@ -308,8 +308,13 @@ let tests =
 
 [<EntryPoint>]
 let main argv = 
+    use log = System.IO.File.CreateText("..\\..\\log.txt")
+
+    System.Diagnostics.Trace.Listeners.Clear()
+    System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(log)) |> ignore
+
     TestConfiguration.ReverseOrder <- false
-    TestConfiguration.GenerateOfflineHistory <- true
+    TestConfiguration.GenerateOfflineHistory <- false
     TestConfiguration.IsConnected <- false
 
     //let tests = testCase "Record using do!"     <| TestRecordMarker.``Record Marker using do!``

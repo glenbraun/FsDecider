@@ -9,6 +9,7 @@ open FlowSharp.Actions
 open FlowSharp.HistoryWalker
 open FlowSharp.EventPatterns
 open FlowSharp.ExecutionContext
+open FlowSharp.Trace
 
 exception FlowSharpBuilderException of HistoryEvent option * string
 
@@ -18,10 +19,13 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
     let mutable blockFlag = false
     let mutable exceptionEvents = List.empty<int64>
 
+    do Trace.BuilderCreated DecisionTask ReverseOrder ContextManager
+
     let AddExceptionEventId (eventId:int64) =
         exceptionEvents <- eventId :: exceptionEvents
 
     let Wait() =
+        Trace.BuilderWait DecisionTask response
         blockFlag <- true
         response
 
@@ -46,6 +50,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
     new (decisionTask:DecisionTask, contextManager:IContextManager option) = Builder(decisionTask, false, contextManager)
 
     member this.Delay(f) =
+        Trace.BuilderDelay(DecisionTask)
+
         if DecisionTask.TaskToken = null then 
             // When PollForDecisionTask times out, the TaskToken is null. There's nothing to decide in this case so null is returned.
             (fun () -> null)
@@ -62,9 +68,12 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
     member this.Run(f) : RespondDecisionTaskCompletedRequest = 
         // Run is used to call the Delay function, making execution immediate which is what we want.
+        Trace.BuilderRun(DecisionTask)
         f()
 
-    member this.Zero() = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)
+    member this.Zero() = 
+        Trace.BuilderZero(DecisionTask)
+        new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)
 
     member this.Return(result:ReturnResult) =
         blockFlag <- true
@@ -73,6 +82,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | ReturnResult.CompleteWorkflowExecution(r) -> 
             // Look for possible return failures
             let exceptionEvent = walker.FindWorkflowException(EventType.CompleteWorkflowExecutionFailed, exceptionEvents)
+            
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CompleteWorkflowExecutionFailed)
 
             match (exceptionEvent) with
             | None -> 
@@ -94,6 +105,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | ReturnResult.CancelWorkflowExecution(details) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.CancelWorkflowExecutionFailed, exceptionEvents)
 
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CancelWorkflowExecutionFailed)
+
             match (exceptionEvent) with
             | None ->
                 let decision = new Decision();
@@ -114,6 +127,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         | ReturnResult.FailWorkflowExecution(reason, details) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.FailWorkflowExecutionFailed, exceptionEvents)
 
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.FailWorkflowExecutionFailed)
+            
             match (exceptionEvent) with
             | None ->
                 let decision = new Decision();
@@ -134,6 +149,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
         | ReturnResult.ContinueAsNewWorkflowExecution(attr) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.ContinueAsNewWorkflowExecutionFailed, exceptionEvents)
+
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.ContinueAsNewWorkflowExecutionFailed)
 
             match (exceptionEvent) with
             | None ->
@@ -182,53 +199,83 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.ScheduleActivityTaskDecisionAttributes <- attr
                 response.Decisions.Add(d)
 
-                f(ScheduleActivityTaskResult.Scheduling(attr))
+                let result = ScheduleActivityTaskResult.Scheduling(attr)
+
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
+                f(result)
             
             // Completed
             | SomeEventOfType(EventType.ActivityTaskCompleted) hev ->
                 let result = ScheduleActivityTaskResult.Completed(hev.ActivityTaskCompletedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
                 f(result)
 
             // Canceled
             | SomeEventOfType(EventType.ActivityTaskCanceled) hev ->
                 let result = ScheduleActivityTaskResult.Canceled(hev.ActivityTaskCanceledEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
                 f(result)
 
             // Failed
             | SomeEventOfType(EventType.ActivityTaskFailed) hev ->
                 let result = ScheduleActivityTaskResult.Failed(hev.ActivityTaskFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
                 f(result)
         
             // TimedOut
             | SomeEventOfType(EventType.ActivityTaskTimedOut) hev ->
                 let result = ScheduleActivityTaskResult.TimedOut(hev.ActivityTaskTimedOutEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
                 f(result)
 
             // ScheduleFailed
             | SomeEventOfType(EventType.ScheduleActivityTaskFailed) hev ->
                 let result = ScheduleActivityTaskResult.ScheduleFailed(hev.ScheduleActivityTaskFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
                 f(result)
 
             // Started
             | SomeEventOfType(EventType.ActivityTaskStarted) hev ->
-                f(ScheduleActivityTaskResult.Started(hev.ActivityTaskStartedEventAttributes, hev.ActivityTaskScheduledEventAttributes))
+                let result = ScheduleActivityTaskResult.Started(hev.ActivityTaskStartedEventAttributes, hev.ActivityTaskScheduledEventAttributes)
+                
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
+                f(result)
 
             // Scheduled
             | SomeEventOfType(EventType.ActivityTaskScheduled) hev ->
-                f(ScheduleActivityTaskResult.Scheduled(hev.ActivityTaskScheduledEventAttributes))
+                let result = ScheduleActivityTaskResult.Scheduled(hev.ActivityTaskScheduledEventAttributes)
+
+                Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result false
+
+                f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of ScheduleActivityTaskAction."))
 
         | ScheduleActivityTaskAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result true
             f(result)
 
     // Wait For Activity Task (do!)
     member this.Bind(WaitForActivityTaskAction.ScheduleResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderBindWaitForActivityTaskAction DecisionTask result
+
         match (result.IsFinished()) with 
         | true  -> f()
         | false -> Wait()
@@ -239,6 +286,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             results
             |> List.exists (fun r -> r.IsFinished())
 
+        Trace.BuilderBindWaitForAnyActivityTaskAction DecisionTask results anyFinished
+
         match anyFinished with
         | true  -> f()
         | false -> Wait()
@@ -248,6 +297,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         let allFinished = 
             results
             |> List.forall (fun r -> r.IsFinished())
+
+        Trace.BuilderBindWaitForAllActivityTaskAction DecisionTask results allFinished
 
         match allFinished with
         | true  -> f()
@@ -262,9 +313,12 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
     // Request Cancel Activity Task (let!)
     member this.Bind(RequestCancelActivityTaskAction.ScheduleResult(schedule), f:(RequestCancelActivityTaskResult -> RespondDecisionTaskCompletedRequest)) = 
+        let action = RequestCancelActivityTaskAction.ScheduleResult(schedule)
         match schedule with 
         // Scheduling
         | ScheduleActivityTaskResult.Scheduling(_) -> 
+            Trace.BuilderBindRequestCancelActivityTaskAction DecisionTask action None
+
             Wait()
 
         // ScheduleFailed
@@ -272,7 +326,11 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
         | _ -> 
             if (schedule.IsFinished()) then
-                f(RequestCancelActivityTaskResult.ActivityFinished)
+                let result = RequestCancelActivityTaskResult.ActivityFinished
+
+                Trace.BuilderBindRequestCancelActivityTaskAction DecisionTask action (Some(result))
+
+                f(result)
             else
                 let activityId = 
                     match schedule with
@@ -290,13 +348,25 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                     d.RequestCancelActivityTaskDecisionAttributes.ActivityId <- activityId
                     response.Decisions.Add(d)
 
-                    f(RequestCancelActivityTaskResult.Requesting)
+                    let result = RequestCancelActivityTaskResult.Requesting
+
+                    Trace.BuilderBindRequestCancelActivityTaskAction DecisionTask action (Some(result))
+
+                    f(result)
 
                 | SomeEventOfType(EventType.ActivityTaskCancelRequested) hev ->
-                    f(RequestCancelActivityTaskResult.CancelRequested(hev.ActivityTaskCancelRequestedEventAttributes))
+                    let result = RequestCancelActivityTaskResult.CancelRequested(hev.ActivityTaskCancelRequestedEventAttributes)
+
+                    Trace.BuilderBindRequestCancelActivityTaskAction DecisionTask action (Some(result))
+
+                    f(result)
 
                 | SomeEventOfType(EventType.RequestCancelActivityTaskFailed) hev ->
-                    f(RequestCancelActivityTaskResult.RequestCancelFailed(hev.RequestCancelActivityTaskFailedEventAttributes))
+                    let result = RequestCancelActivityTaskResult.RequestCancelFailed(hev.RequestCancelActivityTaskFailedEventAttributes)
+
+                    Trace.BuilderBindRequestCancelActivityTaskAction DecisionTask action (Some(result))
+
+                    f(result)
 
                 | _ -> raise (FlowSharpBuilderException(cancelHistory, "Unexpected event history of RequestCancelActivityTaskAction."))
 
@@ -322,59 +392,76 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.StartChildWorkflowExecutionDecisionAttributes <- attr
                 response.Decisions.Add(d)
                 
-                f(StartChildWorkflowExecutionResult.Starting(d.StartChildWorkflowExecutionDecisionAttributes))
+                let result = StartChildWorkflowExecutionResult.Starting(d.StartChildWorkflowExecutionDecisionAttributes)
+
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
+                
+                f(result)
 
             // Completed
             | SomeEventOfType(EventType.ChildWorkflowExecutionCompleted) hev ->
                 let result = StartChildWorkflowExecutionResult.Completed(hev.ChildWorkflowExecutionCompletedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
                 f(result)
                  
             // Canceled
             | SomeEventOfType(EventType.ChildWorkflowExecutionCanceled) hev ->
                 let result = StartChildWorkflowExecutionResult.Canceled(hev.ChildWorkflowExecutionCanceledEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
             // TimedOut
             | SomeEventOfType(EventType.ChildWorkflowExecutionTimedOut) hev ->
                 let result = StartChildWorkflowExecutionResult.TimedOut(hev.ChildWorkflowExecutionTimedOutEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
             // Failed
             | SomeEventOfType(EventType.ChildWorkflowExecutionFailed) hev ->
                 let result = StartChildWorkflowExecutionResult.Failed(hev.ChildWorkflowExecutionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
             // Terminated
             | SomeEventOfType(EventType.ChildWorkflowExecutionTerminated) hev ->
                 let result = StartChildWorkflowExecutionResult.Terminated(hev.ChildWorkflowExecutionTerminatedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
             // StartChildWorkflowExecutionFailed
             | SomeEventOfType(EventType.StartChildWorkflowExecutionFailed) hev ->
                 let result = StartChildWorkflowExecutionResult.StartFailed(hev.StartChildWorkflowExecutionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
             // Started
             | SomeEventOfType(EventType.ChildWorkflowExecutionStarted) hev ->
-                f(StartChildWorkflowExecutionResult.Started(hev.ChildWorkflowExecutionStartedEventAttributes))
+                let result = StartChildWorkflowExecutionResult.Started(hev.ChildWorkflowExecutionStartedEventAttributes)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
+                f(result)
 
             // Initiated
             | SomeEventOfType(EventType.StartChildWorkflowExecutionInitiated) hev ->
-                f(StartChildWorkflowExecutionResult.Initiated(hev.StartChildWorkflowExecutionInitiatedEventAttributes))
+                let result = StartChildWorkflowExecutionResult.Initiated(hev.StartChildWorkflowExecutionInitiatedEventAttributes)
+                Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
+                f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of StartChildWorkflowExecutionAction."))
 
         | StartChildWorkflowExecutionAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result true
             f(result)
 
     // Wait For Child Workflow Execution (do!)
     member this.Bind(WaitForChildWorkflowExecutionAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderBindWaitForChildWorkflowExecutionAction DecisionTask result
+
         match (result.IsFinished()) with 
         | true  -> f()
         | false -> Wait() 
@@ -385,6 +472,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             results
             |> List.exists (fun r -> r.IsFinished())
 
+        Trace.BuilderBindWaitForAnyChildWorkflowExecutionAction DecisionTask results anyFinished
+
         match anyFinished with
         | true  -> f()
         | false -> Wait()
@@ -394,6 +483,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         let allFinished = 
             results
             |> List.forall (fun r -> r.IsFinished())
+
+        Trace.BuilderBindWaitForAllChildWorkflowExecutionAction DecisionTask results allFinished
 
         match allFinished with
         | true  -> f()
@@ -408,6 +499,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
     // Request Cancel External Workflow Execution (let!)
     member this.Bind(RequestCancelExternalWorkflowExecutionAction.Attributes(attr), f:(RequestCancelExternalWorkflowExecutionResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = RequestCancelExternalWorkflowExecutionAction.Attributes(attr)
+
         let combinedHistory = walker.FindRequestCancelExternalWorkflowExecution(attr)
         
         match (combinedHistory) with
@@ -417,25 +510,32 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             d.RequestCancelExternalWorkflowExecutionDecisionAttributes <- attr
             response.Decisions.Add(d)
                 
-            f(RequestCancelExternalWorkflowExecutionResult.Requesting(attr))
+            let result = RequestCancelExternalWorkflowExecutionResult.Requesting(attr)
+            Trace.BuilderBindRequestCancelExternalWorkflowExecutionAction DecisionTask action result
+            f(result)
             
         // Request Delivered
         | SomeEventOfType(EventType.ExternalWorkflowExecutionCancelRequested) hev ->
-            f(RequestCancelExternalWorkflowExecutionResult.Delivered(hev.ExternalWorkflowExecutionCancelRequestedEventAttributes))
+            let result = RequestCancelExternalWorkflowExecutionResult.Delivered(hev.ExternalWorkflowExecutionCancelRequestedEventAttributes)
+            f(result)
 
         // Request Failed
         | SomeEventOfType(EventType.RequestCancelExternalWorkflowExecutionFailed) hev ->
-            f(RequestCancelExternalWorkflowExecutionResult.Failed(hev.RequestCancelExternalWorkflowExecutionFailedEventAttributes))
+            let result = RequestCancelExternalWorkflowExecutionResult.Failed(hev.RequestCancelExternalWorkflowExecutionFailedEventAttributes)
+            Trace.BuilderBindRequestCancelExternalWorkflowExecutionAction DecisionTask action result
+            f(result)
  
         // Request Initiated
         | SomeEventOfType(EventType.RequestCancelExternalWorkflowExecutionInitiated) hev ->
-            f(RequestCancelExternalWorkflowExecutionResult.Initiated(hev.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes))
+            let result = RequestCancelExternalWorkflowExecutionResult.Initiated(hev.RequestCancelExternalWorkflowExecutionInitiatedEventAttributes)
+            Trace.BuilderBindRequestCancelExternalWorkflowExecutionAction DecisionTask action result
+            f(result)
 
         | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of RequestCancelExternalWorkflowExecutionAction."))
 
     // Schedule Lambda Function (do!)
     member this.Bind(action:ScheduleLambdaFunctionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
-        let DoFunction (result:ScheduleLambdaFunctionResult) : RespondDecisionTaskCompletedRequest =            
+        let DoFunction (result:ScheduleLambdaFunctionResult) : RespondDecisionTaskCompletedRequest =
             f()
 
         this.Bind(action, DoFunction)
@@ -455,53 +555,67 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.ScheduleLambdaFunctionDecisionAttributes <- attr
                 response.Decisions.Add(d)
                 
-                f(ScheduleLambdaFunctionResult.Scheduling(attr))
+                let result = ScheduleLambdaFunctionResult.Scheduling(attr)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
+                f(result)
 
             // Lambda Function Completed
             | SomeEventOfType(EventType.LambdaFunctionCompleted) hev -> 
                 let result = ScheduleLambdaFunctionResult.Completed(hev.LambdaFunctionCompletedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
                 f(result)
 
             // Lambda Function Failed
             | SomeEventOfType(EventType.LambdaFunctionFailed) hev -> 
                 let result = ScheduleLambdaFunctionResult.Failed(hev.LambdaFunctionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
                 f(result)
 
             // Lambda Function TimedOut
             | SomeEventOfType(EventType.LambdaFunctionTimedOut) hev -> 
                 let result = ScheduleLambdaFunctionResult.TimedOut(hev.LambdaFunctionTimedOutEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
                 f(result)
 
             // StartLambdaFunctionFailed
             | SomeEventOfType(EventType.StartLambdaFunctionFailed) hev -> 
                 let result = ScheduleLambdaFunctionResult.StartFailed(hev.StartLambdaFunctionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
                 f(result)
 
             // ScheduleLambdaFunctionFailed
             | SomeEventOfType(EventType.ScheduleLambdaFunctionFailed) hev -> 
                 let result = ScheduleLambdaFunctionResult.ScheduleFailed(hev.ScheduleLambdaFunctionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
                 f(result)
 
             // LambdaFunctionStarted
             | SomeEventOfType(EventType.LambdaFunctionStarted) hev ->
-                f(ScheduleLambdaFunctionResult.Started(hev.LambdaFunctionStartedEventAttributes, hev.LambdaFunctionScheduledEventAttributes))
+                let result = ScheduleLambdaFunctionResult.Started(hev.LambdaFunctionStartedEventAttributes, hev.LambdaFunctionScheduledEventAttributes)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
+                f(result)
 
             // LambdaFunctionScheduled
             | SomeEventOfType(EventType.LambdaFunctionScheduled) hev ->
-                f(ScheduleLambdaFunctionResult.Scheduled(hev.LambdaFunctionScheduledEventAttributes))
+                let result = ScheduleLambdaFunctionResult.Scheduled(hev.LambdaFunctionScheduledEventAttributes)
+                Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
+                f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of ScheduleLambdaFunctionAction."))
 
         | ScheduleLambdaFunctionAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result true
             f(result)
 
     // Wait For Lambda Function (do!)
     member this.Bind(WaitForLambdaFunctionAction.ScheduleResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderBindWaitForLambdaFunctionAction DecisionTask result
+
         match (result.IsFinished()) with 
         | true  -> f()
         | false -> Wait() 
@@ -512,6 +626,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             results
             |> List.exists (fun r -> r.IsFinished())
 
+        Trace.BuilderBindWaitForAnyLambdaFunctionAction DecisionTask results anyFinished
+
         match anyFinished with
         | true  -> f()
         | false -> Wait()
@@ -521,6 +637,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
         let allFinished = 
             results
             |> List.forall (fun r -> r.IsFinished())
+
+        Trace.BuilderBindWaitForAllLambdaFunctionAction DecisionTask results allFinished
 
         match allFinished with
         | true  -> f()
@@ -548,37 +666,48 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.StartTimerDecisionAttributes <- attr
                 response.Decisions.Add(d)
                 
-                f(StartTimerResult.Starting(d.StartTimerDecisionAttributes))
+                let result = StartTimerResult.Starting(d.StartTimerDecisionAttributes)
+                Trace.BuilderBindStartTimerAction DecisionTask action result false
+                f(result)
 
             // Fired
             | SomeEventOfType(EventType.TimerFired) hev ->
                 let result = StartTimerResult.Fired(hev.TimerFiredEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartTimerAction DecisionTask action result false
                 f(result)
 
             // Canceled
             | SomeEventOfType(EventType.TimerCanceled) hev ->
                 let result = StartTimerResult.Canceled(hev.TimerCanceledEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartTimerAction DecisionTask action result false
                 f(result)
 
             // StartTimerFailed
             | SomeEventOfType(EventType.StartTimerFailed) hev ->
                 let result = StartTimerResult.StartTimerFailed(hev.StartTimerFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindStartTimerAction DecisionTask action result false
                 f(result)
 
             // TimerStarted
             | SomeEventOfType(EventType.TimerStarted) hev ->
-                f(StartTimerResult.Started(hev.TimerStartedEventAttributes))
+                let result = StartTimerResult.Started(hev.TimerStartedEventAttributes)
+                Trace.BuilderBindStartTimerAction DecisionTask action result false
+                f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of StartTimerAction."))
 
         | StartTimerAction.ResultFromContext(_, result) -> 
+            Trace.BuilderBindStartTimerAction DecisionTask action result true
             f(result)
 
     // Wait For Timer (do!)
     member this.Bind(WaitForTimerAction.StartResult(result), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let action = WaitForTimerAction.StartResult(result)
+        Trace.BuilderBindWaitForTimerAction DecisionTask action
+
         match result with 
         // Canceled | Fired | StartTimerFailed
         | StartTimerResult.Canceled(_)
@@ -599,19 +728,31 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
     // Cancel Timer (let!)
     member this.Bind(CancelTimerAction.StartResult(result), f:(CancelTimerResult -> RespondDecisionTaskCompletedRequest)) =
+        let action = CancelTimerAction.StartResult(result)
+
         match result with 
         // Starting
         | StartTimerResult.Starting(_) -> 
+            Trace.BuilderBindCancelTimerAction DecisionTask action None
             Wait()
 
         // Canceled
-        | StartTimerResult.Canceled(attr) -> f(CancelTimerResult.Canceled(attr))
+        | StartTimerResult.Canceled(attr) -> 
+            let result = CancelTimerResult.Canceled(attr)
+            Trace.BuilderBindCancelTimerAction DecisionTask action (Some(result))
+            f(result)
 
         // Fired
-        | StartTimerResult.Fired(attr) -> f(CancelTimerResult.Fired(attr))
+        | StartTimerResult.Fired(attr) -> 
+            let result = CancelTimerResult.Fired(attr)
+            Trace.BuilderBindCancelTimerAction DecisionTask action (Some(result))
+            f(result)
 
         // StartTimerFailed
-        | StartTimerResult.StartTimerFailed(attr) -> f(CancelTimerResult.StartTimerFailed(attr))
+        | StartTimerResult.StartTimerFailed(attr) -> 
+            let result = CancelTimerResult.StartTimerFailed(attr)
+            Trace.BuilderBindCancelTimerAction DecisionTask action (Some(result))
+            f(result)
 
         // Started
         | StartTimerResult.Started(attr) -> 
@@ -625,11 +766,15 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.CancelTimerDecisionAttributes <- new CancelTimerDecisionAttributes(TimerId=attr.TimerId)
                 response.Decisions.Add(d)
 
-                f(CancelTimerResult.Canceling)
+                let result = CancelTimerResult.Canceling
+                Trace.BuilderBindCancelTimerAction DecisionTask action (Some(result))
+                f(result)
 
             // CancelTimerFailed
             | SomeEventOfType(EventType.CancelTimerFailed) hev ->
-                f(CancelTimerResult.CancelTimerFailed(hev.CancelTimerFailedEventAttributes))
+                let result = CancelTimerResult.CancelTimerFailed(hev.CancelTimerFailedEventAttributes)
+                Trace.BuilderBindCancelTimerAction DecisionTask action (Some(result))
+                f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of CancelTimerAction."))
 
@@ -643,23 +788,28 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             match combinedHistory with
             // NotRecorded
             | None ->
-                f(MarkerRecordedResult.NotRecorded)
+                let result = MarkerRecordedResult.NotRecorded
+                Trace.BuilderBindMarkerRecordedAction DecisionTask action result false
+                f(result)
 
             // RecordMarkerFailed
             | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
                 let result = MarkerRecordedResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(markerName, result)
+                Trace.BuilderBindMarkerRecordedAction DecisionTask action result false
                 f(result)
 
             // MarkerRecorded
             | SomeEventOfType(EventType.MarkerRecorded) hev ->
                 let result = MarkerRecordedResult.Recorded(hev.MarkerRecordedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(markerName, result)
+                Trace.BuilderBindMarkerRecordedAction DecisionTask action result false
                 f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of MarkerRecordedAction."))
 
         | MarkerRecordedAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindMarkerRecordedAction DecisionTask action result true
             f(result)
 
     // Record Marker (do!)
@@ -684,23 +834,28 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.RecordMarkerDecisionAttributes <- attr
                 response.Decisions.Add(d)
 
-                f(RecordMarkerResult.Recording)
+                let result = RecordMarkerResult.Recording
+                Trace.BuilderBindRecordMarkerAction DecisionTask action result false
+                f(result)
             
             // RecordMarkerFailed
             | SomeEventOfType(EventType.RecordMarkerFailed) hev ->
                 let result = RecordMarkerResult.RecordMarkerFailed(hev.RecordMarkerFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindRecordMarkerAction DecisionTask action result false
                 f(result)
 
             // MarkerRecorded
             | SomeEventOfType(EventType.MarkerRecorded) hev ->
                 let result = RecordMarkerResult.Recorded(hev.MarkerRecordedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindRecordMarkerAction DecisionTask action result false
                 f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of RecordMarkerAction."))
 
         | RecordMarkerAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindRecordMarkerAction DecisionTask action result true
             f(result)
 
     // Signal External Workflow Execution (do!)
@@ -725,27 +880,35 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 d.DecisionType <- DecisionType.SignalExternalWorkflowExecution
                 d.SignalExternalWorkflowExecutionDecisionAttributes <- attr
                 response.Decisions.Add(d)
-                f(SignalExternalWorkflowExecutionResult.Signaling)
+
+                let result = SignalExternalWorkflowExecutionResult.Signaling
+                Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result false
+                f(result)
 
             // Signaled
             | SomeEventOfType(EventType.ExternalWorkflowExecutionSignaled) hev ->
                 let result = SignalExternalWorkflowExecutionResult.Signaled(hev.ExternalWorkflowExecutionSignaledEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
             // Failed
             | SomeEventOfType(EventType.SignalExternalWorkflowExecutionFailed) hev ->
                 let result = SignalExternalWorkflowExecutionResult.Failed(hev.SignalExternalWorkflowExecutionFailedEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(attr, result)
+                Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result false
                 f(result)
         
             // Initiated
             | SomeEventOfType(EventType.SignalExternalWorkflowExecutionInitiated) hev ->
-                f(SignalExternalWorkflowExecutionResult.Initiated(hev.SignalExternalWorkflowExecutionInitiatedEventAttributes))
+                let result = SignalExternalWorkflowExecutionResult.Initiated(hev.SignalExternalWorkflowExecutionInitiatedEventAttributes)
+                Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result false
+                f(result)
 
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of SignalExternalWorkflowExecutionAction."))
 
         | SignalExternalWorkflowExecutionAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result true
             f(result)
             
     // Workflow Execution Signaled (let!)
@@ -758,17 +921,21 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             match combinedHistory with
             // Not Signaled
             | None ->
-                f(WorkflowExecutionSignaledResult.NotSignaled)
+                let result = WorkflowExecutionSignaledResult.NotSignaled
+                Trace.BuilderBindWorkflowExecutionSignaledAction DecisionTask action result false
+                f(result)
 
             // Signaled
             | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
                 let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
+                Trace.BuilderBindWorkflowExecutionSignaledAction DecisionTask action result false
                 f(result)
         
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WorkflowExecutionSignaledAction."))
 
         | WorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindWorkflowExecutionSignaledAction DecisionTask action result true
             f(result)
 
     // Wait For Workflow Execution Signaled (do!)
@@ -781,76 +948,93 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             match combinedHistory with
             // Not Signaled, keep waiting
             | None ->
+                Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action None false
                 Wait()
 
             // Signaled
             | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
                 let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
                 if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
+                Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) false
                 f(result)
         
             | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WaitForWorkflowExecutionSignaledAction."))
 
         | WaitForWorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) true
             f(result)
 
     // Workflow Execution Cancel Requested (let!)
-    member this.Bind(WorkflowExecutionCancelRequestedAction.Attributes(), f:(WorkflowExecutionCancelRequestedResult -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(action:WorkflowExecutionCancelRequestedAction, f:(WorkflowExecutionCancelRequestedResult -> RespondDecisionTaskCompletedRequest)) =
         let cancelRequestedEvent = walker.FindWorkflowExecutionCancelRequested()
 
         match cancelRequestedEvent with
         // NotRequested
         | None ->
-            f(WorkflowExecutionCancelRequestedResult.NotRequested)            
+            let result = WorkflowExecutionCancelRequestedResult.NotRequested
+            Trace.BuilderBindWorkflowExecutionCancelRequestedAction DecisionTask action result
+            f(result)
 
         // Workflow Cancel Requsted
         | SomeEventOfType(EventType.WorkflowExecutionCancelRequested) hev ->
-            f(WorkflowExecutionCancelRequestedResult.CancelRequested(hev.WorkflowExecutionCancelRequestedEventAttributes))
+            let result = WorkflowExecutionCancelRequestedResult.CancelRequested(hev.WorkflowExecutionCancelRequestedEventAttributes)
+            Trace.BuilderBindWorkflowExecutionCancelRequestedAction DecisionTask action result
+            f(result)
             
         | _ -> raise (FlowSharpBuilderException(cancelRequestedEvent, "Unexpected event history of WorkflowExecutionCancelRequestedAction."))
 
     // Get Workflow Execution Input (let!)
-    member this.Bind(GetWorkflowExecutionInputAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(action:GetWorkflowExecutionInputAction, f:(string -> RespondDecisionTaskCompletedRequest)) =
 
         let startedEvent = walker.FindWorkflowExecutionStarted()
 
         match (startedEvent) with
         | None ->
+            Trace.BuilderBindGetWorkflowExecutionInputAction DecisionTask action null
             f(null)
 
         | SomeEventOfType(EventType.WorkflowExecutionStarted) hev ->
-            f(hev.WorkflowExecutionStartedEventAttributes.Input)
+            let input = hev.WorkflowExecutionStartedEventAttributes.Input
+            Trace.BuilderBindGetWorkflowExecutionInputAction DecisionTask action input
+            f(input)
 
         | _ -> raise (FlowSharpBuilderException(startedEvent, "Unexpected event history of GetWorkflowExecutionInputAction."))
 
     // Get Execution Context (let!)
-    member this.Bind(GetExecutionContextAction.Attributes(), f:(string -> RespondDecisionTaskCompletedRequest)) =
+    member this.Bind(action:GetExecutionContextAction, f:(string -> RespondDecisionTaskCompletedRequest)) =
 
         let completedEvent = walker.FindLatestDecisionTaskCompleted()
 
         match (completedEvent) with
         | None ->
+            Trace.BuilderBindGetExecutionContextAction DecisionTask action null
             f(null)
 
         | SomeEventOfType(EventType.DecisionTaskCompleted) hev ->
-            f(hev.DecisionTaskCompletedEventAttributes.ExecutionContext)
+            let context = hev.DecisionTaskCompletedEventAttributes.ExecutionContext
+            Trace.BuilderBindGetExecutionContextAction DecisionTask action context
+            f(context)
 
         | _ -> raise (FlowSharpBuilderException(completedEvent, "Unexpected event history of GetExecutionContextAction."))
 
     // Set Execution Context (do!)
     member this.Bind(SetExecutionContextAction.Attributes(context), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderBindSetExecutionContextAction DecisionTask (SetExecutionContextAction.Attributes(context))
         response.ExecutionContext <- context
         f()
 
     // Remove From Context (do!)
     member this.Bind(action:RemoveFromContextAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderBindRemoveFromContextAction DecisionTask action
         if ContextManager.IsSome then ContextManager.Value.Remove(action)
         f()
 
     // For Loop
     member this.For(enumeration:seq<'T>, f:(_ -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderForLoop DecisionTask
 
         let processForBlock x = 
+            Trace.BuilderForLoopIteration DecisionTask blockFlag
             if not blockFlag then f(x) |> ignore
             (not blockFlag)
 
@@ -860,27 +1044,35 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
     // While Loop
     member this.While(condition:(unit -> bool), f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderWhileLoop DecisionTask
+
         while (not blockFlag) && condition() do
+            Trace.BuilderWhileLoopIteration DecisionTask blockFlag
             f() |> ignore
 
     // Combine
     member this.Combine(exprBefore, fAfter) =
         // We assume the exprBefore decisions have been added to the response already
         // Just need to run the expression after this, which will add their decisions while executing
+        Trace.BuilderCombine DecisionTask blockFlag
         if blockFlag then response else fAfter()
 
     // Try Finally
     member this.TryFinally(exprInside:(unit -> RespondDecisionTaskCompletedRequest), exprFinally:(unit -> unit)) =
+        Trace.BuilderTryFinallyTry DecisionTask
         try 
             exprInside()
         finally
+            Trace.BuilderTryFinallyFinally DecisionTask blockFlag
             if not blockFlag then exprFinally()
 
     // Try With
     member this.TryWith(exprInside:(unit -> RespondDecisionTaskCompletedRequest), exprWith:(Exception -> RespondDecisionTaskCompletedRequest)) =
+        Trace.BuilderTryWithTry DecisionTask
         try
             exprInside()
         with
         | e ->
+            Trace.BuilderTryWithWith DecisionTask e
             exprWith e
 
