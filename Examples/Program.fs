@@ -8,32 +8,47 @@ open FlowSharp
 open FlowSharp.Examples.CommandInterpreter
 
 (*
-sw a1  // start workflow for example as (activity in series) (grab runid and make sure same for all below)
-dt a1  // do the decision task for a1  (this polls, gets the decision and responds)
-at a   // do the activity for at (this polls, and completes activity)
-dt a1  // do the decision task for a1
-h      // gets the current history for the active workflow
+How to use the command iterpreter
+    When you run this project a command window will appear
+    Type a command and hit enter
+    Most commands are two parts, the command name and an argument. For example, the command 'sw hello'
+    will run the start workflow command (sw) for the example registered with the key of 'hello'.
+
+    Each example has a comment directly above its registration function which gives the sequence of 
+    commands to type to complete the example. Typing commands different from the ones provided will produce
+    unspecified results. 
+
+    The following commands are supported.
+        sw <key>            Start workflow execution for the example registered with key.
+        dt <key>            Poll for a Decision Task and use the decider function registered with key.
+        at <key>            Poll for Activity Task and respond with based on the registered key.
+        h                   List the current History events for the latest workflow execution.
 
 *)
 
 
-let RegisterExample1() =
-    let start = Operation.StartWorkflowExecution(ExamplesConfiguration.WorkflowType, "FlowSharp Example 1", None, None)
+// Example 1 : Hello FlowSharp
+//      This example demonstrates a simple FlowSharp decider for a workflow with one simple action, it 
+//      completes with a result of "Hello FlowSharp"
+// To Run, start the project and type these commands into the command line interpreter.
+//    sw hello
+//    dt hello
+let RegisterHelloFlowSharp() =
+    // This creates a decider function using the FlowSharp decider builder. This
+    // decider expression simply completes the workflow with a result of "Hello FlowSharp"
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt, false) {
-            return "OK"            
+            return "Hello FlowSharp"            
         }
 
-    AddOperation (Command.StartWorkflow("e1")) start
-    AddOperation (Command.DecisionTask("e1")) (Operation.DecisionTask(decider, None))
-    // To Run: 
-    //    sw e1
-    //    dt e1
-
+    // The code below supports the example runner
+    let start = Operation.StartWorkflowExecution(ExamplesConfiguration.WorkflowType, "Hello FlowSharp example", None, None)
+    AddOperation (Command.StartWorkflow("hello")) start
+    AddOperation (Command.DecisionTask("hello")) (Operation.DecisionTask(decider, None))
 
 [<EntryPoint>]
 let main argv = 
-    RegisterExample1()
+    RegisterHelloFlowSharp()
 
     System.Diagnostics.Trace.Listeners.Clear()
     System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore

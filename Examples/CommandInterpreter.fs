@@ -13,6 +13,7 @@ type Command =
     | SignalWorkflow of string
     | Error of string
     | Quit
+    | History
 
 type Operation =
     | StartWorkflowExecution of workflow:WorkflowType * 
@@ -25,9 +26,10 @@ type Operation =
     | ActivityTask of ActivityType *
                       (ActivityTask -> string) option *
                       TaskList option
+    | History
     
 let mutable internal OperationMap = Map.empty<Command, Operation>
-let mutable internal CurrentRunId = String.Empty
+let mutable internal CurrentWorkflowExecution : WorkflowExecution = null
 
 let public AddOperation cmd op =
     OperationMap <- Map.add cmd op OperationMap
@@ -73,6 +75,12 @@ let internal ParseCommand chars =
         | (a, []) when a.Length > 0 -> Command.ActivityTask( a )
         | _ -> Command.Error("Expected 'at {argument}'")
 
+    | 'h' :: t ->
+        let chars = SkipWhiteSpace t
+        match chars with
+        | [] -> Command.History
+        | _ -> Command.Error("Expected 'h'")
+
     | 'q' :: t ->
         let chars = SkipWhiteSpace t
         match chars with
@@ -100,9 +108,9 @@ let internal ExecuteOperation op =
         if startResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
             failwith "Error while starting workflow execution."
 
-        CurrentRunId <- startResponse.Run.RunId
+        CurrentWorkflowExecution <- WorkflowExecution(WorkflowId=workflowId, RunId=startResponse.Run.RunId)
 
-        FlowSharp.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input CurrentRunId 
+        FlowSharp.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input (startResponse.Run.RunId) 
 
     | Operation.DecisionTask(decider, tasklist) ->
         let pollRequest = PollForDecisionTaskRequest()
@@ -140,7 +148,23 @@ let internal ExecuteOperation op =
       
         FlowSharp.Trace.ActivityCompleted activityType (respondRequest.Result) (pollRequest.TaskList)
 
+    | Operation.History ->
+        if CurrentWorkflowExecution = null then
+            System.Diagnostics.Trace.TraceInformation("Unable to get history. No workflow has been started yet.")
+        else
+            let request = GetWorkflowExecutionHistoryRequest()
+            request.Domain <- ExamplesConfiguration.Domain
+            request.Execution <- CurrentWorkflowExecution
+        
+            let response = swf.GetWorkflowExecutionHistory(request)
+
+            if response.HttpStatusCode <> System.Net.HttpStatusCode.OK then
+                failwith "Error while getting workflow execution history."
+
+            FlowSharp.Trace.History CurrentWorkflowExecution (response.History)
+
 let rec public Loop() =
+    Console.WriteLine("------------------------------------------------")
     Console.WriteLine("Enter command.")
     let s = Console.ReadLine()
     let command = ParseCommand(s |> List.ofSeq)
@@ -149,6 +173,9 @@ let rec public Loop() =
 
     match command with
     | Command.Quit -> ()
+    | Command.History -> 
+        ExecuteOperation (Operation.History)
+        Loop()
     | Command.Error(_) -> Loop()
     | cmd -> 
         match (Map.tryFind cmd OperationMap) with

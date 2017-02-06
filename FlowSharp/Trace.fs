@@ -21,7 +21,7 @@ module Trace =
 
         static member val public WriteWorkflowExecution = 
             fun (w:WorkflowExecution) -> 
-                sprintf """WorkflowExecution(RunId="%s", WorkflowId="%s")""" w.RunId w.WorkflowId
+                sprintf """WorkflowExecution(WorkflowId="%s", RunId="%s")""" w.WorkflowId w.RunId
             with get, set
 
         static member val public WriteWorkflowType = 
@@ -566,3 +566,23 @@ module Trace =
                     e
         System.Diagnostics.Trace.TraceInformation(ti)
 
+    let History (we:WorkflowExecution) (history:History) = 
+        let rec Events i (s:string) =
+            if i = history.Events.Count then
+                s
+            else
+                let ns = 
+                    sprintf """%s
+                        %i      %s"""
+                        s
+                        (history.Events.[i].EventId)
+                        (history.Events.[i].EventType.ToString())
+
+                Events (i+1) ns
+        
+        let ti = sprintf """History for %s
+                    %s"""
+                    (TraceWriter.WriteWorkflowExecution we)
+                    (Events 0 "")
+        System.Diagnostics.Trace.TraceInformation(ti)
+            
