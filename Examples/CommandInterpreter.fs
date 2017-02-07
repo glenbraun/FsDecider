@@ -6,6 +6,8 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
+open FlowSharp.UnitTests
+
 type Command =
     | StartWorkflow of string
     | DecisionTask of string
@@ -90,17 +92,17 @@ let internal ParseCommand chars =
     | _ -> Command.Error("Unrecognized command")
 
 let internal ExecuteOperation op =
-    use swf = ExamplesConfiguration.GetSwfClient()
+    use swf = TestConfiguration.GetSwfClient()
     
     match op with
     | Operation.StartWorkflowExecution(workflowType, workflowId, tasklist, input) ->
         let startRequest = StartWorkflowExecutionRequest()
         startRequest.ChildPolicy <- ChildPolicy.TERMINATE
-        startRequest.Domain <- ExamplesConfiguration.Domain
-        startRequest.ExecutionStartToCloseTimeout <- ExamplesConfiguration.TwentyMinuteTimeout
+        startRequest.Domain <- TestConfiguration.Domain
+        startRequest.ExecutionStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout
         startRequest.Input <- if input.IsSome then input.Value else null
-        startRequest.TaskList <- if tasklist.IsSome then tasklist.Value else ExamplesConfiguration.TaskList
-        startRequest.TaskStartToCloseTimeout <- ExamplesConfiguration.TwentyMinuteTimeout
+        startRequest.TaskList <- if tasklist.IsSome then tasklist.Value else TestConfiguration.TaskList
+        startRequest.TaskStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout
         startRequest.WorkflowId <- workflowId
         startRequest.WorkflowType <- workflowType
 
@@ -114,9 +116,9 @@ let internal ExecuteOperation op =
 
     | Operation.DecisionTask(decider, tasklist) ->
         let pollRequest = PollForDecisionTaskRequest()
-        pollRequest.Domain <- ExamplesConfiguration.Domain
-        pollRequest.Identity <- ExamplesConfiguration.Identity
-        pollRequest.TaskList <- if tasklist.IsSome then tasklist.Value else ExamplesConfiguration.TaskList
+        pollRequest.Domain <- TestConfiguration.Domain
+        pollRequest.Identity <- TestConfiguration.Identity
+        pollRequest.TaskList <- if tasklist.IsSome then tasklist.Value else TestConfiguration.TaskList
         
         let pollResponse = swf.PollForDecisionTask(pollRequest)
         if pollResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
@@ -130,9 +132,9 @@ let internal ExecuteOperation op =
     
     | Operation.ActivityTask(activityType, resultFunction, tasklist) ->
         let pollRequest = PollForActivityTaskRequest()
-        pollRequest.Domain <- ExamplesConfiguration.Domain
-        pollRequest.Identity <- ExamplesConfiguration.Identity
-        pollRequest.TaskList <- if tasklist.IsSome then tasklist.Value else ExamplesConfiguration.TaskList
+        pollRequest.Domain <- TestConfiguration.Domain
+        pollRequest.Identity <- TestConfiguration.Identity
+        pollRequest.TaskList <- if tasklist.IsSome then tasklist.Value else TestConfiguration.TaskList
         
         let pollResponse = swf.PollForActivityTask(pollRequest)
         if pollResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
@@ -153,7 +155,7 @@ let internal ExecuteOperation op =
             System.Diagnostics.Trace.TraceInformation("Unable to get history. No workflow has been started yet.")
         else
             let request = GetWorkflowExecutionHistoryRequest()
-            request.Domain <- ExamplesConfiguration.Domain
+            request.Domain <- TestConfiguration.Domain
             request.Execution <- CurrentWorkflowExecution
         
             let response = swf.GetWorkflowExecutionHistory(request)

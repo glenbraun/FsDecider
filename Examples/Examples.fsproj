@@ -55,7 +55,6 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="ExamplesConfiguration.fs" />
     <Compile Include="CommandInterpreter.fs" />
     <Compile Include="ActivityExamples.fs" />
     <Compile Include="Program.fs" />
@@ -63,6 +62,11 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UnitTests\UnitTests.fsproj">
+      <Name>UnitTests</Name>
+      <Project>{0a139c2d-fd75-4784-a0a6-19193d409934}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="AWSSDK.Core">
       <HintPath>..\packages\AWSSDK.Core.3.3.8\lib\net45\AWSSDK.Core.dll</HintPath>
       <Private>True</Private>

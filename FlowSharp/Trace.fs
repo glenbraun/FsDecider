@@ -21,12 +21,16 @@ module Trace =
 
         static member val public WriteWorkflowExecution = 
             fun (w:WorkflowExecution) -> 
-                sprintf """WorkflowExecution(WorkflowId="%s", RunId="%s")""" w.WorkflowId w.RunId
+                match w with
+                | null  -> "null"
+                | _     -> sprintf """WorkflowExecution(WorkflowId="%s", RunId="%s")""" w.WorkflowId w.RunId
             with get, set
 
         static member val public WriteWorkflowType = 
             fun (w:WorkflowType) -> 
-                sprintf """WorkflowType(Name="%s", Version="%s")""" w.Name w.Version
+                match w with
+                | null  -> "null"
+                | _     -> sprintf """WorkflowType(Name="%s", Version="%s")""" w.Name w.Version
             with get, set
 
         static member val public WriteActivityType = 

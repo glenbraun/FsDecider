@@ -6,6 +6,7 @@ open Amazon.SimpleWorkflow.Model
 
 open FlowSharp
 open FlowSharp.Examples.CommandInterpreter
+open FlowSharp.UnitTests
 
 (*
 How to use the command iterpreter
@@ -42,13 +43,19 @@ let RegisterHelloFlowSharp() =
         }
 
     // The code below supports the example runner
-    let start = Operation.StartWorkflowExecution(ExamplesConfiguration.WorkflowType, "Hello FlowSharp example", None, None)
+    let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Hello FlowSharp example", None, None)
     AddOperation (Command.StartWorkflow("hello")) start
     AddOperation (Command.DecisionTask("hello")) (Operation.DecisionTask(decider, None))
 
 [<EntryPoint>]
 let main argv = 
+    TestConfiguration.GetSwfClient  <- fun () -> new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2) :> IAmazonSimpleWorkflow
+    TestConfiguration.Domain        <- "FlowSharp"
+    TestConfiguration.WorkflowType  <- WorkflowType(Name="FlowSharp Unit Test Workflow", Version="1")
+    TestConfiguration.ActivityType  <- ActivityType(Name="FlowSharp Unit Test Activity", Version="1")
+
     RegisterHelloFlowSharp()
+    FlowSharp.Examples.ActivityExamples.Register()
 
     System.Diagnostics.Trace.Listeners.Clear()
     System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore
