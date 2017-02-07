@@ -308,20 +308,25 @@ let tests =
 
 [<EntryPoint>]
 let main argv = 
+    TestConfiguration.GetSwfClient  <- fun () -> new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2) :> IAmazonSimpleWorkflow
+    TestConfiguration.Domain        <- "FlowSharp"
+    TestConfiguration.WorkflowType  <- WorkflowType(Name="FlowSharp Unit Test Workflow", Version="1")
+    TestConfiguration.ActivityType  <- ActivityType(Name="FlowSharp Unit Test Activity", Version="1")
+    TestConfiguration.LambdaRole    <- "arn:aws:iam::538386600280:role/swf-lambda"
+    TestConfiguration.LambdaName    <- "SwfLambdaTest"
+
+    TestConfiguration.ReverseOrder              <- false
+    TestConfiguration.GenerateOfflineHistory    <- false
+    TestConfiguration.IsConnected               <- false
+
+    if TestConfiguration.IsConnected then
+        TestConfiguration.Register()
+
     use log = System.IO.File.CreateText("..\\..\\log.txt")
 
     System.Diagnostics.Trace.Listeners.Clear()
     System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(log)) |> ignore
 
-    TestConfiguration.ReverseOrder <- false
-    TestConfiguration.GenerateOfflineHistory <- false
-    TestConfiguration.IsConnected <- false
-
-    //let tests = testCase "Record using do!"     <| TestRecordMarker.``Record Marker using do!``
-    
-    //runParallel tests |> ignore  // Note: Can't run in parallel when IsConnected is true because there's no matching of decision tasks with the right decider
     run tests |> ignore
-     
     0
-
 

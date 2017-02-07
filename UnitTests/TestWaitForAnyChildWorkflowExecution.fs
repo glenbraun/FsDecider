@@ -16,12 +16,12 @@ open FsUnit
 module TestWaitForAnyChildWorkflowExecution =
     let private OfflineHistorySubstitutions =  
         Map.empty<string, string>
-        |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
+        |> Map.add "WorkflowType" "TestConfiguration.WorkflowType"
         |> Map.add "RunId" "\"Offline RunId\""
         |> Map.add "WorkflowId" "workflowId"
-        |> Map.add "LambdaRole" "TestConfiguration.TestLambdaRole"
-        |> Map.add "TaskList" "TestConfiguration.TestTaskList"
-        |> Map.add "Identity" "TestConfiguration.TestIdentity"
+        |> Map.add "LambdaRole" "TestConfiguration.LambdaRole"
+        |> Map.add "TaskList" "TestConfiguration.TaskList"
+        |> Map.add "Identity" "TestConfiguration.Identity"
         |> Map.add "SignalName" "signalName"
         |> Map.add "ParentWorkflowExecution" "WorkflowExecution(RunId=\"Offline RunId\", WorkflowId=workflowId)"
         |> Map.add "StartChildWorkflowExecutionInitiatedEventAttributes.TaskList" "childTaskList"
@@ -40,11 +40,11 @@ module TestWaitForAnyChildWorkflowExecution =
             // Start a Child Workflow Execution
             let! start1 = FlowSharp.StartChildWorkflowExecution
                               (
-                                TestConfiguration.TestWorkflowType,
+                                TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
                                 input=childInput,
                                 childPolicy=ChildPolicy.TERMINATE,
-                                lambdaRole=TestConfiguration.TestLambdaRole,
+                                lambdaRole=TestConfiguration.LambdaRole,
                                 taskList=childTaskList,
                                 executionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
@@ -52,11 +52,11 @@ module TestWaitForAnyChildWorkflowExecution =
 
             let! start2 = FlowSharp.StartChildWorkflowExecution
                               (
-                                TestConfiguration.TestWorkflowType,
+                                TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
                                 input=childInput,
                                 childPolicy=ChildPolicy.TERMINATE,
-                                lambdaRole=TestConfiguration.TestLambdaRole,
+                                lambdaRole=TestConfiguration.LambdaRole,
                                 taskList=childTaskList,
                                 executionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
@@ -85,54 +85,54 @@ module TestWaitForAnyChildWorkflowExecution =
             }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"1", WorkflowType=TestConfiguration.TestWorkflowType))
+                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"1", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="2", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"2", WorkflowType=TestConfiguration.TestWorkflowType))
+                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="2", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"2", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution1"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution1"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution2"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution2"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=5L, Result="Child Result", StartedEventId=7L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution1"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=5L, Result="Child Result", StartedEventId=7L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution1"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=6L, Result="Child Result", StartedEventId=9L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution2"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=6L, Result="Child Result", StartedEventId=9L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId="Child of Wait For Any Child Workflow Execution with All Completed Child Workflow Execution2"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 12
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=8L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 13
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=12L))
                           |> OfflineHistoryEvent (        // EventId = 14
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=13L, Result="TEST PASS"))
 
         // OfflineDecisionTask
-        let childOfflineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Child RunId 1", WorkflowId = childWorkflowId + "1"))
+        let childOfflineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Child RunId 1", WorkflowId = childWorkflowId + "1"))
                                   |> OfflineHistoryEvent (        // EventId = 1
-                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="Offline RunId", WorkflowId=workflowId), TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="Offline RunId", WorkflowId=workflowId), TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                                   |> OfflineHistoryEvent (        // EventId = 2
-                                      DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                                      DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                                   |> OfflineHistoryEvent (        // EventId = 3
-                                      DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                                      DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                                   |> OfflineHistoryEvent (        // EventId = 4
                                       DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                                   |> OfflineHistoryEvent (        // EventId = 5
                                       WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=4L, Result="Child Result"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -140,15 +140,15 @@ module TestWaitForAnyChildWorkflowExecution =
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowId 
                                                         |> should equal (childWorkflowId + "1")
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Name 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Name
+                                                        |> should equal TestConfiguration.WorkflowType.Name
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Version 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Version
+                                                        |> should equal TestConfiguration.WorkflowType.Version
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.Input 
                                                         |> should equal childInput
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.ChildPolicy  
                                                         |> should equal ChildPolicy.TERMINATE
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.LambdaRole  
-                                                        |> should equal TestConfiguration.TestLambdaRole
+                                                        |> should equal TestConfiguration.LambdaRole
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.TaskList.Name  
                                                         |> should equal childTaskList.Name
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.ExecutionStartToCloseTimeout 
@@ -160,15 +160,15 @@ module TestWaitForAnyChildWorkflowExecution =
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowId 
                                                         |> should equal (childWorkflowId + "2")
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Name 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Name
+                                                        |> should equal TestConfiguration.WorkflowType.Name
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Version 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Version
+                                                        |> should equal TestConfiguration.WorkflowType.Version
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.Input 
                                                         |> should equal childInput
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.ChildPolicy  
                                                         |> should equal ChildPolicy.TERMINATE
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.LambdaRole  
-                                                        |> should equal TestConfiguration.TestLambdaRole
+                                                        |> should equal TestConfiguration.LambdaRole
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.TaskList.Name  
                                                         |> should equal childTaskList.Name
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.ExecutionStartToCloseTimeout 
@@ -224,11 +224,11 @@ module TestWaitForAnyChildWorkflowExecution =
             // Start a Child Workflow Execution
             let! start1 = FlowSharp.StartChildWorkflowExecution
                               (
-                                TestConfiguration.TestWorkflowType,
+                                TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
                                 input=childInput,
                                 childPolicy=ChildPolicy.TERMINATE,
-                                lambdaRole=TestConfiguration.TestLambdaRole,
+                                lambdaRole=TestConfiguration.LambdaRole,
                                 taskList=childTaskList,
                                 executionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
@@ -236,11 +236,11 @@ module TestWaitForAnyChildWorkflowExecution =
 
             let! start2 = FlowSharp.StartChildWorkflowExecution
                               (
-                                TestConfiguration.TestWorkflowType,
+                                TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
                                 input=childInput,
                                 childPolicy=ChildPolicy.TERMINATE,
-                                lambdaRole=TestConfiguration.TestLambdaRole,
+                                lambdaRole=TestConfiguration.LambdaRole,
                                 taskList=childTaskList,
                                 executionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
@@ -269,52 +269,52 @@ module TestWaitForAnyChildWorkflowExecution =
             }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"1", WorkflowType=TestConfiguration.TestWorkflowType))
+                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"1", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="2", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"2", WorkflowType=TestConfiguration.TestWorkflowType))
+                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="2", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"2", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId=childWorkflowId+"1"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId=childWorkflowId+"1"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId=childWorkflowId+"2"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId=childWorkflowId+"2"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=5L, Result="Child Result", StartedEventId=7L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId=childWorkflowId+"1"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=5L, Result="Child Result", StartedEventId=7L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId=childWorkflowId+"1"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=8L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 12
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=11L))
                           |> OfflineHistoryEvent (        // EventId = 13
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=12L, Result="TEST PASS"))
 
         // OfflineDecisionTask
-        let childOfflineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Child RunId 1", WorkflowId = childWorkflowId + "1"))
+        let childOfflineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Child RunId 1", WorkflowId = childWorkflowId + "1"))
                                   |> OfflineHistoryEvent (        // EventId = 1
-                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="Offline RunId", WorkflowId=workflowId), TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="Offline RunId", WorkflowId=workflowId), TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                                   |> OfflineHistoryEvent (        // EventId = 2
-                                      DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                                      DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                                   |> OfflineHistoryEvent (        // EventId = 3
-                                      DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                                      DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                                   |> OfflineHistoryEvent (        // EventId = 4
                                       DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                                   |> OfflineHistoryEvent (        // EventId = 5
                                       WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=4L, Result="Child Result"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -322,15 +322,15 @@ module TestWaitForAnyChildWorkflowExecution =
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowId 
                                                         |> should equal (childWorkflowId + "1")
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Name 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Name
+                                                        |> should equal TestConfiguration.WorkflowType.Name
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Version 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Version
+                                                        |> should equal TestConfiguration.WorkflowType.Version
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.Input 
                                                         |> should equal childInput
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.ChildPolicy  
                                                         |> should equal ChildPolicy.TERMINATE
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.LambdaRole  
-                                                        |> should equal TestConfiguration.TestLambdaRole
+                                                        |> should equal TestConfiguration.LambdaRole
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.TaskList.Name  
                                                         |> should equal childTaskList.Name
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.ExecutionStartToCloseTimeout 
@@ -342,15 +342,15 @@ module TestWaitForAnyChildWorkflowExecution =
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowId 
                                                         |> should equal (childWorkflowId + "2")
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Name 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Name
+                                                        |> should equal TestConfiguration.WorkflowType.Name
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Version 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Version
+                                                        |> should equal TestConfiguration.WorkflowType.Version
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.Input 
                                                         |> should equal childInput
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.ChildPolicy  
                                                         |> should equal ChildPolicy.TERMINATE
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.LambdaRole  
-                                                        |> should equal TestConfiguration.TestLambdaRole
+                                                        |> should equal TestConfiguration.LambdaRole
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.TaskList.Name  
                                                         |> should equal childTaskList.Name
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.ExecutionStartToCloseTimeout 
@@ -404,11 +404,11 @@ module TestWaitForAnyChildWorkflowExecution =
             // Start a Child Workflow Execution
             let! start1 = FlowSharp.StartChildWorkflowExecution
                               (
-                                TestConfiguration.TestWorkflowType,
+                                TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
                                 input=childInput,
                                 childPolicy=ChildPolicy.TERMINATE,
-                                lambdaRole=TestConfiguration.TestLambdaRole,
+                                lambdaRole=TestConfiguration.LambdaRole,
                                 taskList=childTaskList,
                                 executionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
@@ -416,11 +416,11 @@ module TestWaitForAnyChildWorkflowExecution =
 
             let! start2 = FlowSharp.StartChildWorkflowExecution
                               (
-                                TestConfiguration.TestWorkflowType,
+                                TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
                                 input=childInput,
                                 childPolicy=ChildPolicy.TERMINATE,
-                                lambdaRole=TestConfiguration.TestLambdaRole,
+                                lambdaRole=TestConfiguration.LambdaRole,
                                 taskList=childTaskList,
                                 executionStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout,
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
@@ -449,58 +449,58 @@ module TestWaitForAnyChildWorkflowExecution =
             }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"1", WorkflowType=TestConfiguration.TestWorkflowType))
+                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="1", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"1", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="2", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"2", WorkflowType=TestConfiguration.TestWorkflowType))
+                              StartChildWorkflowExecutionInitiatedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, Control="2", DecisionTaskCompletedEventId=4L, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, TaskList=childTaskList, TaskStartToCloseTimeout="1200", WorkflowId=childWorkflowId+"2", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId=childWorkflowId+"2"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=6L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId=childWorkflowId+"2"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId=childWorkflowId+"1"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionStartedEventAttributes(InitiatedEventId=5L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 1", WorkflowId=childWorkflowId+"1"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=8L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 11
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=10L))
                           |> OfflineHistoryEvent (        // EventId = 12
-                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=6L, Result="Child Result", StartedEventId=7L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId=childWorkflowId+"2"), WorkflowType=TestConfiguration.TestWorkflowType))
+                              ChildWorkflowExecutionCompletedEventAttributes(InitiatedEventId=6L, Result="Child Result", StartedEventId=7L, WorkflowExecution=WorkflowExecution(RunId="Child RunId 2", WorkflowId=childWorkflowId+"2"), WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 13
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 14
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=13L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=13L))
                           |> OfflineHistoryEvent (        // EventId = 15
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=13L, StartedEventId=14L))
                           |> OfflineHistoryEvent (        // EventId = 16
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=15L, Result="TEST PASS"))
 
         // OfflineDecisionTask
-        let childOfflineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Child RunId 1", WorkflowId = childWorkflowId + "1"))
+        let childOfflineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Child RunId 1", WorkflowId = childWorkflowId + "1"))
                                   |> OfflineHistoryEvent (        // EventId = 1
-                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.TestLambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="Offline RunId", WorkflowId=workflowId), TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                                      WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", Input="Test Child Input", LambdaRole=TestConfiguration.LambdaRole, ParentInitiatedEventId=5L, ParentWorkflowExecution=WorkflowExecution(RunId="Offline RunId", WorkflowId=workflowId), TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                                   |> OfflineHistoryEvent (        // EventId = 2
-                                      DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                                      DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                                   |> OfflineHistoryEvent (        // EventId = 3
-                                      DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                                      DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                                   |> OfflineHistoryEvent (        // EventId = 4
                                       DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                                   |> OfflineHistoryEvent (        // EventId = 5
                                       WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=4L, Result="Child Result"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 3 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 3 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -508,15 +508,15 @@ module TestWaitForAnyChildWorkflowExecution =
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowId 
                                                         |> should equal (childWorkflowId + "1")
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Name 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Name
+                                                        |> should equal TestConfiguration.WorkflowType.Name
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Version 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Version
+                                                        |> should equal TestConfiguration.WorkflowType.Version
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.Input 
                                                         |> should equal childInput
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.ChildPolicy  
                                                         |> should equal ChildPolicy.TERMINATE
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.LambdaRole  
-                                                        |> should equal TestConfiguration.TestLambdaRole
+                                                        |> should equal TestConfiguration.LambdaRole
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.TaskList.Name  
                                                         |> should equal childTaskList.Name
                 resp.Decisions.[0].StartChildWorkflowExecutionDecisionAttributes.ExecutionStartToCloseTimeout 
@@ -528,15 +528,15 @@ module TestWaitForAnyChildWorkflowExecution =
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowId 
                                                         |> should equal (childWorkflowId + "2")
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Name 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Name
+                                                        |> should equal TestConfiguration.WorkflowType.Name
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.WorkflowType.Version 
-                                                        |> should equal TestConfiguration.TestWorkflowType.Version
+                                                        |> should equal TestConfiguration.WorkflowType.Version
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.Input 
                                                         |> should equal childInput
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.ChildPolicy  
                                                         |> should equal ChildPolicy.TERMINATE
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.LambdaRole  
-                                                        |> should equal TestConfiguration.TestLambdaRole
+                                                        |> should equal TestConfiguration.LambdaRole
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.TaskList.Name  
                                                         |> should equal childTaskList.Name
                 resp.Decisions.[1].StartChildWorkflowExecutionDecisionAttributes.ExecutionStartToCloseTimeout 

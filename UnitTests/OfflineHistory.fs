@@ -431,7 +431,7 @@ module OfflineHistory =
         // Write the OfflineDecisionTask
         fprintf tw """
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))""" 
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))""" 
 
         // Write History Events
         events |>

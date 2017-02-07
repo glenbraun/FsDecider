@@ -22,16 +22,16 @@ module TestExecutionContextManager =
         else
             let workflowId = "TestExecutionContextManager"
     
-            let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+            let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                                 |> OfflineHistoryEvent (        // EventId = 1
-                                    WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                                    WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                                 |> OfflineHistoryEvent (        // EventId = 2
-                                    DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                                    DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                                 |> OfflineHistoryEvent (        // EventId = 3
-                                    DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                                    DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
 
             // Poll and make decisions
-            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 1 do
+            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 1 do
                 match i with
                 | 1 -> 
                     resp.Decisions.Count                    |> should equal 1
@@ -43,7 +43,7 @@ module TestExecutionContextManager =
     let ScheduleActivityTask = 
         let decision = ScheduleActivityTaskDecisionAttributes()
         decision.ActivityId <- "ActivityId1"
-        decision.ActivityType <- TestConfiguration.TestActivityType
+        decision.ActivityType <- TestConfiguration.ActivityType
         decision.Control <- "Control1"
         decision.Input <- "Activity Input"            
         decision
@@ -184,7 +184,7 @@ module TestExecutionContextManager =
         let decision = ScheduleLambdaFunctionDecisionAttributes()
         decision.Id <- "lambda1"
         decision.Input <- "Lambda Input"
-        decision.Name <- TestConfiguration.TestLambdaName
+        decision.Name <- TestConfiguration.LambdaName
         decision
 
     let ``Test context for ScheduleLambdaFunction with Completed result``() =
@@ -320,9 +320,9 @@ module TestExecutionContextManager =
         decision.ChildPolicy <- ChildPolicy.TERMINATE
         decision.Control <- "Control 1"
         decision.Input <- "Child Input"
-        decision.LambdaRole <- TestConfiguration.TestLambdaResult
+        decision.LambdaRole <- TestConfiguration.LambdaResult
         decision.WorkflowId <- "Child Workflow Id"
-        decision.WorkflowType <- TestConfiguration.TestWorkflowType
+        decision.WorkflowType <- TestConfiguration.WorkflowType
         decision
 
     let ``Test context for StartChildWorkflowExecution with Completed result``() =

@@ -27,8 +27,8 @@ module TestHelper =
             
             let request = PollForDecisionTaskRequest
                             (
-                                Domain = TestConfiguration.TestDomain,
-                                Identity = TestConfiguration.TestIdentity,
+                                Domain = TestConfiguration.Domain,
+                                Identity = TestConfiguration.Identity,
                                 TaskList = taskList,
                                 ReverseOrder = TestConfiguration.ReverseOrder
                             )
@@ -73,10 +73,10 @@ module TestHelper =
             if input.IsSome then startRequest.Input <- input.Value
 
             startRequest.ChildPolicy <- if childPolicy.IsSome then childPolicy.Value else ChildPolicy.TERMINATE
-            startRequest.Domain <- TestConfiguration.TestDomain
+            startRequest.Domain <- TestConfiguration.Domain
             startRequest.ExecutionStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout.ToString()
             startRequest.TaskStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout.ToString()
-            startRequest.LambdaRole <- if lambdaRoleOverride.IsSome then lambdaRoleOverride.Value else TestConfiguration.TestLambdaRole
+            startRequest.LambdaRole <- if lambdaRoleOverride.IsSome then lambdaRoleOverride.Value else TestConfiguration.LambdaRole
 
             let startResponse = swf.StartWorkflowExecution(startRequest)
 
@@ -93,9 +93,9 @@ module TestHelper =
             use swf = TestConfiguration.GetSwfClient()
 
             let pollRequest = new PollForActivityTaskRequest();
-            pollRequest.Domain <- TestConfiguration.TestDomain
-            pollRequest.Identity <- TestConfiguration.TestIdentity
-            pollRequest.TaskList <- TestConfiguration.TestTaskList
+            pollRequest.Domain <- TestConfiguration.Domain
+            pollRequest.Identity <- TestConfiguration.Identity
+            pollRequest.TaskList <- TestConfiguration.TaskList
 
             let pollResponse = swf.PollForActivityTask(pollRequest)
 
@@ -115,9 +115,9 @@ module TestHelper =
             use swf = TestConfiguration.GetSwfClient()
 
             let pollRequest = new PollForActivityTaskRequest();
-            pollRequest.Domain <- TestConfiguration.TestDomain
-            pollRequest.Identity <- TestConfiguration.TestIdentity
-            pollRequest.TaskList <- TestConfiguration.TestTaskList
+            pollRequest.Domain <- TestConfiguration.Domain
+            pollRequest.Identity <- TestConfiguration.Identity
+            pollRequest.TaskList <- TestConfiguration.TaskList
 
             let pollResponse = swf.PollForActivityTask(pollRequest)
 
@@ -137,9 +137,9 @@ module TestHelper =
             use swf = TestConfiguration.GetSwfClient()
 
             let pollRequest = new PollForActivityTaskRequest();
-            pollRequest.Domain <- TestConfiguration.TestDomain
-            pollRequest.Identity <- TestConfiguration.TestIdentity
-            pollRequest.TaskList <- TestConfiguration.TestTaskList
+            pollRequest.Domain <- TestConfiguration.Domain
+            pollRequest.Identity <- TestConfiguration.Identity
+            pollRequest.TaskList <- TestConfiguration.TaskList
 
             let pollResponse = swf.PollForActivityTask(pollRequest)
 
@@ -160,9 +160,9 @@ module TestHelper =
             use swf = TestConfiguration.GetSwfClient()
 
             let pollRequest = new PollForActivityTaskRequest()
-            pollRequest.Domain <- TestConfiguration.TestDomain
-            pollRequest.Identity <- TestConfiguration.TestIdentity
-            pollRequest.TaskList <- TestConfiguration.TestTaskList
+            pollRequest.Domain <- TestConfiguration.Domain
+            pollRequest.Identity <- TestConfiguration.Identity
+            pollRequest.TaskList <- TestConfiguration.TaskList
 
             let pollResponse = swf.PollForActivityTask(pollRequest)
             if not (pollResponse.ActivityTask.ActivityType <> null && pollResponse.ActivityTask.ActivityType.Name = activity.Name && pollResponse.ActivityTask.ActivityType.Version = activity.Version) then
@@ -198,7 +198,7 @@ module TestHelper =
             use swf = TestConfiguration.GetSwfClient()
 
             let signalRequest = new Amazon.SimpleWorkflow.Model.SignalWorkflowExecutionRequest();
-            signalRequest.Domain <- TestConfiguration.TestDomain
+            signalRequest.Domain <- TestConfiguration.Domain
             signalRequest.RunId <- runId
             signalRequest.SignalName <- signalName
             signalRequest.WorkflowId <- workflowId
@@ -216,7 +216,7 @@ module TestHelper =
             let terminateRequest = new TerminateWorkflowExecutionRequest();
             terminateRequest.ChildPolicy <- ChildPolicy.TERMINATE
             terminateRequest.Details <- details
-            terminateRequest.Domain <- TestConfiguration.TestDomain
+            terminateRequest.Domain <- TestConfiguration.Domain
             terminateRequest.Reason <- reason
             terminateRequest.RunId <- runId
             terminateRequest.WorkflowId <- workflowId
@@ -230,7 +230,7 @@ module TestHelper =
             use swf = TestConfiguration.GetSwfClient()
 
             let request = GetWorkflowExecutionHistoryRequest(
-                            Domain=TestConfiguration.TestDomain,
+                            Domain=TestConfiguration.Domain,
                             Execution=WorkflowExecution(RunId=runId, WorkflowId=workflowId)
                           )
 
@@ -256,7 +256,7 @@ module TestHelper =
 
                 let request = new GetWorkflowExecutionHistoryRequest
                                 (
-                                    Domain = TestConfiguration.TestDomain,
+                                    Domain = TestConfiguration.Domain,
                                     Execution = new WorkflowExecution(RunId=runId, WorkflowId=workflowId)
                                 )
 

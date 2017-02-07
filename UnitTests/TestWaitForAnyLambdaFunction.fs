@@ -16,16 +16,16 @@ open FsUnit
 module TestWaitForAnyLambdaFunction =
     let private OfflineHistorySubstitutions =  
         Map.empty<string, string>
-        |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
+        |> Map.add "WorkflowType" "TestConfiguration.WorkflowType"
         |> Map.add "RunId" "\"Offline RunId\""
         |> Map.add "WorkflowId" "workflowId"
-        |> Map.add "LambdaRole" "TestConfiguration.TestLambdaRole"
-        |> Map.add "TaskList" "TestConfiguration.TestTaskList"
-        |> Map.add "Identity" "TestConfiguration.TestIdentity"
+        |> Map.add "LambdaRole" "TestConfiguration.LambdaRole"
+        |> Map.add "TaskList" "TestConfiguration.TaskList"
+        |> Map.add "Identity" "TestConfiguration.Identity"
         |> Map.add "LambdaFunctionScheduledEventAttributes.Id" "lambdaId"
-        |> Map.add "LambdaFunctionScheduledEventAttributes.Name" "TestConfiguration.TestLambdaName"
-        |> Map.add "LambdaFunctionScheduledEventAttributes.Input" "TestConfiguration.TestLambdaInput"
-        |> Map.add "LambdaFunctionCompletedEventAttributes.Result" "TestConfiguration.TestLambdaResult"
+        |> Map.add "LambdaFunctionScheduledEventAttributes.Name" "TestConfiguration.LambdaName"
+        |> Map.add "LambdaFunctionScheduledEventAttributes.Input" "TestConfiguration.LambdaInput"
+        |> Map.add "LambdaFunctionCompletedEventAttributes.Result" "TestConfiguration.LambdaResult"
 
     let ``Wait For Any Lambda Function with One Completed Lambda Function``() =
         let workflowId = "Wait For Any Lambda Function with One Completed Lambda Function"
@@ -40,15 +40,15 @@ module TestWaitForAnyLambdaFunction =
             // Schedule a Lambda Function
             let! lambda1 = FlowSharp.ScheduleLambdaFunction (
                             id=lambdaId + "1",
-                            name=TestConfiguration.TestLambdaName,
-                            input=TestConfiguration.TestLambdaInput,
+                            name=TestConfiguration.LambdaName,
+                            input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
             let! lambda2 = FlowSharp.ScheduleLambdaFunction (
                             id=lambdaId + "2",
-                            name=TestConfiguration.TestLambdaName,
-                            input=TestConfiguration.TestLambdaInput,
+                            name=TestConfiguration.LambdaName,
+                            input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
@@ -61,34 +61,34 @@ module TestWaitForAnyLambdaFunction =
                 |> List.choose (fun r -> if r.IsFinished() then Some(r) else None)
 
             match finishedList with
-            | [ ScheduleLambdaFunctionResult.Completed(attr) ] when attr.Result = TestConfiguration.TestLambdaResult -> return "TEST PASS"
+            | [ ScheduleLambdaFunctionResult.Completed(attr) ] when attr.Result = TestConfiguration.LambdaResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "1", Input=TestConfiguration.TestLambdaInput, Name=TestConfiguration.TestLambdaName, StartToCloseTimeout="5"))
+                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "1", Input=TestConfiguration.LambdaInput, Name=TestConfiguration.LambdaName, StartToCloseTimeout="5"))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "2", Input=TestConfiguration.TestLambdaInput, Name=TestConfiguration.TestLambdaName, StartToCloseTimeout="5"))
+                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "2", Input=TestConfiguration.LambdaInput, Name=TestConfiguration.LambdaName, StartToCloseTimeout="5"))
                           |> OfflineHistoryEvent (        // EventId = 7
                               LambdaFunctionStartedEventAttributes(ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 8
                               LambdaFunctionStartedEventAttributes(ScheduledEventId=6L))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.TestLambdaResult, ScheduledEventId=5L, StartedEventId=7L))
+                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.LambdaResult, ScheduledEventId=5L, StartedEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=10L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=10L))
                           |> OfflineHistoryEvent (        // EventId = 12
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=10L, StartedEventId=11L))
                           |> OfflineHistoryEvent (        // EventId = 13
@@ -99,10 +99,10 @@ module TestWaitForAnyLambdaFunction =
             ()
         else
             // Start the workflow
-            let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+            let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
             // Poll and make decisions
-            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
+            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 2 do
                 match i with
                 | 1 -> 
                     resp.Decisions.Count                    |> should equal 2
@@ -110,9 +110,9 @@ module TestWaitForAnyLambdaFunction =
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Id
                                                             |> should equal (lambdaId + "1")
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Name
-                                                            |> should equal TestConfiguration.TestLambdaName
+                                                            |> should equal TestConfiguration.LambdaName
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Input
-                                                            |> should equal TestConfiguration.TestLambdaInput
+                                                            |> should equal TestConfiguration.LambdaInput
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout
                                                             |> should equal (FiveSeconds.ToString())
 
@@ -120,9 +120,9 @@ module TestWaitForAnyLambdaFunction =
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Id
                                                             |> should equal (lambdaId + "2")
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Name
-                                                            |> should equal TestConfiguration.TestLambdaName
+                                                            |> should equal TestConfiguration.LambdaName
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Input
-                                                            |> should equal TestConfiguration.TestLambdaInput
+                                                            |> should equal TestConfiguration.LambdaInput
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout
                                                             |> should equal (FiveSeconds.ToString())
 
@@ -158,15 +158,15 @@ module TestWaitForAnyLambdaFunction =
             // Schedule a Lambda Function
             let! lambda1 = FlowSharp.ScheduleLambdaFunction (
                             id=lambdaId + "1",
-                            name=TestConfiguration.TestLambdaName,
-                            input=TestConfiguration.TestLambdaInput,
+                            name=TestConfiguration.LambdaName,
+                            input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
             let! lambda2 = FlowSharp.ScheduleLambdaFunction (
                             id=lambdaId + "2",
-                            name=TestConfiguration.TestLambdaName,
-                            input=TestConfiguration.TestLambdaInput,
+                            name=TestConfiguration.LambdaName,
+                            input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
@@ -180,48 +180,48 @@ module TestWaitForAnyLambdaFunction =
 
             match finishedList with
             | [ ScheduleLambdaFunctionResult.Completed(attr1); ScheduleLambdaFunctionResult.Completed(attr2); ] 
-                when attr1.Result = TestConfiguration.TestLambdaResult && 
-                     attr2.Result = TestConfiguration.TestLambdaResult -> return "TEST PASS"
+                when attr1.Result = TestConfiguration.LambdaResult && 
+                     attr2.Result = TestConfiguration.LambdaResult -> return "TEST PASS"
 
             | _ -> return "TEST FAIL"
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId+"1", Input=TestConfiguration.TestLambdaInput, Name=TestConfiguration.TestLambdaName, StartToCloseTimeout="5"))
+                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId+"1", Input=TestConfiguration.LambdaInput, Name=TestConfiguration.LambdaName, StartToCloseTimeout="5"))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId+"2", Input=TestConfiguration.TestLambdaInput, Name=TestConfiguration.TestLambdaName, StartToCloseTimeout="5"))
+                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId+"2", Input=TestConfiguration.LambdaInput, Name=TestConfiguration.LambdaName, StartToCloseTimeout="5"))
                           |> OfflineHistoryEvent (        // EventId = 7
                               LambdaFunctionStartedEventAttributes(ScheduledEventId=6L))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.TestLambdaResult, ScheduledEventId=6L, StartedEventId=7L))
+                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.LambdaResult, ScheduledEventId=6L, StartedEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 10
                               LambdaFunctionStartedEventAttributes(ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.TestLambdaResult, ScheduledEventId=5L, StartedEventId=10L))
+                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.LambdaResult, ScheduledEventId=5L, StartedEventId=10L))
                           |> OfflineHistoryEvent (        // EventId = 12
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=9L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=9L))
                           |> OfflineHistoryEvent (        // EventId = 13
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=9L, StartedEventId=12L))
                           |> OfflineHistoryEvent (        // EventId = 14
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=13L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 2
@@ -229,9 +229,9 @@ module TestWaitForAnyLambdaFunction =
                 resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Id
                                                         |> should equal (lambdaId + "1")
                 resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Name
-                                                        |> should equal TestConfiguration.TestLambdaName
+                                                        |> should equal TestConfiguration.LambdaName
                 resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Input
-                                                        |> should equal TestConfiguration.TestLambdaInput
+                                                        |> should equal TestConfiguration.LambdaInput
                 resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout
                                                         |> should equal (FiveSeconds.ToString())
 
@@ -239,9 +239,9 @@ module TestWaitForAnyLambdaFunction =
                 resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Id
                                                         |> should equal (lambdaId + "2")
                 resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Name
-                                                        |> should equal TestConfiguration.TestLambdaName
+                                                        |> should equal TestConfiguration.LambdaName
                 resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Input
-                                                        |> should equal TestConfiguration.TestLambdaInput
+                                                        |> should equal TestConfiguration.LambdaInput
                 resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout
                                                         |> should equal (FiveSeconds.ToString())
 
@@ -277,15 +277,15 @@ module TestWaitForAnyLambdaFunction =
             // Schedule a Lambda Function
             let! lambda1 = FlowSharp.ScheduleLambdaFunction (
                             id=lambdaId + "1",
-                            name=TestConfiguration.TestLambdaName,
-                            input=TestConfiguration.TestLambdaInput,
+                            name=TestConfiguration.LambdaName,
+                            input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
             let! lambda2 = FlowSharp.ScheduleLambdaFunction (
                             id=lambdaId + "2",
-                            name=TestConfiguration.TestLambdaName,
-                            input=TestConfiguration.TestLambdaInput,
+                            name=TestConfiguration.LambdaName,
+                            input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
@@ -299,26 +299,26 @@ module TestWaitForAnyLambdaFunction =
 
             match finishedList with
             | [ ScheduleLambdaFunctionResult.Completed(attr1); ScheduleLambdaFunctionResult.Completed(attr2); ] 
-                when attr1.Result = TestConfiguration.TestLambdaResult && 
-                     attr2.Result = TestConfiguration.TestLambdaResult -> return "TEST PASS"
+                when attr1.Result = TestConfiguration.LambdaResult && 
+                     attr2.Result = TestConfiguration.LambdaResult -> return "TEST PASS"
 
             | _ -> return "TEST FAIL"
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "1", Input=TestConfiguration.TestLambdaInput, Name=TestConfiguration.TestLambdaName, StartToCloseTimeout="5"))
+                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "1", Input=TestConfiguration.LambdaInput, Name=TestConfiguration.LambdaName, StartToCloseTimeout="5"))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "2", Input=TestConfiguration.TestLambdaInput, Name=TestConfiguration.TestLambdaName, StartToCloseTimeout="5"))
+                              LambdaFunctionScheduledEventAttributes(DecisionTaskCompletedEventId=4L, Id=lambdaId + "2", Input=TestConfiguration.LambdaInput, Name=TestConfiguration.LambdaName, StartToCloseTimeout="5"))
                           |> OfflineHistoryEvent (        // EventId = 7
                               LambdaFunctionStartedEventAttributes(ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 8
@@ -326,19 +326,19 @@ module TestWaitForAnyLambdaFunction =
                           |> OfflineHistoryEvent (        // EventId = 9
                               WorkflowExecutionSignaledEventAttributes(Input="", SignalName="Test Signal"))
                           |> OfflineHistoryEvent (        // EventId = 10
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 11
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=10L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=10L))
                           |> OfflineHistoryEvent (        // EventId = 12
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=10L, StartedEventId=11L))
                           |> OfflineHistoryEvent (        // EventId = 13
-                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.TestLambdaResult, ScheduledEventId=5L, StartedEventId=7L))
+                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.LambdaResult, ScheduledEventId=5L, StartedEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 14
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 15
-                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.TestLambdaResult, ScheduledEventId=6L, StartedEventId=8L))
+                              LambdaFunctionCompletedEventAttributes(Result=TestConfiguration.LambdaResult, ScheduledEventId=6L, StartedEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 16
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=14L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=14L))
                           |> OfflineHistoryEvent (        // EventId = 17
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=14L, StartedEventId=16L))
                           |> OfflineHistoryEvent (        // EventId = 18
@@ -349,10 +349,10 @@ module TestWaitForAnyLambdaFunction =
             ()
         else
             // Start the workflow
-            let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+            let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
             // Poll and make decisions
-            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 3 do
+            for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 3 do
                 match i with
                 | 1 -> 
                     resp.Decisions.Count                    |> should equal 2
@@ -360,9 +360,9 @@ module TestWaitForAnyLambdaFunction =
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Id
                                                             |> should equal (lambdaId + "1")
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Name
-                                                            |> should equal TestConfiguration.TestLambdaName
+                                                            |> should equal TestConfiguration.LambdaName
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.Input
-                                                            |> should equal TestConfiguration.TestLambdaInput
+                                                            |> should equal TestConfiguration.LambdaInput
                     resp.Decisions.[0].ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout
                                                             |> should equal (FiveSeconds.ToString())
 
@@ -370,9 +370,9 @@ module TestWaitForAnyLambdaFunction =
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Id
                                                             |> should equal (lambdaId + "2")
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Name
-                                                            |> should equal TestConfiguration.TestLambdaName
+                                                            |> should equal TestConfiguration.LambdaName
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.Input
-                                                            |> should equal TestConfiguration.TestLambdaInput
+                                                            |> should equal TestConfiguration.LambdaInput
                     resp.Decisions.[1].ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout
                                                             |> should equal (FiveSeconds.ToString())
 

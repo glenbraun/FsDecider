@@ -22,7 +22,7 @@ let RegisterDomain (getswf:unit -> IAmazonSimpleWorkflow) (domainRequest:Registe
 // If it is not yet registered, it registers it.
 // If it is registered with the same configuration, then nothing else is done.
 // If it is registered with a different configuration, an exception is thrown.
-let RegisterWorkflow (getswf:unit -> IAmazonSimpleWorkflow) (workflowRequest:RegisterWorkflowTypeRequest) = 
+let RegisterWorkflowType (getswf:unit -> IAmazonSimpleWorkflow) (workflowRequest:RegisterWorkflowTypeRequest) = 
     use swf = getswf()
         
     // First find out if the name is registered in the domain
@@ -70,7 +70,7 @@ let RegisterWorkflow (getswf:unit -> IAmazonSimpleWorkflow) (workflowRequest:Reg
 // If it is not yet registered, it registers it.
 // If it is registered with the same configuration, then nothing else is done.
 // If it is registered with a different configuration, en exception is thrown.
-let RegisterActivity (getswf:unit -> IAmazonSimpleWorkflow) (activityRequest:RegisterActivityTypeRequest) = 
+let RegisterActivityType (getswf:unit -> IAmazonSimpleWorkflow) (activityRequest:RegisterActivityTypeRequest) = 
     use swf = getswf()
 
     // First find out if the name is registered in the domain
@@ -94,7 +94,7 @@ let RegisterActivity (getswf:unit -> IAmazonSimpleWorkflow) (activityRequest:Reg
             let response = swf.DescribeActivityType(describeRequest)
 
             if ((activityRequest.DefaultTaskHeartbeatTimeout = response.ActivityTypeDetail.Configuration.DefaultTaskHeartbeatTimeout) &&
-                (activityRequest.DefaultTaskList = response.ActivityTypeDetail.Configuration.DefaultTaskList) &&
+                (activityRequest.DefaultTaskList.Name = response.ActivityTypeDetail.Configuration.DefaultTaskList.Name) &&
                 (activityRequest.DefaultTaskPriority = response.ActivityTypeDetail.Configuration.DefaultTaskPriority) &&
                 (activityRequest.DefaultTaskScheduleToCloseTimeout = response.ActivityTypeDetail.Configuration.DefaultTaskScheduleToCloseTimeout) &&
                 (activityRequest.DefaultTaskScheduleToStartTimeout = response.ActivityTypeDetail.Configuration.DefaultTaskScheduleToStartTimeout) &&

@@ -16,14 +16,14 @@ open FsUnit
 module TestRequestCancelActivityTask =
     let private OfflineHistorySubstitutions =  
         Map.empty<string, string>
-        |> Map.add "WorkflowType" "TestConfiguration.TestWorkflowType"
+        |> Map.add "WorkflowType" "TestConfiguration.WorkflowType"
         |> Map.add "RunId" "\"Offline RunId\""
         |> Map.add "WorkflowId" "workflowId"
-        |> Map.add "LambdaRole" "TestConfiguration.TestLambdaRole"
-        |> Map.add "TaskList" "TestConfiguration.TestTaskList"
-        |> Map.add "Identity" "TestConfiguration.TestIdentity"
+        |> Map.add "LambdaRole" "TestConfiguration.LambdaRole"
+        |> Map.add "TaskList" "TestConfiguration.TaskList"
+        |> Map.add "Identity" "TestConfiguration.Identity"
         |> Map.add "ActivityId" "activityId"
-        |> Map.add "ActivityType" "TestConfiguration.TestActivityType"
+        |> Map.add "ActivityType" "TestConfiguration.ActivityType"
         |> Map.add "ActivityTaskScheduledEventAttributes.Input" "activityInput"
         |> Map.add "ActivityTaskCompleted.Result" "activityResult"
         |> Map.add "ActivityTaskCanceled.Details" "activityDetails"
@@ -40,10 +40,10 @@ module TestRequestCancelActivityTask =
             
             // Schedule an Activity Task
             let! activity = FlowSharp.ScheduleActivityTask (
-                                TestConfiguration.TestActivityType, 
+                                TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
-                                taskList=TestConfiguration.TestTaskList, 
+                                taskList=TestConfiguration.TaskList, 
                                 heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -61,25 +61,25 @@ module TestRequestCancelActivityTask =
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.ActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
+                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 7
                               WorkflowExecutionSignaledEventAttributes(Input="Signal Input", SignalName="Signal for RequestCancelActivityTask"))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=8L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 10
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=9L))
                           |> OfflineHistoryEvent (        // EventId = 11
@@ -87,19 +87,19 @@ module TestRequestCancelActivityTask =
                           |> OfflineHistoryEvent (        // EventId = 12
                               WorkflowExecutionSignaledEventAttributes(Input="Signal Input", SignalName="Signal for RequestCancelActivityTask"))
                           |> OfflineHistoryEvent (        // EventId = 13
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 14
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=13L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=13L))
                           |> OfflineHistoryEvent (        // EventId = 15
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=13L, StartedEventId=14L))
                           |> OfflineHistoryEvent (        // EventId = 16
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=15L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 3 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 3 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -107,15 +107,15 @@ module TestRequestCancelActivityTask =
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
                                                         |> should equal activityId
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
-                                                        |> should equal TestConfiguration.TestActivityType.Name
+                                                        |> should equal TestConfiguration.ActivityType.Name
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
-                                                        |> should equal TestConfiguration.TestActivityType.Version
+                                                        |> should equal TestConfiguration.ActivityType.Version
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
                                                         |> should equal activityInput
 
                 TestHelper.RespondDecisionTaskCompleted resp
 
-                TestHelper.PollAndStartActivityTask (TestConfiguration.TestActivityType) |> ignore
+                TestHelper.PollAndStartActivityTask (TestConfiguration.ActivityType) |> ignore
 
                 TestHelper.SignalWorkflow runId workflowId signalName "Signal Input"
 
@@ -155,10 +155,10 @@ module TestRequestCancelActivityTask =
             
             // Schedule an Activity Task
             let! activity = FlowSharp.ScheduleActivityTask (
-                                TestConfiguration.TestActivityType, 
+                                TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
-                                taskList=TestConfiguration.TestTaskList, 
+                                taskList=TestConfiguration.TaskList, 
                                 heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -200,43 +200,43 @@ module TestRequestCancelActivityTask =
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.ActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=5L))
+                              ActivityTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=5L))
                           |> OfflineHistoryEvent (        // EventId = 7
                               WorkflowExecutionSignaledEventAttributes(Input="Signal Input", SignalName="Signal for RequestCancelActivityTask"))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=8L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 10
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=8L, StartedEventId=9L))
                           |> OfflineHistoryEvent (        // EventId = 11
                               RequestCancelActivityTaskFailedEventAttributes(ActivityId=fakeActivityId, Cause=RequestCancelActivityTaskFailedCause.ACTIVITY_ID_UNKNOWN, DecisionTaskCompletedEventId=10L))
                           |> OfflineHistoryEvent (        // EventId = 12
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 13
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=12L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=12L))
                           |> OfflineHistoryEvent (        // EventId = 14
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=12L, StartedEventId=13L))
                           |> OfflineHistoryEvent (        // EventId = 15
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=14L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 3 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 3 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -244,15 +244,15 @@ module TestRequestCancelActivityTask =
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
                                                         |> should equal activityId
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
-                                                        |> should equal TestConfiguration.TestActivityType.Name
+                                                        |> should equal TestConfiguration.ActivityType.Name
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
-                                                        |> should equal TestConfiguration.TestActivityType.Version
+                                                        |> should equal TestConfiguration.ActivityType.Version
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
                                                         |> should equal activityInput
 
                 TestHelper.RespondDecisionTaskCompleted resp
 
-                TestHelper.PollAndStartActivityTask (TestConfiguration.TestActivityType) |> ignore
+                TestHelper.PollAndStartActivityTask (TestConfiguration.ActivityType) |> ignore
 
                 TestHelper.SignalWorkflow runId workflowId signalName "Signal Input"
 
@@ -290,10 +290,10 @@ module TestRequestCancelActivityTask =
             
             // Schedule an Activity Task
             let! activity = FlowSharp.ScheduleActivityTask (
-                                TestConfiguration.TestActivityType, 
+                                TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
-                                taskList=TestConfiguration.TestTaskList, 
+                                taskList=TestConfiguration.TaskList, 
                                 heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToStartTimeout="5", 
@@ -311,35 +311,35 @@ module TestRequestCancelActivityTask =
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.TestActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="5", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.ActivityType, Control="1", DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="5", StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 6
                               ActivityTaskTimedOutEventAttributes(ScheduledEventId=5L, TimeoutType=ActivityTaskTimeoutType.SCHEDULE_TO_START))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 8
                               WorkflowExecutionSignaledEventAttributes(Input="Signal Input", SignalName="Signal for RequestCancelActivityTask"))
                           |> OfflineHistoryEvent (        // EventId = 9
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=7L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 10
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=7L, StartedEventId=9L))
                           |> OfflineHistoryEvent (        // EventId = 11
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=10L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -347,9 +347,9 @@ module TestRequestCancelActivityTask =
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
                                                         |> should equal activityId
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
-                                                        |> should equal TestConfiguration.TestActivityType.Name
+                                                        |> should equal TestConfiguration.ActivityType.Name
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
-                                                        |> should equal TestConfiguration.TestActivityType.Version
+                                                        |> should equal TestConfiguration.ActivityType.Version
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
                                                         |> should equal activityInput
 
@@ -388,7 +388,7 @@ module TestRequestCancelActivityTask =
                                 activityType, 
                                 activityId, 
                                 input=activityInput,
-                                taskList=TestConfiguration.TestTaskList, 
+                                taskList=TestConfiguration.TaskList, 
                                 heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -404,31 +404,31 @@ module TestRequestCancelActivityTask =
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
                               ScheduleActivityTaskFailedEventAttributes(ActivityId=activityId, ActivityType=activityType, Cause=ScheduleActivityTaskFailedCause.ACTIVITY_TYPE_DOES_NOT_EXIST, DecisionTaskCompletedEventId=4L))
                           |> OfflineHistoryEvent (        // EventId = 6
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=6L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=6L))
                           |> OfflineHistoryEvent (        // EventId = 8
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=6L, StartedEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 9
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=8L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -469,10 +469,10 @@ module TestRequestCancelActivityTask =
             
             // Schedule an Activity Task
             let! activity = FlowSharp.ScheduleActivityTask (
-                                TestConfiguration.TestActivityType, 
+                                TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
-                                taskList=TestConfiguration.TestTaskList, 
+                                taskList=TestConfiguration.TaskList, 
                                 heartbeatTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToCloseTimeout=TestConfiguration.TwentyMinuteTimeout, 
                                 scheduleToStartTimeout=TestConfiguration.TwentyMinuteTimeout, 
@@ -487,23 +487,23 @@ module TestRequestCancelActivityTask =
         }
 
         // OfflineDecisionTask
-        let offlineFunc = OfflineDecisionTask (TestConfiguration.TestWorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
+        let offlineFunc = OfflineDecisionTask (TestConfiguration.WorkflowType) (WorkflowExecution(RunId="Offline RunId", WorkflowId = workflowId))
                           |> OfflineHistoryEvent (        // EventId = 1
-                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.TestLambdaRole, TaskList=TestConfiguration.TestTaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.TestWorkflowType))
+                              WorkflowExecutionStartedEventAttributes(ChildPolicy=ChildPolicy.TERMINATE, ExecutionStartToCloseTimeout="1200", LambdaRole=TestConfiguration.LambdaRole, TaskList=TestConfiguration.TaskList, TaskStartToCloseTimeout="1200", WorkflowType=TestConfiguration.WorkflowType))
                           |> OfflineHistoryEvent (        // EventId = 2
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 3
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=2L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=2L, StartedEventId=3L))
                           |> OfflineHistoryEvent (        // EventId = 5
-                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.TestActivityType, DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              ActivityTaskScheduledEventAttributes(ActivityId=activityId, ActivityType=TestConfiguration.ActivityType, DecisionTaskCompletedEventId=4L, HeartbeatTimeout="1200", Input=activityInput, ScheduleToCloseTimeout="1200", ScheduleToStartTimeout="1200", StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 6
                               WorkflowExecutionSignaledEventAttributes(Input="Signal Input", SignalName="Signal for RequestCancelActivityTask"))
                           |> OfflineHistoryEvent (        // EventId = 7
-                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TestTaskList))
+                              DecisionTaskScheduledEventAttributes(StartToCloseTimeout="1200", TaskList=TestConfiguration.TaskList))
                           |> OfflineHistoryEvent (        // EventId = 8
-                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.TestIdentity, ScheduledEventId=7L))
+                              DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=7L))
                           |> OfflineHistoryEvent (        // EventId = 9
                               DecisionTaskCompletedEventAttributes(ScheduledEventId=7L, StartedEventId=8L))
                           |> OfflineHistoryEvent (        // EventId = 10
@@ -512,10 +512,10 @@ module TestRequestCancelActivityTask =
                               WorkflowExecutionCompletedEventAttributes(DecisionTaskCompletedEventId=9L, Result="TEST PASS"))
 
         // Start the workflow
-        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.TestWorkflowType) workflowId (TestConfiguration.TestTaskList) None None None
+        let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
 
         // Poll and make decisions
-        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TestTaskList) deciderFunc offlineFunc false 2 do
+        for (i, resp) in TestHelper.PollAndDecide (TestConfiguration.TaskList) deciderFunc offlineFunc false 2 do
             match i with
             | 1 -> 
                 resp.Decisions.Count                    |> should equal 1
@@ -523,9 +523,9 @@ module TestRequestCancelActivityTask =
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityId
                                                         |> should equal activityId
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Name 
-                                                        |> should equal TestConfiguration.TestActivityType.Name
+                                                        |> should equal TestConfiguration.ActivityType.Name
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.ActivityType.Version 
-                                                        |> should equal TestConfiguration.TestActivityType.Version
+                                                        |> should equal TestConfiguration.ActivityType.Version
                 resp.Decisions.[0].ScheduleActivityTaskDecisionAttributes.Input  
                                                         |> should equal activityInput
 
