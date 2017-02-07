@@ -16,13 +16,13 @@ open FlowSharp.UnitTests
 //      activity tasks. Once the first activity task completes, the second is started. 
 //      The workflow execution completes when after the second activity task completes.
 // To Run, start the project and type these commands into the command line interpreter.
-//    sw a1
-//    dt a1
-//    at a1
-//    dt a1
-//    at a1
-//    dt a1
-let RegisterActivitiesInSeries() =
+//    sw a1             (Starts the workflow)
+//    dt a1             (Processes the initial decision task, schedules first activity task)
+//    at a1             (Completes the first activity task)
+//    dt a1             (Processes the second decision task, schedules second activity task)
+//    at a1             (Completes the second activity task)
+//    dt a1             (Processes the final decision task, completes the workflow)
+let private RegisterActivitiesInSeries() =
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt, false) {
             // Schedule the first activity task
@@ -59,12 +59,12 @@ let RegisterActivitiesInSeries() =
 //      activity tasks. The activity tasks run in parallel. The workflow completes when both
 //      activity tasks have completed.
 // To Run, start the project and type these commands into the command line interpreter.
-//    sw a2
-//    dt a2
-//    at a2
-//    at a2
-//    dt a2
-let RegisterActivitiesInParallel() =
+//    sw a2             (Starts the workflow)
+//    dt a2             (Processes the initial decision task, schedules two activity tasks)
+//    at a2             (Completes one activity task)
+//    at a2             (Completes the other activity task)
+//    dt a2             (Processes the final decision task, completes the workflow)
+let private RegisterActivitiesInParallel() =
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt, false) {
             // Schedule the first activity task
@@ -95,10 +95,10 @@ let RegisterActivitiesInParallel() =
 //      activity task. The activity task has a short timeout (10 seconds), once it times out the 
 //      workflow execution completes.
 // To Run, start the project and type these commands into the command line interpreter.
-//    sw a3
-//    dt a3
-//    dt a3
-let RegisterActivityStatus() =
+//    sw a3         (Starts the workflow)
+//    dt a3         (Processes the initial decision task, schedules the activity task)
+//    dt a3         (Processes the final decision task, at 10 seconds after previous step activity will timeout)
+let private RegisterActivityStatus() =
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt, false) {
             // Schedule the activity task
@@ -119,7 +119,6 @@ let RegisterActivityStatus() =
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Activities status example", None, None)
     AddOperation (Command.StartWorkflow("a3")) start
     AddOperation (Command.DecisionTask("a3")) (Operation.DecisionTask(decider, None))
-
 
 let Register() =
     RegisterActivitiesInSeries()

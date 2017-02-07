@@ -83,8 +83,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             // Look for possible return failures
             let exceptionEvent = walker.FindWorkflowException(EventType.CompleteWorkflowExecutionFailed, exceptionEvents)
             
-            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CompleteWorkflowExecutionFailed)
-
             match (exceptionEvent) with
             | None -> 
                 let decision = new Decision();
@@ -102,10 +100,10 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of CompleteWorkflowExecution during return operation."))
 
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CompleteWorkflowExecutionFailed)
+
         | ReturnResult.CancelWorkflowExecution(details) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.CancelWorkflowExecutionFailed, exceptionEvents)
-
-            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CancelWorkflowExecutionFailed)
 
             match (exceptionEvent) with
             | None ->
@@ -124,11 +122,11 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of CancelWorkflowExecution during return operation."))
 
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CancelWorkflowExecutionFailed)
+
         | ReturnResult.FailWorkflowExecution(reason, details) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.FailWorkflowExecutionFailed, exceptionEvents)
 
-            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.FailWorkflowExecutionFailed)
-            
             match (exceptionEvent) with
             | None ->
                 let decision = new Decision();
@@ -147,10 +145,10 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
             | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of FailWorkflowExecution during return operation."))
 
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.FailWorkflowExecutionFailed)
+            
         | ReturnResult.ContinueAsNewWorkflowExecution(attr) ->
             let exceptionEvent = walker.FindWorkflowException(EventType.ContinueAsNewWorkflowExecutionFailed, exceptionEvents)
-
-            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.ContinueAsNewWorkflowExecutionFailed)
 
             match (exceptionEvent) with
             | None ->
@@ -167,6 +165,8 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
                 raise (ContinueAsNewWorkflowExecutionFailedException(hev.ContinueAsNewWorkflowExecutionFailedEventAttributes))
 
             | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of ContinueAsNewWorkflowExecution during return operation."))
+
+            Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.ContinueAsNewWorkflowExecutionFailed)
 
         response
 
@@ -911,6 +911,32 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result true
             f(result)
             
+    // Wait For Workflow Execution Signaled (do!)
+    member this.Bind(action:WaitForWorkflowExecutionSignaledAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
+        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
+        match action with
+        | WaitForWorkflowExecutionSignaledAction.Attributes(signalName, pushToContext) ->
+            let combinedHistory = walker.FindSignaled(signalName)
+
+            match combinedHistory with
+            // Not Signaled, keep waiting
+            | None ->
+                Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action None false
+                Wait()
+
+            // Signaled
+            | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
+                let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
+                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
+                Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) false
+                f()
+        
+            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WaitForWorkflowExecutionSignaledAction."))
+
+        | WaitForWorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
+            Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) true
+            f()
+
     // Workflow Execution Signaled (let!)
     member this.Bind(action:WorkflowExecutionSignaledAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
         let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
@@ -936,32 +962,6 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
 
         | WorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             Trace.BuilderBindWorkflowExecutionSignaledAction DecisionTask action result true
-            f(result)
-
-    // Wait For Workflow Execution Signaled (do!)
-    member this.Bind(action:WaitForWorkflowExecutionSignaledAction, f:(WorkflowExecutionSignaledResult -> RespondDecisionTaskCompletedRequest)) =
-        let action = if ContextManager.IsSome then ContextManager.Value.Pull(action) else action
-        match action with
-        | WaitForWorkflowExecutionSignaledAction.Attributes(signalName, pushToContext) ->
-            let combinedHistory = walker.FindSignaled(signalName)
-
-            match combinedHistory with
-            // Not Signaled, keep waiting
-            | None ->
-                Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action None false
-                Wait()
-
-            // Signaled
-            | SomeEventOfType(EventType.WorkflowExecutionSignaled) hev ->
-                let result = WorkflowExecutionSignaledResult.Signaled(hev.WorkflowExecutionSignaledEventAttributes)
-                if (pushToContext && ContextManager.IsSome) then ContextManager.Value.Push(signalName, result)
-                Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) false
-                f(result)
-        
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WaitForWorkflowExecutionSignaledAction."))
-
-        | WaitForWorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
-            Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) true
             f(result)
 
     // Workflow Execution Cancel Requested (let!)

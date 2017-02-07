@@ -56,6 +56,7 @@ let main argv =
 
     RegisterHelloFlowSharp()
     FlowSharp.Examples.ActivityExamples.Register()
+    FlowSharp.Examples.SignalExamples.Register()
 
     System.Diagnostics.Trace.Listeners.Clear()
     System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore

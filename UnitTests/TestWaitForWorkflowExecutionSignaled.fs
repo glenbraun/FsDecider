@@ -33,15 +33,9 @@ module TestWaitForWorkflowExecutionSignaled =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! signal = FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
-                
-            match signal with
-            | WorkflowExecutionSignaledResult.Signaled(attr) when
-                attr.SignalName = signalName &&
-                attr.Input = signalInput -> return "TEST PASS"
+            do! FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
 
-            | _ -> return "TEST FAIL"
-
+            return "TEST PASS"
         }
 
         // OfflineDecisionTask

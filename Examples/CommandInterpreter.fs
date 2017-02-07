@@ -106,13 +106,16 @@ let internal ExecuteOperation op =
         startRequest.WorkflowId <- workflowId
         startRequest.WorkflowType <- workflowType
 
-        let startResponse = swf.StartWorkflowExecution(startRequest)
-        if startResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
-            failwith "Error while starting workflow execution."
+        try
+            let startResponse = swf.StartWorkflowExecution(startRequest)
+            if startResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
+                failwith "Error while starting workflow execution."
 
-        CurrentWorkflowExecution <- WorkflowExecution(WorkflowId=workflowId, RunId=startResponse.Run.RunId)
+            CurrentWorkflowExecution <- WorkflowExecution(WorkflowId=workflowId, RunId=startResponse.Run.RunId)
 
-        FlowSharp.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input (startResponse.Run.RunId) 
+            FlowSharp.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input (startResponse.Run.RunId) 
+        with 
+        | ex -> System.Diagnostics.Trace.TraceInformation(sprintf "%s" ex.Message)
 
     | Operation.DecisionTask(decider, tasklist) ->
         let pollRequest = PollForDecisionTaskRequest()
@@ -125,10 +128,13 @@ let internal ExecuteOperation op =
             failwith "Error while retrieving decision task."
 
         let respondRequest = decider(pollResponse.DecisionTask)
-        let respondResponse = swf.RespondDecisionTaskCompleted(respondRequest)
+        if respondRequest = null then
+            System.Diagnostics.Trace.TraceInformation("Decider retuned null.")
+        else 
+            let respondResponse = swf.RespondDecisionTaskCompleted(respondRequest)
 
-        if respondResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
-            failwith "Error while responding with decisions."
+            if respondResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
+                failwith "Error while responding with decisions."
     
     | Operation.ActivityTask(activityType, resultFunction, tasklist) ->
         let pollRequest = PollForActivityTaskRequest()
