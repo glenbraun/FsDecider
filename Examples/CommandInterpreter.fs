@@ -22,12 +22,16 @@ type Operation =
                       workflowId:string * 
                       taskList:TaskList option * 
                       input:string option
+
     | DecisionTask of decider:(DecisionTask -> RespondDecisionTaskCompletedRequest) * 
                       TaskList option
 
     | ActivityTask of ActivityType *
                       (ActivityTask -> string) option *
                       TaskList option
+
+    | SignalWorkflow of workflowId:string * signalName:string
+
     | History
     
 let mutable internal OperationMap = Map.empty<Command, Operation>
@@ -60,6 +64,14 @@ let internal ParseCommand chars =
         match (arg, chars) with
         | (a, []) when a.Length > 0 -> Command.StartWorkflow( a )
         | _ -> Command.Error("Expected 'sw {argument}'")
+
+    | 's' :: 'g' :: s :: t when Char.IsWhiteSpace(s) -> 
+        let (arg, chars) = ParseArgumentValue t []
+        let chars = SkipWhiteSpace chars
+
+        match (arg, chars) with
+        | (a, []) when a.Length > 0 -> Command.SignalWorkflow( a )
+        | _ -> Command.Error("Expected 'sg {argument}'")
 
     | 'd' :: 't' :: s :: t when Char.IsWhiteSpace(s) -> 
         let (arg, chars) = ParseArgumentValue t []
@@ -155,6 +167,21 @@ let internal ExecuteOperation op =
             failwith "Error while responding activity task completed."
       
         FlowSharp.Trace.ActivityCompleted activityType (respondRequest.Result) (pollRequest.TaskList)
+
+    | Operation.SignalWorkflow(workflowId, signalName) ->
+        let signalRequest = SignalWorkflowExecutionRequest()
+        signalRequest.Domain <- TestConfiguration.Domain
+        signalRequest.SignalName <- signalName
+        signalRequest.WorkflowId <- workflowId
+
+        try 
+            let signalResponse = swf.SignalWorkflowExecution(signalRequest)
+            if signalResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
+                failwith "Error while signalling workflow execution."
+        with 
+        | ex -> System.Diagnostics.Trace.TraceInformation(ex.Message)
+
+        System.Diagnostics.Trace.TraceInformation("Workflow signal sent.")
 
     | Operation.History ->
         if CurrentWorkflowExecution = null then

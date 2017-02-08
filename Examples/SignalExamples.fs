@@ -11,10 +11,8 @@ open FlowSharp.Actions
 open FlowSharp.Examples.CommandInterpreter
 open FlowSharp.UnitTests
 
-// Example a1 : Activities in series
-//      This example demonstrates a simple FlowSharp decider for a workflow with two 
-//      activity tasks. Once the first activity task completes, the second is started. 
-//      The workflow execution completes when after the second activity task completes.
+// Example s1 : Sending and receiving signals
+//      This example has two workflows. One which sends a signal and the other which receives it.
 // To Run, start the project and type these commands into the command line interpreter.
 //    sw s1r            (Starts the receiving workflow)
 //    dt s1r            (Processes the receiving workflow initial decision task, nothing to do but wait)
@@ -27,7 +25,7 @@ let private RegisterSendingAndReceivingSignals() =
     let sendingWorkflowId = "FlowSharp Signals Example (sender)"
 
     let sendSignalDecider(dt:DecisionTask) =
-        FlowSharp.Builder(dt, false) {
+        FlowSharp.Builder(dt) {
             // Send a signal to an external workflow
             let! signal = FlowSharp.SignalExternalWorkflowExecution("Some Signal", receivingWorkflowId)
 

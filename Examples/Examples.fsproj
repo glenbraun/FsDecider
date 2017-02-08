@@ -58,6 +58,7 @@
     <Compile Include="CommandInterpreter.fs" />
     <Compile Include="ActivityExamples.fs" />
     <Compile Include="SignalExamples.fs" />
+    <Compile Include="MarkerExamples.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />

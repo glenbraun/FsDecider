@@ -23,6 +23,7 @@ How to use the command iterpreter
         sw <key>            Start workflow execution for the example registered with key.
         dt <key>            Poll for a Decision Task and use the decider function registered with key.
         at <key>            Poll for Activity Task and respond with based on the registered key.
+        sg <key>            Signals a workflow execution based on the registered key.
         h                   List the current History events for the latest workflow execution.
 
 *)
@@ -57,6 +58,7 @@ let main argv =
     RegisterHelloFlowSharp()
     FlowSharp.Examples.ActivityExamples.Register()
     FlowSharp.Examples.SignalExamples.Register()
+    FlowSharp.Examples.MarkerExamples.Register()
 
     System.Diagnostics.Trace.Listeners.Clear()
     System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore
