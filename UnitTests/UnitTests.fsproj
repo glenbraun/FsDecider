@@ -56,6 +56,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <Content Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="TestConfiguration.fs" />
     <Compile Include="OfflineHistory.fs" />
     <Compile Include="TestHelper.fs" />

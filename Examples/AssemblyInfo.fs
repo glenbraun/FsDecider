@@ -7,12 +7,12 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("Examples")>]
-[<assembly: AssemblyDescription("")>]
+[<assembly: AssemblyTitle("FlowSharp Examples")>]
+[<assembly: AssemblyDescription("FlowSharp. F# computation expressions for writing AWS SimpleWorkflow deciders")>]
+[<assembly: AssemblyProduct("FlowSharp")>]
+[<assembly: AssemblyCompany("LP4-3, LLC")>]
+[<assembly: AssemblyCopyright("Copyright 2017 LP4-3, LLC. All Rights Reserved.")>]
 [<assembly: AssemblyConfiguration("")>]
-[<assembly: AssemblyCompany("HP Inc.")>]
-[<assembly: AssemblyProduct("Examples")>]
-[<assembly: AssemblyCopyright("Copyright © HP Inc. 2017")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 
