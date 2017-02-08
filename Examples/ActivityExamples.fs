@@ -52,7 +52,7 @@ let private RegisterActivitiesInSeries() =
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Activities in series example", None, None)
     AddOperation (Command.StartWorkflow("a1")) start
     AddOperation (Command.ActivityTask("a1")) (Operation.ActivityTask(TestConfiguration.ActivityType, None, None))
-    AddOperation (Command.DecisionTask("a1")) (Operation.DecisionTask(decider, None))
+    AddOperation (Command.DecisionTask("a1")) (Operation.DecisionTask(decider, false, None))
 
 // Example a2 : Activities in parallel
 //      This example demonstrates a simple FlowSharp decider for a workflow with two 
@@ -88,7 +88,7 @@ let private RegisterActivitiesInParallel() =
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Activities in parallel example", None, None)
     AddOperation (Command.StartWorkflow("a2")) start
     AddOperation (Command.ActivityTask("a2")) (Operation.ActivityTask(TestConfiguration.ActivityType, None, None))
-    AddOperation (Command.DecisionTask("a2")) (Operation.DecisionTask(decider, None))
+    AddOperation (Command.DecisionTask("a2")) (Operation.DecisionTask(decider, false, None))
 
 // Example a3 : Conditional logic based on the status of an activity task
 //      This example demonstrates a simple FlowSharp decider for a workflow with one 
@@ -118,7 +118,7 @@ let private RegisterActivityStatus() =
     // The code below supports the example runner
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Activities status example", None, None)
     AddOperation (Command.StartWorkflow("a3")) start
-    AddOperation (Command.DecisionTask("a3")) (Operation.DecisionTask(decider, None))
+    AddOperation (Command.DecisionTask("a3")) (Operation.DecisionTask(decider, false, None))
 
 let Register() =
     RegisterActivitiesInSeries()

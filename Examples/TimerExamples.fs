@@ -33,7 +33,7 @@ let private RegisterTimerExample() =
     // The code below supports the example runner
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, workflowId, None, None)
     AddOperation (Command.StartWorkflow("t1")) start
-    AddOperation (Command.DecisionTask("t1")) (Operation.DecisionTask(decider, None))
+    AddOperation (Command.DecisionTask("t1")) (Operation.DecisionTask(decider, false, None))
 
 // Example t2 : Restart timer example
 //      This example demonstracts waiting for a timer three times.
@@ -66,7 +66,7 @@ let private RegisterRestartTimerExample() =
     // The code below supports the example runner
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, workflowId, None, None)
     AddOperation (Command.StartWorkflow("t2")) start
-    AddOperation (Command.DecisionTask("t2")) (Operation.DecisionTask(decider, None))
+    AddOperation (Command.DecisionTask("t2")) (Operation.DecisionTask(decider, false, None))
 
 let Register() =
     RegisterTimerExample()

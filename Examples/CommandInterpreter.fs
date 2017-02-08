@@ -21,9 +21,10 @@ type Operation =
     | StartWorkflowExecution of workflow:WorkflowType * 
                       workflowId:string * 
                       taskList:TaskList option * 
-                      input:string option
+                      input:string option 
 
     | DecisionTask of decider:(DecisionTask -> RespondDecisionTaskCompletedRequest) * 
+                      reverseOrder:bool *
                       TaskList option
 
     | ActivityTask of ActivityType *
@@ -129,11 +130,12 @@ let internal ExecuteOperation op =
         with 
         | ex -> System.Diagnostics.Trace.TraceInformation(sprintf "%s" ex.Message)
 
-    | Operation.DecisionTask(decider, tasklist) ->
+    | Operation.DecisionTask(decider, reverseOrder, tasklist) ->
         let pollRequest = PollForDecisionTaskRequest()
         pollRequest.Domain <- TestConfiguration.Domain
         pollRequest.Identity <- TestConfiguration.Identity
         pollRequest.TaskList <- if tasklist.IsSome then tasklist.Value else TestConfiguration.TaskList
+        pollRequest.ReverseOrder <- reverseOrder
         
         let pollResponse = swf.PollForDecisionTask(pollRequest)
         if pollResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then

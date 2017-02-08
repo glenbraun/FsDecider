@@ -44,8 +44,8 @@ let private RegisterChildWorkflowExample() =
     // The code below supports the example runner
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, parentWorkflowId, None, None)
     AddOperation (Command.StartWorkflow("c1")) start
-    AddOperation (Command.DecisionTask("c1p")) (Operation.DecisionTask(parentDecider, None))
-    AddOperation (Command.DecisionTask("c1c")) (Operation.DecisionTask(childDecider, None))
+    AddOperation (Command.DecisionTask("c1p")) (Operation.DecisionTask(parentDecider, false, None))
+    AddOperation (Command.DecisionTask("c1c")) (Operation.DecisionTask(childDecider, false, None))
 
 let Register() =
     RegisterChildWorkflowExample()

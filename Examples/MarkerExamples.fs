@@ -39,7 +39,7 @@ let private RegisterRecordAndDetectMarker() =
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, workflowId, None, None)
     AddOperation (Command.StartWorkflow("m1")) start
     AddOperation (Command.SignalWorkflow("m1")) (Operation.SignalWorkflow(workflowId, "Some Signal"))
-    AddOperation (Command.DecisionTask("m1")) (Operation.DecisionTask(decider, None))
+    AddOperation (Command.DecisionTask("m1")) (Operation.DecisionTask(decider, false, None))
 
 let Register() =
     RegisterRecordAndDetectMarker()

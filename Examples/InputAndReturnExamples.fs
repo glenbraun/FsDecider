@@ -40,8 +40,8 @@ let private RegisterInputAndReturnExample() =
     AddOperation (Command.StartWorkflow("ir1c")) (Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, workflowId, None, Some("Completed")))
     AddOperation (Command.StartWorkflow("ir1f")) (Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, workflowId, None, Some("Failed")))
     AddOperation (Command.StartWorkflow("ir1n")) (Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, workflowId, None, Some("Canceled")))
-    AddOperation (Command.DecisionTask("ir1")) (Operation.DecisionTask(decider, None))
-
+    AddOperation (Command.DecisionTask("ir1")) (Operation.DecisionTask(decider, false, None))
 
 let Register() =
     RegisterInputAndReturnExample()
+

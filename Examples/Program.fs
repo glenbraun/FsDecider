@@ -39,14 +39,14 @@ let RegisterHelloFlowSharp() =
     // This creates a decider function using the FlowSharp decider builder. This
     // decider expression simply completes the workflow with a result of "Hello FlowSharp"
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt, false) {
+        FlowSharp.Builder(dt) {
             return "Hello FlowSharp"            
         }
 
     // The code below supports the example runner
     let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Hello FlowSharp example", None, None)
     AddOperation (Command.StartWorkflow("hello")) start
-    AddOperation (Command.DecisionTask("hello")) (Operation.DecisionTask(decider, None))
+    AddOperation (Command.DecisionTask("hello")) (Operation.DecisionTask(decider, false, None))
 
 [<EntryPoint>]
 let main argv = 
@@ -62,6 +62,7 @@ let main argv =
     FlowSharp.Examples.ChildWorkflowExamples.Register()
     FlowSharp.Examples.TimerExamples.Register()
     FlowSharp.Examples.InputAndReturnExamples.Register()
+    FlowSharp.Examples.ContextExamples.Register()
 
     System.Diagnostics.Trace.Listeners.Clear()
     System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore

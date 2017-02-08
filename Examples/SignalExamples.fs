@@ -49,8 +49,8 @@ let private RegisterSendingAndReceivingSignals() =
     let startSender = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, sendingWorkflowId, None, None)
     AddOperation (Command.StartWorkflow("s1r")) startReceiver
     AddOperation (Command.StartWorkflow("s1s")) startSender
-    AddOperation (Command.DecisionTask("s1r")) (Operation.DecisionTask(receiveSignalDecider, None))
-    AddOperation (Command.DecisionTask("s1s")) (Operation.DecisionTask(sendSignalDecider, None))
+    AddOperation (Command.DecisionTask("s1r")) (Operation.DecisionTask(receiveSignalDecider, false, None))
+    AddOperation (Command.DecisionTask("s1s")) (Operation.DecisionTask(sendSignalDecider, false, None))
 
 let Register() =
     RegisterSendingAndReceivingSignals()
