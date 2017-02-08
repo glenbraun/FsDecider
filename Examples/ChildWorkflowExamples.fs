@@ -12,7 +12,8 @@ open FlowSharp.Examples.CommandInterpreter
 open FlowSharp.UnitTests
 
 // Example c1 : Start and wait for a child workflow 
-//      This example demonstrates recording and detecting a marker.
+//      This example demonstrates starting a child workflow and waiting for it to complete
+//      from within a parent workflow.
 // To Run, start the project and type these commands into the command line interpreter.
 //    sw c1             (Starts the workflow)
 //    dt c1p            (Processes the initial decision task for the parent workflow, starts the child workflow and waits)
@@ -24,6 +25,7 @@ let private RegisterChildWorkflowExample() =
 
     let parentDecider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
+            // Start a child workflow
             let! child = FlowSharp.StartChildWorkflowExecution(TestConfiguration.WorkflowType, childWorkflowId)
 
             match child with
