@@ -33,7 +33,7 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! result = FlowSharpAction.ScheduleLambdaFunction (
@@ -120,7 +120,7 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! result = FlowSharpAction.ScheduleLambdaFunction (
@@ -206,7 +206,7 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! result = FlowSharpAction.ScheduleLambdaFunction (
@@ -292,7 +292,7 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! result = FlowSharpAction.ScheduleLambdaFunction (
@@ -378,7 +378,7 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! result = FlowSharpAction.ScheduleLambdaFunction (

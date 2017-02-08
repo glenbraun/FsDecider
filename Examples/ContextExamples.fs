@@ -41,7 +41,7 @@ let private RegisterContextExample() =
         // Construct the FlowSharp computation expression with ReverseOrder=true, and passing in the context manager.
         // Using ReverseOrder, the decider could retrieve only the latest history events since the last decision
         // task.
-        FlowSharp.Builder(dt, true, Some(context :> IContextManager) ) {
+        FlowSharp(dt, true, Some(context :> IContextManager) ) {
             let! marker = FlowSharpAction.MarkerRecorded("Marker 1", pushToContext=true)
 
             // Notice "let" not "let!" here. Binding contextActivityAction so both branches of the match

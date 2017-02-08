@@ -24,7 +24,7 @@ let private RegisterInputAndReturnExample() =
     let workflowId = "FlowSharp Input and Return Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             // Get the input to the workflow, set when starting the workflow
             let! input = FlowSharpAction.GetWorkflowExecutionInput()
 

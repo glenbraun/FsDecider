@@ -35,7 +35,7 @@ module TestWaitForAllLambdaFunction =
 
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
@@ -169,7 +169,7 @@ module TestWaitForAllLambdaFunction =
 
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
@@ -288,7 +288,7 @@ module TestWaitForAllLambdaFunction =
 
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
             let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (

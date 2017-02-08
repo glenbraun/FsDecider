@@ -35,7 +35,7 @@ module TestWaitForAnyChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start1 = FlowSharpAction.StartChildWorkflowExecution
@@ -80,7 +80,7 @@ module TestWaitForAnyChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 
@@ -219,7 +219,7 @@ module TestWaitForAnyChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start1 = FlowSharpAction.StartChildWorkflowExecution
@@ -264,7 +264,7 @@ module TestWaitForAnyChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 
@@ -399,7 +399,7 @@ module TestWaitForAnyChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start1 = FlowSharpAction.StartChildWorkflowExecution
@@ -444,7 +444,7 @@ module TestWaitForAnyChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 

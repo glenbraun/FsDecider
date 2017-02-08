@@ -24,7 +24,7 @@ open FlowSharp.UnitTests
 //    dt a1             (Processes the final decision task, completes the workflow)
 let private RegisterActivitiesInSeries() =
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             // Schedule the first activity task
             let! first = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
@@ -66,7 +66,7 @@ let private RegisterActivitiesInSeries() =
 //    dt a2             (Processes the final decision task, completes the workflow)
 let private RegisterActivitiesInParallel() =
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             // Schedule the first activity task
             let! first = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
@@ -100,7 +100,7 @@ let private RegisterActivitiesInParallel() =
 //    dt a3         (Processes the final decision task, at 10 seconds after previous step activity will timeout)
 let private RegisterActivityStatus() =
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             // Schedule the activity task
             let! activity = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 

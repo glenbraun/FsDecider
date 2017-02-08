@@ -39,7 +39,7 @@ module TestRemoveFromContext =
         let action = ScheduleActivityTaskAction.Attributes(ScheduleActivityTask, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 
@@ -117,7 +117,7 @@ module TestRemoveFromContext =
         let action = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 
@@ -196,7 +196,7 @@ module TestRemoveFromContext =
         let action = StartChildWorkflowExecutionAction.Attributes(StartChildWorkflowExecution, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 
@@ -285,7 +285,7 @@ module TestRemoveFromContext =
         let action = StartTimerAction.Attributes(StartTimer, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 
@@ -357,7 +357,7 @@ module TestRemoveFromContext =
         let action = WorkflowExecutionSignaledAction.Attributes(WorkflowExecutionSignaled, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 
@@ -424,7 +424,7 @@ module TestRemoveFromContext =
         let action = SignalExternalWorkflowExecutionAction.Attributes(SignalExternalWorkflowExecution, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 
@@ -500,7 +500,7 @@ module TestRemoveFromContext =
         let action = RecordMarkerAction.Attributes(RecordMarker, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 
@@ -568,7 +568,7 @@ module TestRemoveFromContext =
         let action = MarkerRecordedAction.Attributes(MarkerRecorded, true)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = action
 

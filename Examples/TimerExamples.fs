@@ -21,7 +21,7 @@ let private RegisterTimerExample() =
     let workflowId = "FlowSharp Timer Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             let! timer = FlowSharpAction.StartTimer("Some Timer", "15")
 
             do! FlowSharpAction.WaitForTimer(timer)
@@ -47,7 +47,7 @@ let private RegisterRestartTimerExample() =
     let workflowId = "FlowSharp Restart Timer Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             for i = 1 to 3 do
                 // Once a timer name has been used, it cannot be used again.
                 // Append a unique value to the new timer name each time.

@@ -61,7 +61,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleActivityTaskAction.Attributes(ScheduleActivityTask, true)
 
@@ -85,7 +85,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleActivityTaskAction.Attributes(ScheduleActivityTask, true)
 
@@ -110,7 +110,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleActivityTaskAction.Attributes(ScheduleActivityTask, true)
 
@@ -137,7 +137,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleActivityTaskAction.Attributes(ScheduleActivityTask, true)
 
@@ -164,7 +164,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleActivityTaskAction.Attributes(ScheduleActivityTask, true)
 
@@ -199,7 +199,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
@@ -224,7 +224,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
@@ -249,7 +249,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
@@ -274,7 +274,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
@@ -301,7 +301,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = ScheduleLambdaFunctionAction.Attributes(ScheduleLambdaFunction, true)
 
@@ -339,7 +339,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartChildWorkflowExecutionAction.Attributes(StartChildWorkflowExecution, true)
 
@@ -369,7 +369,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartChildWorkflowExecutionAction.Attributes(StartChildWorkflowExecution, true)
 
@@ -400,7 +400,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartChildWorkflowExecutionAction.Attributes(StartChildWorkflowExecution, true)
 
@@ -431,7 +431,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartChildWorkflowExecutionAction.Attributes(StartChildWorkflowExecution, true)
 
@@ -460,7 +460,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartChildWorkflowExecutionAction.Attributes(StartChildWorkflowExecution, true)
 
@@ -490,7 +490,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartChildWorkflowExecutionAction.Attributes(StartChildWorkflowExecution, true)
 
@@ -524,7 +524,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartTimerAction.Attributes(StartTimer, true)
 
@@ -548,7 +548,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartTimerAction.Attributes(StartTimer, true)
 
@@ -573,7 +573,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = StartTimerAction.Attributes(StartTimer, true)
 
@@ -603,7 +603,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = WorkflowExecutionSignaledAction.Attributes(WorkflowExecutionSignaled, true)
 
@@ -637,7 +637,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = SignalExternalWorkflowExecutionAction.Attributes(SignalExternalWorkflowExecution, true)
 
@@ -665,7 +665,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = SignalExternalWorkflowExecutionAction.Attributes(SignalExternalWorkflowExecution, true)
 
@@ -699,7 +699,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = RecordMarkerAction.Attributes(RecordMarker, true)
 
@@ -725,7 +725,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = RecordMarkerAction.Attributes(RecordMarker, true)
 
@@ -755,7 +755,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = MarkerRecordedAction.Attributes(MarkerRecorded, true)
 
@@ -781,7 +781,7 @@ module TestExecutionContextManager =
         context.Read(contextString)
             
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder, Some(context :> IContextManager)) {
             
             let! result = MarkerRecordedAction.Attributes(MarkerRecorded, true)
 

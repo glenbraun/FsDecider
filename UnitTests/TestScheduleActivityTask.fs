@@ -36,7 +36,7 @@ module TestScheduleActivityTask =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -105,7 +105,7 @@ module TestScheduleActivityTask =
         let signalName = "Test Signal"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -198,7 +198,7 @@ module TestScheduleActivityTask =
         let signalName = "Test Signal"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -295,7 +295,7 @@ module TestScheduleActivityTask =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -384,7 +384,7 @@ module TestScheduleActivityTask =
         let activityDetails = "Test Activity 1 Canceled Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -474,7 +474,7 @@ module TestScheduleActivityTask =
         let activityTimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -563,7 +563,7 @@ module TestScheduleActivityTask =
         let activityDetails = "Test Activity 1 Failed Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -653,7 +653,7 @@ module TestScheduleActivityTask =
         let signalName = "Test Signal"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! result = FlowSharpAction.ScheduleActivityTask (
@@ -740,7 +740,7 @@ module TestScheduleActivityTask =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             do! FlowSharpAction.ScheduleActivityTask (

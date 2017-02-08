@@ -29,7 +29,7 @@ module TestGetWorkflowExecutionInput =
         let workflowInput = "Test Workflow Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
 
             let! input = FlowSharpAction.GetWorkflowExecutionInput()
 
@@ -75,7 +75,7 @@ module TestGetWorkflowExecutionInput =
         let workflowInput = null
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
 
             let! input = FlowSharpAction.GetWorkflowExecutionInput()
 

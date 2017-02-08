@@ -37,7 +37,7 @@ module TestStartChildWorkflowExecution =
         let childTaskList = TaskList(Name="Child")
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -116,7 +116,7 @@ module TestStartChildWorkflowExecution =
         let childTaskList = TaskList(Name="Child")
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -220,7 +220,7 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -252,7 +252,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return "OK"
             }
 
@@ -339,7 +339,7 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -373,7 +373,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return "OK"
             }
 
@@ -484,7 +484,7 @@ module TestStartChildWorkflowExecution =
         let cancelDetails = "Child Canceled Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -518,7 +518,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return ReturnResult.CancelWorkflowExecution(cancelDetails)
             }
 
@@ -630,7 +630,7 @@ module TestStartChildWorkflowExecution =
         let failedDetails = "Child Failed Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -666,7 +666,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return ReturnResult.FailWorkflowExecution(failedReason, failedDetails)
             }
 
@@ -780,7 +780,7 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -815,7 +815,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {                
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {                
                 return "OK"
             }
 
@@ -908,7 +908,7 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -940,7 +940,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 return "OK"
             }
 
@@ -1043,7 +1043,7 @@ module TestStartChildWorkflowExecution =
         let cause = StartChildWorkflowExecutionFailedCause.WORKFLOW_TYPE_DOES_NOT_EXIST
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -1140,7 +1140,7 @@ module TestStartChildWorkflowExecution =
         let childTaskList = TaskList(Name="Child")
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             do! FlowSharpAction.StartChildWorkflowExecution

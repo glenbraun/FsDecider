@@ -39,7 +39,7 @@ let RegisterHelloFlowSharp() =
     // This creates a decider function using the FlowSharp decider builder. This
     // decider expression simply completes the workflow with a result of "Hello FlowSharp"
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             return "Hello FlowSharp"            
         }
 

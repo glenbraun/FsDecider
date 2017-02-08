@@ -47,7 +47,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -160,7 +160,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -288,7 +288,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution
@@ -415,7 +415,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let cause = RequestCancelExternalWorkflowExecutionFailedCause.UNKNOWN_EXTERNAL_WORKFLOW_EXECUTION
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             let! request = FlowSharpAction.RequestCancelExternalWorkflowExecution(childWorkflowId)
                 
@@ -491,7 +491,7 @@ module TestRequestCancelExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
             let! start = FlowSharpAction.StartChildWorkflowExecution

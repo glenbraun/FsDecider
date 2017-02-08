@@ -29,7 +29,7 @@ module TestTryFinally =
         let deciderFunc(dt:DecisionTask) =
             let x = ref 0
 
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 try
                     try 
                         x := !x + 1
@@ -84,7 +84,7 @@ module TestTryFinally =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             let x = ref 0
             try 
@@ -185,7 +185,7 @@ module TestTryFinally =
         let cause = ContinueAsNewWorkflowExecutionFailedCause.WORKFLOW_TYPE_DOES_NOT_EXIST
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 let x = ref 0
 
                 try

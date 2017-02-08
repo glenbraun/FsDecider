@@ -13,7 +13,7 @@ open FlowSharp.Trace
 
 exception FlowSharpBuilderException of HistoryEvent option * string
 
-type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
+type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
     let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
     let walker = HistoryWalker(DecisionTask.Events, ReverseOrder)
     let mutable blockFlag = false
@@ -45,9 +45,9 @@ type Builder (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICont
             response.ExecutionContext <- cm.Write()
         | None -> ()
 
-    new (decisionTask:DecisionTask) = Builder(decisionTask, false, None)
-    new (decisionTask:DecisionTask, reverseOrder:bool) = Builder(decisionTask, reverseOrder, None)
-    new (decisionTask:DecisionTask, contextManager:IContextManager option) = Builder(decisionTask, false, contextManager)
+    new (decisionTask:DecisionTask) = FlowSharp(decisionTask, false, None)
+    new (decisionTask:DecisionTask, reverseOrder:bool) = FlowSharp(decisionTask, reverseOrder, None)
+    new (decisionTask:DecisionTask, contextManager:IContextManager option) = FlowSharp(decisionTask, false, contextManager)
 
     member this.Delay(f) =
         Trace.BuilderDelay(DecisionTask)

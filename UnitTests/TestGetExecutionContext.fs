@@ -29,7 +29,7 @@ module TestGetExecutionContext =
         let workflowId = "Get Execution Context"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
 
             let! context = FlowSharpAction.GetExecutionContext()
 
@@ -75,7 +75,7 @@ module TestGetExecutionContext =
         let executionContext = "Test Execution Context"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
 
             let! context = FlowSharpAction.GetExecutionContext()
 

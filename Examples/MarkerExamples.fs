@@ -22,7 +22,7 @@ let private RegisterRecordAndDetectMarker() =
     let workflowId = "FlowSharp Markers Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             do! FlowSharpAction.RecordMarker("Some Marker")
 
             let! marker = FlowSharpAction.MarkerRecorded("Some Marker")

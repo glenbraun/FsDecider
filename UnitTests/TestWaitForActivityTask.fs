@@ -36,7 +36,7 @@ module TestWaitForActivityTask =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! activity = FlowSharpAction.ScheduleActivityTask (
@@ -123,7 +123,7 @@ module TestWaitForActivityTask =
         let activityDetails = "Test Activity 1 Canceled Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! activity = FlowSharpAction.ScheduleActivityTask (
@@ -211,7 +211,7 @@ module TestWaitForActivityTask =
         let activityDetails = "Test Activity 1 Failed Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! activity = FlowSharpAction.ScheduleActivityTask (
@@ -298,7 +298,7 @@ module TestWaitForActivityTask =
         let activityTimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
             let! activity = FlowSharpAction.ScheduleActivityTask (
@@ -387,7 +387,7 @@ module TestWaitForActivityTask =
         let activityCause = ScheduleActivityTaskFailedCause.ACTIVITY_TYPE_DOES_NOT_EXIST
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
             let! activity = FlowSharpAction.ScheduleActivityTask (

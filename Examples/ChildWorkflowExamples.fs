@@ -24,7 +24,7 @@ let private RegisterChildWorkflowExample() =
     let childWorkflowId = "FlowSharp Child Workflow Example (child)"
 
     let parentDecider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             // Start a child workflow
             let! child = FlowSharpAction.StartChildWorkflowExecution(TestConfiguration.WorkflowType, childWorkflowId)
 
@@ -37,7 +37,7 @@ let private RegisterChildWorkflowExample() =
         }
 
     let childDecider(dt:DecisionTask) =
-        FlowSharp.Builder(dt) {
+        FlowSharp(dt) {
             return "OK"
         }
 

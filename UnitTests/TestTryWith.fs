@@ -27,7 +27,7 @@ module TestTryWith =
         let workflowId = "A Try With expression with a Return Completed"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 try
                     return "TEST PASS"
                 with
@@ -70,7 +70,7 @@ module TestTryWith =
         let workflowId = "A Try With expression with an exception raised in the body"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 try
                     failwith "ERROR"
                 with
@@ -120,7 +120,7 @@ module TestTryWith =
         let cause = ContinueAsNewWorkflowExecutionFailedCause.WORKFLOW_TYPE_DOES_NOT_EXIST
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
+            FlowSharp(dt, TestConfiguration.ReverseOrder) {
                 try 
                     let attr = ContinueAsNewWorkflowExecutionDecisionAttributes(
                                 ChildPolicy=ChildPolicy.TERMINATE,
