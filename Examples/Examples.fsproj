@@ -61,6 +61,7 @@
     <Compile Include="MarkerExamples.fs" />
     <Compile Include="ChildWorkflowExamples.fs" />
     <Compile Include="TimerExamples.fs" />
+    <Compile Include="InputAndReturnExamples.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
