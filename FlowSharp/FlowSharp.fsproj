@@ -58,7 +58,7 @@
     <Compile Include="Registrar.fs" />
     <Compile Include="EventPatterns.fs" />
     <Compile Include="Actions.fs" />
-    <Compile Include="FlowSharp.fs" />
+    <Compile Include="FlowSharpAction.fs" />
     <Compile Include="HistoryWalker.fs" />
     <Compile Include="ContextExpression.fs" />
     <Compile Include="ExecutionContextManager.fs" />
