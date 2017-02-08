@@ -38,14 +38,14 @@ module TestWaitForAnyLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! lambda1 = FlowSharp.ScheduleLambdaFunction (
+            let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId + "1",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            let! lambda2 = FlowSharp.ScheduleLambdaFunction (
+            let! lambda2 = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId + "2",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -54,7 +54,7 @@ module TestWaitForAnyLambdaFunction =
 
             let lambdaList = [lambda1; lambda2;]
 
-            do! FlowSharp.WaitForAnyLambdaFunction(lambdaList)
+            do! FlowSharpAction.WaitForAnyLambdaFunction(lambdaList)
 
             let finishedList = 
                 lambdaList
@@ -156,14 +156,14 @@ module TestWaitForAnyLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! lambda1 = FlowSharp.ScheduleLambdaFunction (
+            let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId + "1",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            let! lambda2 = FlowSharp.ScheduleLambdaFunction (
+            let! lambda2 = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId + "2",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -172,7 +172,7 @@ module TestWaitForAnyLambdaFunction =
 
             let lambdaList = [lambda1; lambda2;]
 
-            do! FlowSharp.WaitForAnyLambdaFunction(lambdaList)
+            do! FlowSharpAction.WaitForAnyLambdaFunction(lambdaList)
 
             let finishedList = 
                 lambdaList
@@ -275,14 +275,14 @@ module TestWaitForAnyLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! lambda1 = FlowSharp.ScheduleLambdaFunction (
+            let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId + "1",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            let! lambda2 = FlowSharp.ScheduleLambdaFunction (
+            let! lambda2 = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId + "2",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -291,7 +291,7 @@ module TestWaitForAnyLambdaFunction =
 
             let lambdaList = [lambda1; lambda2;]
 
-            do! FlowSharp.WaitForAnyLambdaFunction(lambdaList)
+            do! FlowSharpAction.WaitForAnyLambdaFunction(lambdaList)
 
             let finishedList = 
                 lambdaList

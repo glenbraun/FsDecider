@@ -43,7 +43,7 @@ module TestWorkflowExecutionCancelRequested =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -57,9 +57,9 @@ module TestWorkflowExecutionCancelRequested =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Started(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -73,11 +73,11 @@ module TestWorkflowExecutionCancelRequested =
 
         let childDeciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
-            let! cancel = FlowSharp.WorkflowExecutionCancelRequested()
+            let! cancel = FlowSharpAction.WorkflowExecutionCancelRequested()
                 
             match cancel with
             | WorkflowExecutionCancelRequestedResult.NotRequested ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | WorkflowExecutionCancelRequestedResult.CancelRequested(attr) when
                 attr.Cause = cause &&
@@ -212,7 +212,7 @@ module TestWorkflowExecutionCancelRequested =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! cancel = FlowSharp.WorkflowExecutionCancelRequested()
+            let! cancel = FlowSharpAction.WorkflowExecutionCancelRequested()
                 
             match cancel with
             | WorkflowExecutionCancelRequestedResult.NotRequested -> return "TEST PASS"

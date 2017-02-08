@@ -36,11 +36,11 @@ module TestRecordMarker =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            let! marker = FlowSharp.RecordMarker(markerName, markerDetails)
+            let! marker = FlowSharpAction.RecordMarker(markerName, markerDetails)
 
             match marker with
             | RecordMarkerResult.Recording ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | RecordMarkerResult.Recorded(attr) when attr.MarkerName = markerName && attr.Details = markerDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
@@ -109,7 +109,7 @@ module TestRecordMarker =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            let! marker = FlowSharp.RecordMarker(markerName, markerDetails)
+            let! marker = FlowSharpAction.RecordMarker(markerName, markerDetails)
 
             match marker with
             | RecordMarkerResult.Recording -> return "TEST PASS"
@@ -165,11 +165,11 @@ module TestRecordMarker =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            let! marker = FlowSharp.RecordMarker(markerName, markerDetails)
+            let! marker = FlowSharpAction.RecordMarker(markerName, markerDetails)
 
             match marker with
             | RecordMarkerResult.Recording ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | RecordMarkerResult.RecordMarkerFailed(attr) when attr.MarkerName = markerName && attr.Cause = cause -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
@@ -237,7 +237,7 @@ module TestRecordMarker =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            do! FlowSharp.RecordMarker(markerName, markerDetails)
+            do! FlowSharpAction.RecordMarker(markerName, markerDetails)
 
             return "TEST PASS"
         }

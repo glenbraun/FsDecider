@@ -33,9 +33,9 @@ module TestWaitForTimer =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FlowSharpAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
-            do! FlowSharp.WaitForTimer(timer1)
+            do! FlowSharpAction.WaitForTimer(timer1)
 
             match timer1 with
             | StartTimerResult.Fired(attr) when attr.TimerId = timerId -> return "TEST PASS"
@@ -106,15 +106,15 @@ module TestWaitForTimer =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FlowSharpAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) -> 
-                do! FlowSharp.WaitForTimer(timer1)
+                do! FlowSharpAction.WaitForTimer(timer1)
 
             | StartTimerResult.Started(_) ->
-                do! FlowSharp.CancelTimer(timer1)
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.CancelTimer(timer1)
+                do! FlowSharpAction.Wait()
                 
             | StartTimerResult.Canceled(attr) when attr.TimerId = timerId -> return "TEST PASS"
 
@@ -207,14 +207,14 @@ module TestWaitForTimer =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharp.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FlowSharpAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
-                do! FlowSharp.WaitForTimer(timer1)
+                do! FlowSharpAction.WaitForTimer(timer1)
                 return "TEST PASS"
 
             | _ -> return "TEST FAIL"                        

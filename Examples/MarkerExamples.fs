@@ -23,16 +23,16 @@ let private RegisterRecordAndDetectMarker() =
 
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
-            do! FlowSharp.RecordMarker("Some Marker")
+            do! FlowSharpAction.RecordMarker("Some Marker")
 
-            let! marker = FlowSharp.MarkerRecorded("Some Marker")
+            let! marker = FlowSharpAction.MarkerRecorded("Some Marker")
 
             match marker with
             | MarkerRecordedResult.Recorded(attr) ->
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
         }
 
     // The code below supports the example runner

@@ -42,11 +42,11 @@ let private RegisterContextExample() =
         // Using ReverseOrder, the decider could retrieve only the latest history events since the last decision
         // task.
         FlowSharp.Builder(dt, true, Some(context :> IContextManager) ) {
-            let! marker = FlowSharp.MarkerRecorded("Marker 1", pushToContext=true)
+            let! marker = FlowSharpAction.MarkerRecorded("Marker 1", pushToContext=true)
 
             // Notice "let" not "let!" here. Binding contextActivityAction so both branches of the match
             // statement below can access it. 
-            let contextActivityAction = FlowSharp.ScheduleActivityTask(TestConfiguration.ActivityType, "Context Activity", pushToContext=true)
+            let contextActivityAction = FlowSharpAction.ScheduleActivityTask(TestConfiguration.ActivityType, "Context Activity", pushToContext=true)
 
             match marker with
             | MarkerRecordedResult.NotRecorded ->
@@ -55,16 +55,16 @@ let private RegisterContextExample() =
 
                 // This activity is not stored in context. It's state cannot be determined without all the
                 // execution history events.
-                let! noContextActivity = FlowSharp.ScheduleActivityTask(TestConfiguration.ActivityType, "No Context Activity")
+                let! noContextActivity = FlowSharpAction.ScheduleActivityTask(TestConfiguration.ActivityType, "No Context Activity")
 
                 // Wait for both activity tasks to complete.
-                do! FlowSharp.WaitForAllActivityTask([contextActivity; noContextActivity;])
+                do! FlowSharpAction.WaitForAllActivityTask([contextActivity; noContextActivity;])
 
                 // Record a marker and store in context.
-                do! FlowSharp.RecordMarker("Marker 1", pushToContext=true)
+                do! FlowSharpAction.RecordMarker("Marker 1", pushToContext=true)
 
                 // Keep the workflow active using Wait.
-                do! FlowSharp.Wait()                
+                do! FlowSharpAction.Wait()                
 
             | MarkerRecordedResult.Recorded(_) ->
                 // Notice "let!" used here. This will retrieve the activity task result from the context manager

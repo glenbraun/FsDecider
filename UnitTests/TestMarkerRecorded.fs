@@ -34,7 +34,7 @@ module TestMarkerRecorded =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // See if Marker was Recorded
-            let! recorded = FlowSharp.MarkerRecorded(markerName)
+            let! recorded = FlowSharpAction.MarkerRecorded(markerName)
 
             match recorded with
             | MarkerRecordedResult.NotRecorded -> return "TEST PASS"
@@ -82,15 +82,15 @@ module TestMarkerRecorded =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            let! marker = FlowSharp.RecordMarker(markerName, markerDetails)
+            let! marker = FlowSharpAction.RecordMarker(markerName, markerDetails)
 
             match marker with
-            | RecordMarkerResult.Recording -> do! FlowSharp.Wait()
+            | RecordMarkerResult.Recording -> do! FlowSharpAction.Wait()
             | RecordMarkerResult.RecordMarkerFailed(_) -> return "TEST FAIL"
             | RecordMarkerResult.Recorded(_) -> ()
 
             // See if marker was recorded
-            let! recorded = FlowSharp.MarkerRecorded(markerName)
+            let! recorded = FlowSharpAction.MarkerRecorded(markerName)
             match recorded with
             | MarkerRecordedResult.Recorded(attr) when attr.MarkerName = markerName && attr.Details = markerDetails -> return "TEST PASS"
             |_ -> return "TEST FAIL"
@@ -161,10 +161,10 @@ module TestMarkerRecorded =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // See if Marker was recorded.
-            let! recorded = FlowSharp.MarkerRecorded(markerName)
+            let! recorded = FlowSharpAction.MarkerRecorded(markerName)
 
             match recorded with
-            | MarkerRecordedResult.NotRecorded -> do! FlowSharp.Wait()
+            | MarkerRecordedResult.NotRecorded -> do! FlowSharpAction.Wait()
             | MarkerRecordedResult.RecordMarkerFailed(attr) when attr.MarkerName = markerName && attr.Cause = cause -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }

@@ -22,9 +22,9 @@ let private RegisterTimerExample() =
 
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
-            let! timer = FlowSharp.StartTimer("Some Timer", "15")
+            let! timer = FlowSharpAction.StartTimer("Some Timer", "15")
 
-            do! FlowSharp.WaitForTimer(timer)
+            do! FlowSharpAction.WaitForTimer(timer)
 
             // Complete the workflow execution with a result of "OK"
             return "OK"
@@ -51,10 +51,10 @@ let private RegisterRestartTimerExample() =
             for i = 1 to 3 do
                 // Once a timer name has been used, it cannot be used again.
                 // Append a unique value to the new timer name each time.
-                let! timer = FlowSharp.StartTimer("Some Timer " + (i.ToString()), "15")
+                let! timer = FlowSharpAction.StartTimer("Some Timer " + (i.ToString()), "15")
 
                 // Wait for the timer to complete
-                do! FlowSharp.WaitForTimer(timer)
+                do! FlowSharpAction.WaitForTimer(timer)
 
                 // Unit value required for 'for' loop
                 ()

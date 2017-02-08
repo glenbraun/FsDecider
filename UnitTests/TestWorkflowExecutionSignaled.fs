@@ -33,11 +33,11 @@ module TestWorkflowExecutionSignaled =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! signal = FlowSharp.WorkflowExecutionSignaled(signalName)
+            let! signal = FlowSharpAction.WorkflowExecutionSignaled(signalName)
                 
             match signal with
             | WorkflowExecutionSignaledResult.NotSignaled -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
                 
             | WorkflowExecutionSignaledResult.Signaled(attr) when
                 attr.SignalName = signalName &&
@@ -101,7 +101,7 @@ module TestWorkflowExecutionSignaled =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! signal = FlowSharp.WorkflowExecutionSignaled(signalName)
+            let! signal = FlowSharpAction.WorkflowExecutionSignaled(signalName)
                 
             match signal with
             | WorkflowExecutionSignaledResult.NotSignaled -> return "TEST PASS"

@@ -31,7 +31,7 @@ module TestGetExecutionContext =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! context = FlowSharp.GetExecutionContext()
+            let! context = FlowSharpAction.GetExecutionContext()
 
             if context = null then
                 return "TEST PASS"
@@ -77,12 +77,12 @@ module TestGetExecutionContext =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! context = FlowSharp.GetExecutionContext()
+            let! context = FlowSharpAction.GetExecutionContext()
 
             match context with
             | null ->
-                do! FlowSharp.SetExecutionContext(executionContext)
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.SetExecutionContext(executionContext)
+                do! FlowSharpAction.Wait()
             | _ when context = executionContext ->
                 return "TEST PASS"
             | _ -> 

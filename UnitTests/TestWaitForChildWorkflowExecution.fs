@@ -41,7 +41,7 @@ module TestWaitForChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -53,7 +53,7 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            do! FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharpAction.WaitForChildWorkflowExecution(start)
 
             match start with
             | StartChildWorkflowExecutionResult.Completed(attr) when
@@ -185,7 +185,7 @@ module TestWaitForChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -197,7 +197,7 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            do! FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharpAction.WaitForChildWorkflowExecution(start)
 
             match start with
             | StartChildWorkflowExecutionResult.Canceled(attr) when
@@ -330,7 +330,7 @@ module TestWaitForChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -342,7 +342,7 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            do! FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharpAction.WaitForChildWorkflowExecution(start)
 
             match start with
             | StartChildWorkflowExecutionResult.Failed(attr) when
@@ -478,7 +478,7 @@ module TestWaitForChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -490,7 +490,7 @@ module TestWaitForChildWorkflowExecution =
                             taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                           )
 
-            do! FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharpAction.WaitForChildWorkflowExecution(start)
 
             match start with
             | StartChildWorkflowExecutionResult.TimedOut(attr) when
@@ -605,7 +605,7 @@ module TestWaitForChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -619,13 +619,13 @@ module TestWaitForChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
                 childRunId := start.WorkflowExecution.RunId
             | _ -> ()
 
-            do! FlowSharp.WaitForChildWorkflowExecution(start)
+            do! FlowSharpAction.WaitForChildWorkflowExecution(start)
 
             match start with
             | StartChildWorkflowExecutionResult.Terminated(attr) when
@@ -745,7 +745,7 @@ module TestWaitForChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             childWorkflowType,
                             childWorkflowId,
@@ -759,7 +759,7 @@ module TestWaitForChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
                     attr.WorkflowId = childWorkflowId &&
@@ -767,7 +767,7 @@ module TestWaitForChildWorkflowExecution =
                     attr.WorkflowType.Version = childWorkflowType.Version &&
                     attr.Cause = cause -> 
                     
-                do! FlowSharp.WaitForChildWorkflowExecution(start)
+                do! FlowSharpAction.WaitForChildWorkflowExecution(start)
                 return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }

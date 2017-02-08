@@ -41,7 +41,7 @@ module TestWaitForAllChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start1 = FlowSharp.StartChildWorkflowExecution
+            let! start1 = FlowSharpAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
@@ -53,7 +53,7 @@ module TestWaitForAllChildWorkflowExecution =
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                               )
 
-            let! start2 = FlowSharp.StartChildWorkflowExecution
+            let! start2 = FlowSharpAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
@@ -68,7 +68,7 @@ module TestWaitForAllChildWorkflowExecution =
             let childList = [start1; start2;]
 
             // Wait for All Child Workflow Execution
-            do! FlowSharp.WaitForAllChildWorkflowExecution(childList)
+            do! FlowSharpAction.WaitForAllChildWorkflowExecution(childList)
 
             let finishedList = 
                 childList
@@ -225,7 +225,7 @@ module TestWaitForAllChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start1 = FlowSharp.StartChildWorkflowExecution
+            let! start1 = FlowSharpAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
@@ -237,7 +237,7 @@ module TestWaitForAllChildWorkflowExecution =
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                               )
 
-            let! start2 = FlowSharp.StartChildWorkflowExecution
+            let! start2 = FlowSharpAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
@@ -252,7 +252,7 @@ module TestWaitForAllChildWorkflowExecution =
             let childList = [start1; start2;]
 
             // Wait for All Child Workflow Execution
-            do! FlowSharp.WaitForAllChildWorkflowExecution(childList)
+            do! FlowSharpAction.WaitForAllChildWorkflowExecution(childList)
 
             let finishedList = 
                 childList
@@ -431,7 +431,7 @@ module TestWaitForAllChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start1 = FlowSharp.StartChildWorkflowExecution
+            let! start1 = FlowSharpAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
@@ -443,7 +443,7 @@ module TestWaitForAllChildWorkflowExecution =
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                               )
 
-            let! start2 = FlowSharp.StartChildWorkflowExecution
+            let! start2 = FlowSharpAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
@@ -458,7 +458,7 @@ module TestWaitForAllChildWorkflowExecution =
             let childList = [start1; start2;]
 
             // Wait for Any Child Workflow Execution
-            do! FlowSharp.WaitForAnyChildWorkflowExecution(childList)
+            do! FlowSharpAction.WaitForAnyChildWorkflowExecution(childList)
 
             let finishedList = 
                 childList

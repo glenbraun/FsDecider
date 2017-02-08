@@ -31,7 +31,7 @@ module TestGetWorkflowExecutionInput =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! input = FlowSharp.GetWorkflowExecutionInput()
+            let! input = FlowSharpAction.GetWorkflowExecutionInput()
 
             if input = workflowInput then
                 return "TEST PASS"
@@ -77,7 +77,7 @@ module TestGetWorkflowExecutionInput =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            let! input = FlowSharp.GetWorkflowExecutionInput()
+            let! input = FlowSharpAction.GetWorkflowExecutionInput()
 
             if input = workflowInput then
                 return "TEST PASS"

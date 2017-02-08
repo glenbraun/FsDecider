@@ -39,7 +39,7 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharp.ScheduleActivityTask (
+            let! activity = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -51,7 +51,7 @@ module TestWaitForActivityTask =
                             )
 
             // Wait for Activity Task
-            do! FlowSharp.WaitForActivityTask(activity)
+            do! FlowSharpAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
@@ -126,7 +126,7 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharp.ScheduleActivityTask (
+            let! activity = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -138,7 +138,7 @@ module TestWaitForActivityTask =
                             )
 
             // Wait for Activity Task
-            do! FlowSharp.WaitForActivityTask(activity)
+            do! FlowSharpAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
@@ -214,7 +214,7 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharp.ScheduleActivityTask (
+            let! activity = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -226,7 +226,7 @@ module TestWaitForActivityTask =
                             )
 
             // Wait for Activity Task
-            do! FlowSharp.WaitForActivityTask(activity)
+            do! FlowSharpAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
@@ -301,7 +301,7 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharp.ScheduleActivityTask (
+            let! activity = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -312,7 +312,7 @@ module TestWaitForActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            do! FlowSharp.WaitForActivityTask(activity)
+            do! FlowSharpAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.TimedOut(attr) 
@@ -390,7 +390,7 @@ module TestWaitForActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
-            let! activity = FlowSharp.ScheduleActivityTask (
+            let! activity = FlowSharpAction.ScheduleActivityTask (
                                 activityType, 
                                 activityId, 
                                 input=activityInput,
@@ -401,7 +401,7 @@ module TestWaitForActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            do! FlowSharp.WaitForActivityTask(activity)
+            do! FlowSharpAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.ScheduleFailed(attr) 

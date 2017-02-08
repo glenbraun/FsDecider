@@ -40,7 +40,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -119,7 +119,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -133,7 +133,7 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-               do! FlowSharp.Wait()
+               do! FlowSharpAction.Wait()
                                
             | StartChildWorkflowExecutionResult.Initiated(attr) when
                     attr.ChildPolicy = ChildPolicy.TERMINATE &&
@@ -223,7 +223,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -237,9 +237,9 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Started(start) when 
                 start.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 start.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -342,7 +342,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -356,11 +356,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Completed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -487,7 +487,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -501,11 +501,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Canceled(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -633,7 +633,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -647,11 +647,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Failed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -783,7 +783,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -797,11 +797,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.TimedOut(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -911,7 +911,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -925,12 +925,12 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Started(start) ->
                 childRunId := start.WorkflowExecution.RunId
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
             | StartChildWorkflowExecutionResult.Terminated(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -1046,7 +1046,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             childWorkflowType,
                             childWorkflowId,
@@ -1060,7 +1060,7 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
                     attr.WorkflowId = childWorkflowId &&
@@ -1143,7 +1143,7 @@ module TestStartChildWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            do! FlowSharp.StartChildWorkflowExecution
+            do! FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,

@@ -26,20 +26,20 @@ let private RegisterActivitiesInSeries() =
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
             // Schedule the first activity task
-            let! first = FlowSharp.ScheduleActivityTask (
+            let! first = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "First Activity")
             
             // Wait for the first activity task to finish
-            do! FlowSharp.WaitForActivityTask(first)
+            do! FlowSharpAction.WaitForActivityTask(first)
 
             // Schedule the second activity task
-            let! second = FlowSharp.ScheduleActivityTask (
+            let! second = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "Second Activity")
 
             // Wait for the second activity task to finish
-            do! FlowSharp.WaitForActivityTask(second)
+            do! FlowSharpAction.WaitForActivityTask(second)
 
             // FlowSharp.WaitForAllActivityTask can be used to wait for a list of activity tasks to finish.
             // FlowSharp.WaitForAnyActivityTask can be used to wait for any of a list of activity tasks to finish.
@@ -68,17 +68,17 @@ let private RegisterActivitiesInParallel() =
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
             // Schedule the first activity task
-            let! first = FlowSharp.ScheduleActivityTask (
+            let! first = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "First Activity")
             
             // Schedule the second activity task
-            let! second = FlowSharp.ScheduleActivityTask (
+            let! second = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "Second Activity")
 
             // Wait for both of the activity tasks to finish
-            do! FlowSharp.WaitForAllActivityTask([first; second;])
+            do! FlowSharpAction.WaitForAllActivityTask([first; second;])
 
             // Complete the workflow execution with a result of "OK"
             return "OK"
@@ -102,7 +102,7 @@ let private RegisterActivityStatus() =
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
             // Schedule the activity task
-            let! activity = FlowSharp.ScheduleActivityTask (
+            let! activity = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "Activity Example",  
                                 scheduleToStartTimeout="10")
@@ -112,7 +112,7 @@ let private RegisterActivityStatus() =
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
         }
 
     // The code below supports the example runner

@@ -133,7 +133,7 @@ module TestForLoop =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
                 for i = 1 to 2 do
                     // Schedule and Wait for an Activity Task
-                    let! result = FlowSharp.ScheduleActivityTask (
+                    let! result = FlowSharpAction.ScheduleActivityTask (
                                     TestConfiguration.ActivityType, 
                                     activityId+(i.ToString()), 
                                     input=i.ToString(),
@@ -144,7 +144,7 @@ module TestForLoop =
                                     startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                                 )
 
-                    do! FlowSharp.WaitForActivityTask(result)
+                    do! FlowSharpAction.WaitForActivityTask(result)
 
                     match result with
                     | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> ()
@@ -253,7 +253,7 @@ module TestForLoop =
                     let activityInput = (i.ToString())
 
                     // Schedule an Activity Task
-                    let! schedule = FlowSharp.ScheduleActivityTask (
+                    let! schedule = FlowSharpAction.ScheduleActivityTask (
                                         TestConfiguration.ActivityType, 
                                         activityId + (i.ToString()), 
                                         input=activityInput,
@@ -266,7 +266,7 @@ module TestForLoop =
 
                     results := (activityInput, schedule) :: !results
 
-                do! FlowSharp.WaitForAllActivityTask(!results |> List.map (fun (_, r) -> r))
+                do! FlowSharpAction.WaitForAllActivityTask(!results |> List.map (fun (_, r) -> r))
 
                 let allCompleted =
                     !results

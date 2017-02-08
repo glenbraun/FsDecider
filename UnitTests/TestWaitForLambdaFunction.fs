@@ -36,14 +36,14 @@ module TestWaitForLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharp.WaitForLambdaFunction(result)
+            do! FlowSharpAction.WaitForLambdaFunction(result)
 
             match result with
             | ScheduleLambdaFunctionResult.Completed(attr) when attr.Result = TestConfiguration.LambdaResult -> return "TEST PASS"
@@ -123,14 +123,14 @@ module TestWaitForLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=lambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharp.WaitForLambdaFunction(result)
+            do! FlowSharpAction.WaitForLambdaFunction(result)
 
             match result with
             | ScheduleLambdaFunctionResult.TimedOut(attr) when attr.TimeoutType = timeoutType -> return "TEST PASS"
@@ -209,14 +209,14 @@ module TestWaitForLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=lambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharp.WaitForLambdaFunction(result)
+            do! FlowSharpAction.WaitForLambdaFunction(result)
 
             match result with
             | ScheduleLambdaFunctionResult.Failed(attr) -> return "TEST PASS"
@@ -295,14 +295,14 @@ module TestWaitForLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharp.WaitForLambdaFunction(result)
+            do! FlowSharpAction.WaitForLambdaFunction(result)
             
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
@@ -381,14 +381,14 @@ module TestWaitForLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharp.WaitForLambdaFunction(result)
+            do! FlowSharpAction.WaitForLambdaFunction(result)
             
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with

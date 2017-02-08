@@ -36,7 +36,7 @@ module TestWaitForAllActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity1 = FlowSharp.ScheduleActivityTask (
+            let! activity1 = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId1, 
                                 input="1",
@@ -47,7 +47,7 @@ module TestWaitForAllActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            let! activity2 = FlowSharp.ScheduleActivityTask (
+            let! activity2 = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId2, 
                                 input="2",
@@ -61,7 +61,7 @@ module TestWaitForAllActivityTask =
             let activityList = [activity1; activity2;]
 
             // Wait for All Activity Task
-            do! FlowSharp.WaitForAllActivityTask(activityList)
+            do! FlowSharpAction.WaitForAllActivityTask(activityList)
 
             let finishedList = 
                 activityList
@@ -156,7 +156,7 @@ module TestWaitForAllActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity1 = FlowSharp.ScheduleActivityTask (
+            let! activity1 = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId1, 
                                 input="1",
@@ -167,7 +167,7 @@ module TestWaitForAllActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            let! activity2 = FlowSharp.ScheduleActivityTask (
+            let! activity2 = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId2, 
                                 input="2",
@@ -181,7 +181,7 @@ module TestWaitForAllActivityTask =
             let activityList = [activity1; activity2;]
 
             // Wait for All Activity Task
-            do! FlowSharp.WaitForAllActivityTask(activityList)
+            do! FlowSharpAction.WaitForAllActivityTask(activityList)
 
             let finishedList = 
                 activityList
@@ -290,7 +290,7 @@ module TestWaitForAllActivityTask =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity1 = FlowSharp.ScheduleActivityTask (
+            let! activity1 = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId1, 
                                 input="1",
@@ -301,7 +301,7 @@ module TestWaitForAllActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            let! activity2 = FlowSharp.ScheduleActivityTask (
+            let! activity2 = FlowSharpAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId2, 
                                 input="2",
@@ -315,7 +315,7 @@ module TestWaitForAllActivityTask =
             let activityList = [activity1; activity2;]
 
             // Wait for All Activity Task
-            do! FlowSharp.WaitForAllActivityTask(activityList)
+            do! FlowSharpAction.WaitForAllActivityTask(activityList)
 
             let finishedList = 
                 activityList

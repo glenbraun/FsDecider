@@ -47,7 +47,7 @@ module TestRemoveFromContext =
             | ScheduleActivityTaskResult.Completed(hev)                
                 when hev.Result = event.Result -> 
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 
@@ -125,7 +125,7 @@ module TestRemoveFromContext =
             | ScheduleLambdaFunctionResult.Completed(hev)                
                 when hev.Result = event.Result -> 
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 
@@ -208,7 +208,7 @@ module TestRemoveFromContext =
                         hev.WorkflowType.Name = event.WorkflowType.Name &&
                         hev.WorkflowType.Version = event.WorkflowType.Version ->
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 
@@ -293,7 +293,7 @@ module TestRemoveFromContext =
             | StartTimerResult.Fired(hev) 
                 when hev.TimerId = event.TimerId ->
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 
@@ -366,7 +366,7 @@ module TestRemoveFromContext =
                 when hev.SignalName = event.SignalName &&
                      hev.Input = event.Input ->
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 
@@ -433,7 +433,7 @@ module TestRemoveFromContext =
                 when hev.WorkflowExecution.RunId = event.WorkflowExecution.RunId &&
                      hev.WorkflowExecution.WorkflowId = event.WorkflowExecution.WorkflowId ->
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 
@@ -509,7 +509,7 @@ module TestRemoveFromContext =
                 when hev.Details = event.Details &&
                      hev.MarkerName = event.MarkerName ->
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 
@@ -577,7 +577,7 @@ module TestRemoveFromContext =
                 when hev.Details = event.Details &&
                      hev.MarkerName = event.MarkerName ->
                 
-                do! FlowSharp.RemoveFromContext(action)
+                do! FlowSharpAction.RemoveFromContext(action)
                 
                 let! newresult = action
 

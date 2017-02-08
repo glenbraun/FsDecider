@@ -50,7 +50,7 @@ module TestRequestCancelExternalWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -64,10 +64,10 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
-                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
+                let! request = FlowSharpAction.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
                 | RequestCancelExternalWorkflowExecutionResult.Requesting(d) when 
@@ -163,7 +163,7 @@ module TestRequestCancelExternalWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -177,14 +177,14 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
-                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
+                let! request = FlowSharpAction.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
                 | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
-                    do! FlowSharp.Wait()
+                    do! FlowSharpAction.Wait()
 
                 | RequestCancelExternalWorkflowExecutionResult.Initiated(ia) when
                         ia.WorkflowId = start.WorkflowExecution.WorkflowId &&
@@ -291,7 +291,7 @@ module TestRequestCancelExternalWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -305,14 +305,14 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
-                let! request = FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
+                let! request = FlowSharpAction.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)
                 
                 match request with
                 | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
-                    do! FlowSharp.Wait()
+                    do! FlowSharpAction.Wait()
 
                 | RequestCancelExternalWorkflowExecutionResult.Delivered(da) when
                         da.WorkflowExecution.WorkflowId = da.WorkflowExecution.WorkflowId &&
@@ -417,11 +417,11 @@ module TestRequestCancelExternalWorkflowExecution =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
-            let! request = FlowSharp.RequestCancelExternalWorkflowExecution(childWorkflowId)
+            let! request = FlowSharpAction.RequestCancelExternalWorkflowExecution(childWorkflowId)
                 
             match request with
             | RequestCancelExternalWorkflowExecutionResult.Requesting(_) -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | RequestCancelExternalWorkflowExecutionResult.Failed(attr) when
                         attr.Cause = cause &&
@@ -494,7 +494,7 @@ module TestRequestCancelExternalWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -508,10 +508,10 @@ module TestRequestCancelExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(start) ->
-                do! FlowSharp.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)                
+                do! FlowSharpAction.RequestCancelExternalWorkflowExecution(start.WorkflowExecution.WorkflowId, start.WorkflowExecution.RunId)                
 
                 return "TEST PASS"
             

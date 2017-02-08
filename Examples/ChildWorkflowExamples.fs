@@ -26,14 +26,14 @@ let private RegisterChildWorkflowExample() =
     let parentDecider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
             // Start a child workflow
-            let! child = FlowSharp.StartChildWorkflowExecution(TestConfiguration.WorkflowType, childWorkflowId)
+            let! child = FlowSharpAction.StartChildWorkflowExecution(TestConfiguration.WorkflowType, childWorkflowId)
 
             match child with
             | StartChildWorkflowExecutionResult.Completed(_) ->
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
         }
 
     let childDecider(dt:DecisionTask) =

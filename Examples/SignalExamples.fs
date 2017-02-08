@@ -27,19 +27,19 @@ let private RegisterSendingAndReceivingSignals() =
     let sendSignalDecider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
             // Send a signal to an external workflow
-            let! signal = FlowSharp.SignalExternalWorkflowExecution("Some Signal", receivingWorkflowId)
+            let! signal = FlowSharpAction.SignalExternalWorkflowExecution("Some Signal", receivingWorkflowId)
 
             match signal with
             | SignalExternalWorkflowExecutionResult.Signaled(_) ->
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
         }
 
     let receiveSignalDecider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
-            do! FlowSharp.WaitForWorkflowExecutionSignaled("Some Signal")
+            do! FlowSharpAction.WaitForWorkflowExecutionSignaled("Some Signal")
 
             return "OK"
         }

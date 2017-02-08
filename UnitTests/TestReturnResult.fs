@@ -35,7 +35,7 @@ module TestReturnResult =
 
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
         }
 
         // OfflineDecisionTask

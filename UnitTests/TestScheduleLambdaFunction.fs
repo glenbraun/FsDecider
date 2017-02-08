@@ -36,7 +36,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -100,7 +100,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -108,7 +108,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> do! FlowSharp.Wait()
+            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> do! FlowSharpAction.Wait()
             | ScheduleLambdaFunctionResult.Scheduled(attr) when
                 attr.Id = lambdaId &&
                 attr.Name = TestConfiguration.LambdaName &&
@@ -185,7 +185,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -193,7 +193,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> do! FlowSharp.Wait()
+            | ScheduleLambdaFunctionResult.Scheduling(attr) when attr.Id = lambdaId -> do! FlowSharpAction.Wait()
             | ScheduleLambdaFunctionResult.Started(_, scheduled) when
                 scheduled.Id = lambdaId &&
                 scheduled.Name = TestConfiguration.LambdaName &&
@@ -273,7 +273,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -281,7 +281,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharpAction.Wait()
             | ScheduleLambdaFunctionResult.Completed(attr) when attr.Result = TestConfiguration.LambdaResult -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
@@ -359,7 +359,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=lambdaInput,
@@ -367,7 +367,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharpAction.Wait()
             | ScheduleLambdaFunctionResult.TimedOut(attr) when attr.TimeoutType = timeoutType -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
@@ -444,7 +444,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=lambdaInput,
@@ -452,7 +452,7 @@ module TestScheduleLambdaFunction =
                           )
 
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharpAction.Wait()
             | ScheduleLambdaFunctionResult.Failed(attr) -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
         }
@@ -529,7 +529,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -538,7 +538,7 @@ module TestScheduleLambdaFunction =
 
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharpAction.Wait()
             | ScheduleLambdaFunctionResult.ScheduleFailed(attr) 
                 when attr.Id = lambdaId &&
                      attr.Name = TestConfiguration.LambdaName &&
@@ -614,7 +614,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharp.ScheduleLambdaFunction (
+            let! result = FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -623,7 +623,7 @@ module TestScheduleLambdaFunction =
 
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
-            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharp.Wait()
+            | ScheduleLambdaFunctionResult.Scheduling(_) -> do! FlowSharpAction.Wait()
             | ScheduleLambdaFunctionResult.StartFailed(attr) 
                 when attr.Cause = cause -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
@@ -693,7 +693,7 @@ module TestScheduleLambdaFunction =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            do! FlowSharp.ScheduleLambdaFunction (
+            do! FlowSharpAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,

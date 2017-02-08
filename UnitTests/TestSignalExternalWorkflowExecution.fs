@@ -50,7 +50,7 @@ module TestSignalExternalWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -64,10 +64,10 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(attr) ->
-                let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
+                let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> return "TEST PASS"
@@ -164,7 +164,7 @@ module TestSignalExternalWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -178,14 +178,14 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(attr) ->
-                let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
+                let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> 
-                    do! FlowSharp.Wait()
+                    do! FlowSharpAction.Wait()
 
                 | SignalExternalWorkflowExecutionResult.Initiated(ia) when
                         ia.SignalName = signalName &&
@@ -300,7 +300,7 @@ module TestSignalExternalWorkflowExecution =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharp.StartChildWorkflowExecution
+            let! start = FlowSharpAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -314,14 +314,14 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(attr) ->
-                let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
+                let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> 
-                    do! FlowSharp.Wait()
+                    do! FlowSharpAction.Wait()
 
                 | SignalExternalWorkflowExecutionResult.Signaled(sa) when
                         sa.WorkflowExecution.WorkflowId = childWorkflowId -> return "TEST PASS"
@@ -429,11 +429,11 @@ module TestSignalExternalWorkflowExecution =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
             
-            let! signal = FlowSharp.SignalExternalWorkflowExecution(signalName, childWorkflowId, signalInput)
+            let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, childWorkflowId, signalInput)
                 
             match signal with
             | SignalExternalWorkflowExecutionResult.Signaling -> 
-                do! FlowSharp.Wait()
+                do! FlowSharpAction.Wait()
 
             | SignalExternalWorkflowExecutionResult.Failed(attr) when
                         attr.Cause = cause &&

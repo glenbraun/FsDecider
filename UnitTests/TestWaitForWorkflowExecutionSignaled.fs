@@ -33,7 +33,7 @@ module TestWaitForWorkflowExecutionSignaled =
         let deciderFunc(dt:DecisionTask) =
             FlowSharp.Builder(dt, TestConfiguration.ReverseOrder) {
 
-            do! FlowSharp.WaitForWorkflowExecutionSignaled(signalName)
+            do! FlowSharpAction.WaitForWorkflowExecutionSignaled(signalName)
 
             return "TEST PASS"
         }

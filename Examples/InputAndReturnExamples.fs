@@ -26,7 +26,7 @@ let private RegisterInputAndReturnExample() =
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
             // Get the input to the workflow, set when starting the workflow
-            let! input = FlowSharp.GetWorkflowExecutionInput()
+            let! input = FlowSharpAction.GetWorkflowExecutionInput()
 
             // Based on the input value, return as Completed, Failed, or Canceled
             match input with

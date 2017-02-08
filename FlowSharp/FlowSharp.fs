@@ -7,7 +7,7 @@ open Amazon.SimpleWorkflow.Model
 
 open FlowSharp.Actions
 
-type FlowSharp = 
+type FlowSharpAction = 
     /// <summary>Determines if a request to cancel this workflow execution was made.</summary>
     /// <returns>A WorkflowExecutionCancelRequestedResult of CancelRequested or NotRequested.</returns>
     static member WorkflowExecutionCancelRequested() =
