@@ -93,6 +93,7 @@
     <Compile Include="TestTryFinally.fs" />
     <Compile Include="TestExecutionContextManager.fs" />
     <Compile Include="TestRemoveFromContext.fs" />
+    <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
