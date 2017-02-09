@@ -5,11 +5,11 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
+open FlowSharp
 open FlowSharp.Actions
 open FlowSharp.HistoryWalker
 open FlowSharp.EventPatterns
 open FlowSharp.ExecutionContext
-open FlowSharp.Trace
 
 exception FlowSharpBuilderException of HistoryEvent option * string
 

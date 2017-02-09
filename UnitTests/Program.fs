@@ -5,8 +5,9 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 open Fuchu
+open FlowSharp
 open FlowSharp.UnitTests.Tests
-open FlowSharp.Trace
+
 
 [<EntryPoint>]
 let main argv = 
@@ -33,8 +34,8 @@ let main argv =
     // Set up the trace log
     use log = System.IO.File.CreateText("..\\..\\log.txt")
     let listener = new System.Diagnostics.TextWriterTraceListener(log)
-    TraceSource.Listeners.Clear()
-    TraceSource.Listeners.Add(listener) |> ignore
+    Trace.TraceSource.Listeners.Clear()
+    Trace.TraceSource.Listeners.Add(listener) |> ignore
 
     // Run the tests    
     run tests |> ignore
