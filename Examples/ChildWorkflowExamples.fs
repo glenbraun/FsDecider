@@ -19,7 +19,7 @@ open FlowSharp.UnitTests
 //    dt c1p            (Processes the initial decision task for the parent workflow, starts the child workflow and waits)
 //    dt c1c            (Processes the decision task for the child workflow, completes workflow)
 //    dt c1p            (Processes the final decision task for the parent workflow, completes workflow)
-let private RegisterChildWorkflowExample() =
+let private LoadChildWorkflowExample() =
     let parentWorkflowId = "FlowSharp Child Workflow Example (parent)"
     let childWorkflowId = "FlowSharp Child Workflow Example (child)"
 
@@ -47,5 +47,5 @@ let private RegisterChildWorkflowExample() =
     AddOperation (Command.DecisionTask("c1p")) (Operation.DecisionTask(parentDecider, false, None))
     AddOperation (Command.DecisionTask("c1c")) (Operation.DecisionTask(childDecider, false, None))
 
-let Register() =
-    RegisterChildWorkflowExample()
+let Load() =
+    LoadChildWorkflowExample()

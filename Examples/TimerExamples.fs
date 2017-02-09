@@ -17,7 +17,7 @@ open FlowSharp.UnitTests
 //    sw t1             (Starts the workflow)
 //    dt t1             (Processes the initial decision task, starts the timer and waits)
 //    dt t1             (Processes the final decision task, after 15 seconds detects fired timer and completes workflow)
-let private RegisterTimerExample() =
+let private LoadTimerExample() =
     let workflowId = "FlowSharp Timer Example"
 
     let decider(dt:DecisionTask) =
@@ -43,7 +43,7 @@ let private RegisterTimerExample() =
 //    dt t2             (Processes a decision task, waits for timer to time out and resets it)
 //    dt t2             (Processes a decision task, waits for timer to time out and resets it)
 //    dt t2             (Processes the final decision task, after 15 seconds detects fired timer and completes workflow)
-let private RegisterRestartTimerExample() =
+let private LoadRestartTimerExample() =
     let workflowId = "FlowSharp Restart Timer Example"
 
     let decider(dt:DecisionTask) =
@@ -68,6 +68,6 @@ let private RegisterRestartTimerExample() =
     AddOperation (Command.StartWorkflow("t2")) start
     AddOperation (Command.DecisionTask("t2")) (Operation.DecisionTask(decider, false, None))
 
-let Register() =
-    RegisterTimerExample()
-    RegisterRestartTimerExample()
+let Load() =
+    LoadTimerExample()
+    LoadRestartTimerExample()

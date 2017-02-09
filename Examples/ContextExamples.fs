@@ -30,7 +30,7 @@ open FlowSharp.UnitTests
 //    dt x1             (Processes a decision task, gets activity task state from history this time but stores it in context, then records marker)
 //    sg x1             (Sends a signal to the workflow to trigger a decision task)
 //    dt x1             (Processes the final decistion task, activity results retrieved from context, not history.)
-let private RegisterContextExample() =
+let private LoadContextExample() =
     let workflowId = "FlowSharp Context Example"
 
     let decider(dt:DecisionTask) =
@@ -89,6 +89,6 @@ let private RegisterContextExample() =
     AddOperation (Command.SignalWorkflow("x1")) (Operation.SignalWorkflow(workflowId, "Some Signal"))
     AddOperation (Command.DecisionTask("x1")) (Operation.DecisionTask(decider, true, None))
 
-let Register() =
-    RegisterContextExample()
+let Load() =
+    LoadContextExample()
 

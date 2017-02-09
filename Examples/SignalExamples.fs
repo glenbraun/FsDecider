@@ -20,7 +20,7 @@ open FlowSharp.UnitTests
 //    dt s1s            (Processes the sending workflow initial decision task, sends signal and waits)
 //    dt s1r            (Processes the receiving workflow, gets signal and completes)
 //    dt s1s            (Processes the sending workflow initial decision task, sends signal and completes)
-let private RegisterSendingAndReceivingSignals() =
+let private LoadSendingAndReceivingSignals() =
     let receivingWorkflowId = "FlowSharp Signals Example (receiver)"
     let sendingWorkflowId = "FlowSharp Signals Example (sender)"
 
@@ -52,5 +52,5 @@ let private RegisterSendingAndReceivingSignals() =
     AddOperation (Command.DecisionTask("s1r")) (Operation.DecisionTask(receiveSignalDecider, false, None))
     AddOperation (Command.DecisionTask("s1s")) (Operation.DecisionTask(sendSignalDecider, false, None))
 
-let Register() =
-    RegisterSendingAndReceivingSignals()
+let Load() =
+    LoadSendingAndReceivingSignals()

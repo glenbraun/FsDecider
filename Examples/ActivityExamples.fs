@@ -22,7 +22,7 @@ open FlowSharp.UnitTests
 //    dt a1             (Processes the second decision task, schedules second activity task)
 //    at a1             (Completes the second activity task)
 //    dt a1             (Processes the final decision task, completes the workflow)
-let private RegisterActivitiesInSeries() =
+let private LoadActivitiesInSeries() =
     let decider(dt:DecisionTask) =
         FlowSharp(dt) {
             // Schedule the first activity task
@@ -64,7 +64,7 @@ let private RegisterActivitiesInSeries() =
 //    at a2             (Completes one activity task)
 //    at a2             (Completes the other activity task)
 //    dt a2             (Processes the final decision task, completes the workflow)
-let private RegisterActivitiesInParallel() =
+let private LoadActivitiesInParallel() =
     let decider(dt:DecisionTask) =
         FlowSharp(dt) {
             // Schedule the first activity task
@@ -98,7 +98,7 @@ let private RegisterActivitiesInParallel() =
 //    sw a3         (Starts the workflow)
 //    dt a3         (Processes the initial decision task, schedules the activity task)
 //    dt a3         (Processes the final decision task, at 10 seconds after previous step activity will timeout)
-let private RegisterActivityStatus() =
+let private LoadActivityStatus() =
     let decider(dt:DecisionTask) =
         FlowSharp(dt) {
             // Schedule the activity task
@@ -120,7 +120,7 @@ let private RegisterActivityStatus() =
     AddOperation (Command.StartWorkflow("a3")) start
     AddOperation (Command.DecisionTask("a3")) (Operation.DecisionTask(decider, false, None))
 
-let Register() =
-    RegisterActivitiesInSeries()
-    RegisterActivitiesInParallel()
-    RegisterActivityStatus()
+let Load() =
+    LoadActivitiesInSeries()
+    LoadActivitiesInParallel()
+    LoadActivityStatus()

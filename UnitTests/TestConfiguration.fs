@@ -22,6 +22,10 @@ type TestConfiguration() =
     static member val public TwentyMinuteTimeout = (TimeSpan.FromMinutes(20.0)).TotalSeconds.ToString()
 
     static member public Register() =
+        if String.IsNullOrEmpty(TestConfiguration.Domain) then failwith "Error registering TestConfiguration. Domain cannot be null or empty."
+        if TestConfiguration.WorkflowType = null then failwith "Error registering TestConfiguration. WorkflowType cannot be null."
+        if TestConfiguration.ActivityType = null then failwith "Error registering TestConfiguration. ActivityType cannot be null."
+
         // Register the Domain
         let registerDomain = RegisterDomainRequest()
         registerDomain.Name <- TestConfiguration.Domain

@@ -20,7 +20,7 @@ open FlowSharp.UnitTests
 //    dt ir1            (Processes the one decision task, gets input and fails workflow with reason and details)
 //    sw ir1n           (Starts the workflow with input of "Canceled")
 //    dt ir1            (Processes the one decision task, gets input and cancels workflow with details)
-let private RegisterInputAndReturnExample() =
+let private LoadInputAndReturnExample() =
     let workflowId = "FlowSharp Input and Return Example"
 
     let decider(dt:DecisionTask) =
@@ -42,6 +42,6 @@ let private RegisterInputAndReturnExample() =
     AddOperation (Command.StartWorkflow("ir1n")) (Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, workflowId, None, Some("Canceled")))
     AddOperation (Command.DecisionTask("ir1")) (Operation.DecisionTask(decider, false, None))
 
-let Register() =
-    RegisterInputAndReturnExample()
+let Load() =
+    LoadInputAndReturnExample()
 

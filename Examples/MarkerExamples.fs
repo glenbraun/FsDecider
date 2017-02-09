@@ -18,7 +18,7 @@ open FlowSharp.UnitTests
 //    dt m1             (Processes the initial decision task, records marker and waits)
 //    sg m1             (Sends a signal to the workflow to force a decision task)
 //    dt m1             (Processes the final decision task, detects marker and completes workflow)
-let private RegisterRecordAndDetectMarker() =
+let private LoadRecordAndDetectMarker() =
     let workflowId = "FlowSharp Markers Example"
 
     let decider(dt:DecisionTask) =
@@ -41,5 +41,5 @@ let private RegisterRecordAndDetectMarker() =
     AddOperation (Command.SignalWorkflow("m1")) (Operation.SignalWorkflow(workflowId, "Some Signal"))
     AddOperation (Command.DecisionTask("m1")) (Operation.DecisionTask(decider, false, None))
 
-let Register() =
-    RegisterRecordAndDetectMarker()
+let Load() =
+    LoadRecordAndDetectMarker()
