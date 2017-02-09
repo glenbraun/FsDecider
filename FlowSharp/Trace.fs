@@ -135,6 +135,8 @@ module Trace =
     let internal wn o =
         if o = null then "Null" else "Not Null"
 
+    let TraceSource = new TraceSource("FlowSharp", SourceLevels.All)
+
     let WorkflowExecutionStarted workflowType workflowId tasklist input runid =
         let ti = sprintf """
             Workflow Execution Started
@@ -148,7 +150,7 @@ module Trace =
                     (TraceWriter.WriteTaskList tasklist)
                     (wsn input)
                     runid
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 1, ti)
 
     let ActivityCompleted activityType result tasklist =
         let ti = sprintf """
@@ -159,7 +161,7 @@ module Trace =
                     (TraceWriter.WriteActivityType activityType)
                     result
                     (TraceWriter.WriteTaskList tasklist)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 2, ti)
         
     let BuilderCreated (decisionTask:DecisionTask) (reverseOrder:bool) (contextManager:IContextManager option) =        
         let ti = sprintf """%s
@@ -181,7 +183,7 @@ module Trace =
                     reverseOrder
                     (wsn contextManager)
         
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 3, ti)
 
     let BuilderDelay decisionTask =
         let ti = sprintf """%s
@@ -189,17 +191,17 @@ module Trace =
                     DecisionTask.TaskToken             %s"""
                     (TraceWriter.WriteHeader decisionTask)
                     (wn decisionTask.TaskToken)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 4, ti)
 
     let BuilderRun decisionTask = 
         let ti = sprintf """%s
             Builder Run()""" (TraceWriter.WriteHeader decisionTask)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 5, ti)
 
     let BuilderZero decisionTask =
         let ti = sprintf """%s
             Builder Zero()""" (TraceWriter.WriteHeader decisionTask)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 6, ti)
 
     let rec DecisionList (response:RespondDecisionTaskCompletedRequest) i (s:string) = 
         if i = response.Decisions.Count 
@@ -208,7 +210,6 @@ module Trace =
             DecisionList response (i+1) ((if s.Length > 0 then s + "," else s) + response.Decisions.[i].DecisionType.ToString())
 
     let BuilderReturn decisionTask (result:ReturnResult) (response:RespondDecisionTaskCompletedRequest) (ev:HistoryEvent option) (et:EventType) =
-                
         let ti = sprintf """%s
             Builder Return
                     Result                             %A
@@ -222,7 +223,7 @@ module Trace =
                     (if ev.IsSome then et.ToString() else "N/A")
                     (response.Decisions.Count)
                     (DecisionList response 0 "")
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 7, ti)
 
     let BuilderWait decisionTask (response:RespondDecisionTaskCompletedRequest) =
         let ti = sprintf """%s
@@ -232,7 +233,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (response.Decisions.Count)
                     (DecisionList response 0 "")
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 8, ti)
 
     let BuilderBindScheduleActivityTaskAction decisionTask (action:ScheduleActivityTaskAction) (result:ScheduleActivityTaskResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -244,7 +245,7 @@ module Trace =
                     (TraceWriter.WriteScheduleActivityTaskAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 9, ti)
 
     let BuilderBindWaitForActivityTaskAction decisionTask (result:ScheduleActivityTaskResult) =
         let ti = sprintf """%s
@@ -252,7 +253,7 @@ module Trace =
                     Is Finished                        %b"""
                     (TraceWriter.WriteHeader decisionTask)
                     (result.IsFinished())
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 10, ti)
 
     let BuilderBindWaitForAnyActivityTaskAction decisionTask (results:ScheduleActivityTaskResult list) (anyFinished:bool) =
         let ti = sprintf """%s
@@ -262,7 +263,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (List.length results)
                     anyFinished
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 11, ti)
 
     let BuilderBindWaitForAllActivityTaskAction decisionTask (results:ScheduleActivityTaskResult list) (allFinished:bool) =
         let ti = sprintf """%s
@@ -272,7 +273,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (List.length results)
                     allFinished
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 12, ti)
 
     let BuilderBindRequestCancelActivityTaskAction decisionTask (action:RequestCancelActivityTaskAction) (result:RequestCancelActivityTaskResult option) = 
         let ti = sprintf """%s
@@ -282,7 +283,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (TraceWriter.WriteRequestCancelActivityTaskAction action)
                     result
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 13, ti)
 
     let BuilderBindStartChildWorkflowExecutionAction decisionTask (action:StartChildWorkflowExecutionAction) (result:StartChildWorkflowExecutionResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -294,7 +295,7 @@ module Trace =
                     (TraceWriter.WriteStartChildWorkflowExecutionAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 14, ti)
 
     let BuilderBindWaitForChildWorkflowExecutionAction decisionTask (result:StartChildWorkflowExecutionResult) =
         let ti = sprintf """%s
@@ -302,7 +303,7 @@ module Trace =
                     Is Finished                        %b"""
                     (TraceWriter.WriteHeader decisionTask)
                     (result.IsFinished())
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 15, ti)
 
     let BuilderBindWaitForAnyChildWorkflowExecutionAction decisionTask (results:StartChildWorkflowExecutionResult list) (anyFinished:bool) =
         let ti = sprintf """%s
@@ -312,7 +313,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (List.length results)
                     anyFinished
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 16, ti)
 
     let BuilderBindWaitForAllChildWorkflowExecutionAction decisionTask (results:StartChildWorkflowExecutionResult list) (allFinished:bool) =
         let ti = sprintf """%s
@@ -322,7 +323,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (List.length results)
                     allFinished
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 17, ti)
 
     let BuilderBindRequestCancelExternalWorkflowExecutionAction decisionTask (action:RequestCancelExternalWorkflowExecutionAction) (result:RequestCancelExternalWorkflowExecutionResult) =
         let ti = sprintf """%s
@@ -332,7 +333,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (TraceWriter.WriteRequestCancelExternalWorkflowExecutionAction action)
                     result
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 18, ti)
 
     let BuilderBindScheduleLambdaFunctionAction decisionTask (action:ScheduleLambdaFunctionAction) (result:ScheduleLambdaFunctionResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -344,7 +345,7 @@ module Trace =
                     (TraceWriter.WriteScheduleLambdaFunctionAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 19, ti)
 
     let BuilderBindWaitForLambdaFunctionAction decisionTask (result:ScheduleLambdaFunctionResult) =
         let ti = sprintf """%s
@@ -352,7 +353,7 @@ module Trace =
                     Is Finished                        %b"""
                     (TraceWriter.WriteHeader decisionTask)
                     (result.IsFinished())
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 20, ti)
 
     let BuilderBindWaitForAnyLambdaFunctionAction decisionTask (results:ScheduleLambdaFunctionResult list) (anyFinished:bool) =
         let ti = sprintf """%s
@@ -362,7 +363,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (List.length results)
                     anyFinished
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 21, ti)
 
     let BuilderBindWaitForAllLambdaFunctionAction decisionTask (results:ScheduleLambdaFunctionResult list) (allFinished:bool) =
         let ti = sprintf """%s
@@ -372,7 +373,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (List.length results)
                     allFinished
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 22, ti)
 
     let BuilderBindStartTimerAction decisionTask (action:StartTimerAction) (result:StartTimerResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -384,7 +385,7 @@ module Trace =
                     (TraceWriter.WriteStartTimerAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 23, ti)
 
     let BuilderBindWaitForTimerAction decisionTask (action:WaitForTimerAction) =
         let ti = sprintf """%s
@@ -392,7 +393,7 @@ module Trace =
                     Action                             %s"""
                     (TraceWriter.WriteHeader decisionTask)
                     (TraceWriter.WriteWaitForTimerAction action)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 24, ti)
 
     let BuilderBindCancelTimerAction decisionTask (action:CancelTimerAction) (result:CancelTimerResult option) =
         let ti = sprintf """%s
@@ -402,7 +403,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     (TraceWriter.WriteCancelTimerAction action)
                     result
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 25, ti)
 
     let BuilderBindMarkerRecordedAction decisionTask (action:MarkerRecordedAction) (result:MarkerRecordedResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -414,7 +415,7 @@ module Trace =
                     (TraceWriter.WriteMarkerRecordedAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 26, ti)
 
     let BuilderBindRecordMarkerAction decisionTask (action:RecordMarkerAction) (result:RecordMarkerResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -426,7 +427,7 @@ module Trace =
                     (TraceWriter.WriteRecordMarkerAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 27, ti)
 
     let BuilderBindSignalExternalWorkflowExecutionAction decisionTask (action:SignalExternalWorkflowExecutionAction) (result:SignalExternalWorkflowExecutionResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -438,7 +439,7 @@ module Trace =
                     (TraceWriter.WriteSignalExternalWorkflowExecutionAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 28, ti)
 
     let BuilderBindWorkflowExecutionSignaledAction decisionTask (action:WorkflowExecutionSignaledAction) (result:WorkflowExecutionSignaledResult) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -450,7 +451,7 @@ module Trace =
                     (TraceWriter.WriteWorkflowExecutionSignaledAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 29, ti)
 
     let BuilderBindWaitForWorkflowExecutionSignaledAction decisionTask (action:WaitForWorkflowExecutionSignaledAction) (result:WorkflowExecutionSignaledResult option) (fromcontext:bool) =
         let ti = sprintf """%s
@@ -462,7 +463,7 @@ module Trace =
                     (TraceWriter.WriteWaitForWorkflowExecutionSignaledAction action)
                     result
                     fromcontext
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 30, ti)
 
     let BuilderBindWorkflowExecutionCancelRequestedAction decisionTask (action:WorkflowExecutionCancelRequestedAction) (result:WorkflowExecutionCancelRequestedResult) =
         let ti = sprintf """%s
@@ -472,7 +473,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     action
                     result
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 31, ti)
 
     let BuilderBindGetWorkflowExecutionInputAction decisionTask (action:GetWorkflowExecutionInputAction) (input:string) =
         let ti = sprintf """%s
@@ -482,7 +483,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     action
                     (wn input)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 32, ti)
 
     let BuilderBindGetExecutionContextAction decisionTask (action:GetExecutionContextAction) (context:string) =
         let ti = sprintf """%s
@@ -492,7 +493,7 @@ module Trace =
                     (TraceWriter.WriteHeader decisionTask)
                     action
                     (wn context)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 33, ti)
 
     let BuilderBindSetExecutionContextAction decisionTask (action:SetExecutionContextAction) =
         let ti = sprintf """%s
@@ -500,7 +501,7 @@ module Trace =
                     Action                             %A"""
                     (TraceWriter.WriteHeader decisionTask)
                     action
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 34, ti)
 
     let BuilderBindRemoveFromContextAction decisionTask (action:RemoveFromContextAction) =
         let ti = sprintf """%s
@@ -508,12 +509,12 @@ module Trace =
                     Action                             %A"""
                     (TraceWriter.WriteHeader decisionTask)
                     action
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 35, ti)
 
     let BuilderForLoop decisionTask = 
         let ti = sprintf """%s
             Builder 'for' loop""" (TraceWriter.WriteHeader decisionTask)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 36, ti)
 
     let BuilderForLoopIteration decisionTask blockFlag = 
         let ti = sprintf """%s
@@ -521,12 +522,12 @@ module Trace =
                     BlockFlag                          %b"""
                     (TraceWriter.WriteHeader decisionTask)
                     blockFlag
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 37, ti)
 
     let BuilderWhileLoop decisionTask = 
         let ti = sprintf """%s
             Builder 'while' loop""" (TraceWriter.WriteHeader decisionTask)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 38, ti)
 
     let BuilderWhileLoopIteration decisionTask blockFlag = 
         let ti = sprintf """%s
@@ -534,7 +535,7 @@ module Trace =
                     BlockFlag                          %b"""
                     (TraceWriter.WriteHeader decisionTask)
                     blockFlag
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 39, ti)
 
     let BuilderCombine decisionTask blockFlag = 
         let ti = sprintf """%s
@@ -542,12 +543,12 @@ module Trace =
                     BlockFlag                          %b"""
                     (TraceWriter.WriteHeader decisionTask)
                     blockFlag
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 40, ti)
 
     let BuilderTryFinallyTry decisionTask = 
         let ti = sprintf """%s
             Builder 'try/finally' (try)""" (TraceWriter.WriteHeader decisionTask)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 41, ti)
 
     let BuilderTryFinallyFinally decisionTask blockFlag = 
         let ti = sprintf """%s
@@ -555,12 +556,12 @@ module Trace =
                     BlockFlag                          %b"""
                     (TraceWriter.WriteHeader decisionTask)
                     blockFlag
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 42, ti)
 
     let BuilderTryWithTry decisionTask = 
         let ti = sprintf """%s
             Builder 'try/with' (try)""" (TraceWriter.WriteHeader decisionTask)
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 43, ti)
 
     let BuilderTryWithWith decisionTask e = 
         let ti = sprintf """%s
@@ -568,7 +569,7 @@ module Trace =
                     Exception                          %A"""
                     (TraceWriter.WriteHeader decisionTask)
                     e
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 44, ti)
 
     let History (we:WorkflowExecution) (history:History) = 
         let rec Events i (s:string) =
@@ -588,5 +589,11 @@ module Trace =
                     %s"""
                     (TraceWriter.WriteWorkflowExecution we)
                     (Events 0 "")
-        System.Diagnostics.Trace.TraceInformation(ti)
+        TraceSource.TraceEvent(TraceEventType.Information, 45, ti)
             
+    let TraceException (ex:'T when 'T :> Exception) =
+        TraceSource.TraceEvent(TraceEventType.Error, 46, ex.Message)
+
+    let TraceInformation (message:string) =
+        TraceSource.TraceEvent(TraceEventType.Information, 47, message)
+

@@ -128,7 +128,7 @@ let internal ExecuteOperation op =
 
             FlowSharp.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input (startResponse.Run.RunId) 
         with 
-        | ex -> System.Diagnostics.Trace.TraceInformation(sprintf "%s" ex.Message)
+        | ex -> FlowSharp.Trace.TraceException ex
 
     | Operation.DecisionTask(decider, reverseOrder, tasklist) ->
         let pollRequest = PollForDecisionTaskRequest()
@@ -143,7 +143,7 @@ let internal ExecuteOperation op =
 
         let respondRequest = decider(pollResponse.DecisionTask)
         if respondRequest = null then
-            System.Diagnostics.Trace.TraceInformation("Decider retuned null.")
+            FlowSharp.Trace.TraceInformation("Decider retuned null.")
         else 
             let respondResponse = swf.RespondDecisionTaskCompleted(respondRequest)
 
@@ -181,13 +181,13 @@ let internal ExecuteOperation op =
             if signalResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
                 failwith "Error while signalling workflow execution."
         with 
-        | ex -> System.Diagnostics.Trace.TraceInformation(ex.Message)
+        | ex -> FlowSharp.Trace.TraceException(ex)
 
-        System.Diagnostics.Trace.TraceInformation("Workflow signal sent.")
+        FlowSharp.Trace.TraceInformation("Workflow signal sent.")
 
     | Operation.History ->
         if CurrentWorkflowExecution = null then
-            System.Diagnostics.Trace.TraceInformation("Unable to get history. No workflow has been started yet.")
+            FlowSharp.Trace.TraceInformation("Unable to get history. No workflow has been started yet.")
         else
             let request = GetWorkflowExecutionHistoryRequest()
             request.Domain <- TestConfiguration.Domain

@@ -6,6 +6,7 @@ open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 open Fuchu
 open FlowSharp.UnitTests.Tests
+open FlowSharp.Trace
 
 [<EntryPoint>]
 let main argv = 
@@ -23,13 +24,12 @@ let main argv =
     if TestConfiguration.IsConnected then
         TestConfiguration.Register()
 
-
     use log = System.IO.File.CreateText("..\\..\\log.txt")
     let listener = new System.Diagnostics.TextWriterTraceListener(log)
     
-    System.Diagnostics.Trace.Listeners.Clear()
-    System.Diagnostics.Trace.Listeners.Add(listener) |> ignore
-
+    TraceSource.Listeners.Clear()
+    TraceSource.Listeners.Add(listener) |> ignore
+    
     run tests |> ignore
     0
 

@@ -7,6 +7,7 @@ open Amazon.SimpleWorkflow.Model
 open FlowSharp
 open FlowSharp.Examples.CommandInterpreter
 open FlowSharp.UnitTests
+open FlowSharp.Trace
 
 (*
 How to use the command iterpreter
@@ -64,8 +65,8 @@ let main argv =
     FlowSharp.Examples.InputAndReturnExamples.Register()
     FlowSharp.Examples.ContextExamples.Register()
 
-    System.Diagnostics.Trace.Listeners.Clear()
-    System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore
+    TraceSource.Listeners.Clear()
+    TraceSource.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out)) |> ignore
 
     Loop()
     0 // return an integer exit code
