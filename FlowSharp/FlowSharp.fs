@@ -16,7 +16,7 @@ exception FlowSharpBuilderException of HistoryEvent option * string
 type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
     let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
     let walker = HistoryWalker(DecisionTask.Events, ReverseOrder)
-    let mutable blockFlag = false
+    let mutable waitFlag = false
     let mutable exceptionEvents = List.empty<int64>
 
     do Trace.BuilderCreated DecisionTask ReverseOrder ContextManager
@@ -26,7 +26,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
 
     let Wait() =
         Trace.BuilderWait DecisionTask response
-        blockFlag <- true
+        waitFlag <- true
         response
 
     let ReadContext () = 
@@ -76,7 +76,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
         new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)
 
     member this.Return(result:ReturnResult) =
-        blockFlag <- true
+        waitFlag <- true
 
         match result with
         | ReturnResult.CompleteWorkflowExecution(r) -> 
@@ -94,7 +94,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             | SomeEventOfType(EventType.CompleteWorkflowExecutionFailed) hev ->
                 // A previous attempt was made to complete this workflow, but it failed
                 // Raise an exception that the decider can process
-                blockFlag <- false
+                waitFlag <- false
                 AddExceptionEventId (hev.EventId)
                 raise (CompleteWorkflowExecutionFailedException(hev.CompleteWorkflowExecutionFailedEventAttributes))
 
@@ -116,7 +116,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             | SomeEventOfType(EventType.CancelWorkflowExecutionFailed) hev ->
                 // A previous attempt was made to cancel this workflow, but it failed
                 // Raise an exception that the decider can process
-                blockFlag <- false
+                waitFlag <- false
                 AddExceptionEventId (hev.EventId)
                 raise (CancelWorkflowExecutionFailedException(hev.CancelWorkflowExecutionFailedEventAttributes))
 
@@ -139,7 +139,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             | SomeEventOfType(EventType.FailWorkflowExecutionFailed) hev ->
                 // A previous attempt was made to fail this workflow, but it failed
                 // Raise an exception that the decider can process
-                blockFlag <- false
+                waitFlag <- false
                 AddExceptionEventId (hev.EventId)
                 raise (FailWorkflowExecutionFailedException(hev.FailWorkflowExecutionFailedEventAttributes))
 
@@ -160,7 +160,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             | SomeEventOfType(EventType.ContinueAsNewWorkflowExecutionFailed) hev ->
                 // A previous attempt was made to continue this workflow as new, but it failed
                 // Raise an exception that the decider can process
-                blockFlag <- false
+                waitFlag <- false
                 AddExceptionEventId (hev.EventId)
                 raise (ContinueAsNewWorkflowExecutionFailedException(hev.ContinueAsNewWorkflowExecutionFailedEventAttributes))
 
@@ -1034,9 +1034,9 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
         Trace.BuilderForLoop DecisionTask
 
         let processForBlock x = 
-            Trace.BuilderForLoopIteration DecisionTask blockFlag
-            if not blockFlag then f(x) |> ignore
-            (not blockFlag)
+            Trace.BuilderForLoopIteration DecisionTask waitFlag
+            if not waitFlag then f(x) |> ignore
+            (not waitFlag)
 
         enumeration |>
         Seq.takeWhile processForBlock |>
@@ -1046,16 +1046,16 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
     member this.While(condition:(unit -> bool), f:(unit -> RespondDecisionTaskCompletedRequest)) =
         Trace.BuilderWhileLoop DecisionTask
 
-        while (not blockFlag) && condition() do
-            Trace.BuilderWhileLoopIteration DecisionTask blockFlag
+        while (not waitFlag) && condition() do
+            Trace.BuilderWhileLoopIteration DecisionTask waitFlag
             f() |> ignore
 
     // Combine
     member this.Combine(exprBefore, fAfter) =
         // We assume the exprBefore decisions have been added to the response already
         // Just need to run the expression after this, which will add their decisions while executing
-        Trace.BuilderCombine DecisionTask blockFlag
-        if blockFlag then response else fAfter()
+        Trace.BuilderCombine DecisionTask waitFlag
+        if waitFlag then response else fAfter()
 
     // Try Finally
     member this.TryFinally(exprInside:(unit -> RespondDecisionTaskCompletedRequest), exprFinally:(unit -> unit)) =
@@ -1063,8 +1063,8 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
         try 
             exprInside()
         finally
-            Trace.BuilderTryFinallyFinally DecisionTask blockFlag
-            if not blockFlag then exprFinally()
+            Trace.BuilderTryFinallyFinally DecisionTask waitFlag
+            if not waitFlag then exprFinally()
 
     // Try With
     member this.TryWith(exprInside:(unit -> RespondDecisionTaskCompletedRequest), exprWith:(Exception -> RespondDecisionTaskCompletedRequest)) =

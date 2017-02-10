@@ -69,7 +69,7 @@ let RegisterWorkflowType (getswf:unit -> IAmazonSimpleWorkflow) (workflowRequest
 // Looks to see if the activity type is registered.
 // If it is not yet registered, it registers it.
 // If it is registered with the same configuration, then nothing else is done.
-// If it is registered with a different configuration, en exception is thrown.
+// If it is registered with a different configuration, an exception is thrown.
 let RegisterActivityType (getswf:unit -> IAmazonSimpleWorkflow) (activityRequest:RegisterActivityTypeRequest) = 
     use swf = getswf()
 

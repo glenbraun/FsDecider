@@ -27,41 +27,58 @@ type FlowSharpAction =
     static member SetExecutionContext(executionContext:string) =
         SetExecutionContextAction.Attributes(executionContext)
 
+    /// <summary>Stops the processing of the workflow at this point for this decision loop iteration. Any 
+    /// decisions made so far will be in the response to the decision task.</summary>
     static member Wait() =
         WaitAction.Attributes()
 
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:ScheduleActivityTaskAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.ScheduleActivityTask(attr)
 
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:ScheduleLambdaFunctionAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.ScheduleLambdaFunction(attr)
 
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:StartChildWorkflowExecutionAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.StartChildWorkflowExecution(attr)
 
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:StartTimerAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.StartTimer(attr)
 
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:WorkflowExecutionSignaledAction) =
         let signalName = action.GetAttributes()
         RemoveFromContextAction.WorkflowExecutionSignaled(signalName)
 
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:SignalExternalWorkflowExecutionAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.SignalExternalWorkflowExecution(attr)
         
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:RecordMarkerAction) =
         let attr = action.GetAttributes()
         RemoveFromContextAction.RecordMarker(attr)
 
+    /// <summary>Removes an action from the context. If the context is no longer needed, this can reduce
+    /// the amount of data storage required for context. </summary>
     static member RemoveFromContext(action:MarkerRecordedAction) =
         let markerName = action.GetAttributes()
         RemoveFromContextAction.MarkerRecorded(markerName)
-
 
     /// <summary>Schedules an Activity Task but does not block further progress.</summary>
     /// <param name="activityType">Required. The type of the activity task to schedule.</param>
