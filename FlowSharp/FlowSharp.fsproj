@@ -66,6 +66,7 @@
     <Compile Include="FlowSharp.fs" />
     <Compile Include="AsyncDeciderActor.fs" />
     <Content Include="packages.config" />
+    <None Include="FlowSharp.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AWSSDK.Core">
