@@ -6,10 +6,10 @@ Use the FlowSharp library for AWS SimpleWorkflow to write deciders using F# comp
     let decider(dt:DecisionTask) =
         FlowSharp.Builder(dt) {
             // Schedule activity tasks
-            let! activity = FlowSharp.ScheduleActivityTask("ActivityType", "id1")
+            let! activity = FlowSharpAction.ScheduleActivityTask("ActivityType", "id1")
 
             // Wait for activities to complete
-            do! FlowSharp.WaitForActivityTask(activity)
+            do! FlowSharpAction.WaitForActivityTask(activity)
 
             // Support for: child workflows, lambda functions, timers, signals, markers, and more.
         }
