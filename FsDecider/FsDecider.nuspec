@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>LP4-3.FsDecider.FsDecider</id>
-    <version>1.0.0</version>
+    <id>LP4-3.FsDecider</id>
+    <version>1.0.1</version>
     <title>FsDecider</title>
     <authors>Glen Braun</authors>
     <owners>LP4-3, LLC</owners>

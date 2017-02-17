@@ -58,7 +58,7 @@
     <Compile Include="Registrar.fs" />
     <Compile Include="EventPatterns.fs" />
     <Compile Include="Actions.fs" />
-    <Compile Include="FlowSharpAction.fs" />
+    <Compile Include="FsDeciderAction.fs" />
     <Compile Include="HistoryWalker.fs" />
     <Compile Include="ContextExpression.fs" />
     <Compile Include="ExecutionContextManager.fs" />
@@ -66,7 +66,7 @@
     <Compile Include="Decider.fs" />
     <Compile Include="AsyncDeciderActor.fs" />
     <Content Include="packages.config" />
-    <None Include="FlowSharp.nuspec" />
+    <None Include="FsDecider.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AWSSDK.Core">
