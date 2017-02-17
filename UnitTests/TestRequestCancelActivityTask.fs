@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -36,10 +36,10 @@ module TestRequestCancelActivityTask =
         let signalName = "Signal for RequestCancelActivityTask"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -50,12 +50,12 @@ module TestRequestCancelActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
             
-            let! wait = FlowSharpAction.WaitForWorkflowExecutionSignaled(signalName)
+            let! wait = FsDeciderAction.WaitForWorkflowExecutionSignaled(signalName)
 
-            let! cancel = FlowSharpAction.RequestCancelActivityTask(activity)
+            let! cancel = FsDeciderAction.RequestCancelActivityTask(activity)
 
             match cancel with
-            | RequestCancelActivityTaskResult.Requesting -> do! FlowSharpAction.Wait()
+            | RequestCancelActivityTaskResult.Requesting -> do! FsDeciderAction.Wait()
             | RequestCancelActivityTaskResult.CancelRequested(attr) when attr.ActivityId = activityId -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -151,10 +151,10 @@ module TestRequestCancelActivityTask =
         let fakeActivityId = activityId + "_DoesNotExist_E8F98536-F45F-4D3B-BA86-8EA9CAF5D674"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -165,7 +165,7 @@ module TestRequestCancelActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
             
-            let! wait = FlowSharpAction.WaitForWorkflowExecutionSignaled(signalName)
+            let! wait = FsDeciderAction.WaitForWorkflowExecutionSignaled(signalName)
 
             // Improper usage here but requried to force RequestCancelFailed 
             let fakeStart = 
@@ -189,10 +189,10 @@ module TestRequestCancelActivityTask =
                     ScheduleActivityTaskResult.Started(started, fakeScheduled)
                 | s -> s
 
-            let! cancel = FlowSharpAction.RequestCancelActivityTask(fakeStart)
+            let! cancel = FsDeciderAction.RequestCancelActivityTask(fakeStart)
 
             match cancel with
-            | RequestCancelActivityTaskResult.Requesting -> do! FlowSharpAction.Wait()
+            | RequestCancelActivityTaskResult.Requesting -> do! FsDeciderAction.Wait()
             | RequestCancelActivityTaskResult.RequestCancelFailed(attr) 
                 when attr.ActivityId = fakeActivityId &&
                      attr.Cause = cancelCause -> return "TEST PASS"
@@ -286,10 +286,10 @@ module TestRequestCancelActivityTask =
         let timeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -300,12 +300,12 @@ module TestRequestCancelActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
             
-            let! wait = FlowSharpAction.WaitForWorkflowExecutionSignaled(signalName)
+            let! wait = FsDeciderAction.WaitForWorkflowExecutionSignaled(signalName)
 
-            let! cancel = FlowSharpAction.RequestCancelActivityTask(activity)
+            let! cancel = FsDeciderAction.RequestCancelActivityTask(activity)
 
             match cancel with
-            | RequestCancelActivityTaskResult.Requesting -> do! FlowSharpAction.Wait()
+            | RequestCancelActivityTaskResult.Requesting -> do! FsDeciderAction.Wait()
             | RequestCancelActivityTaskResult.ActivityFinished -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -381,10 +381,10 @@ module TestRequestCancelActivityTask =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 activityType, 
                                 activityId, 
                                 input=activityInput,
@@ -395,10 +395,10 @@ module TestRequestCancelActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
             
-            let! cancel = FlowSharpAction.RequestCancelActivityTask(activity)
+            let! cancel = FsDeciderAction.RequestCancelActivityTask(activity)
 
             match cancel with
-            | RequestCancelActivityTaskResult.Requesting -> do! FlowSharpAction.Wait()
+            | RequestCancelActivityTaskResult.Requesting -> do! FsDeciderAction.Wait()
             | RequestCancelActivityTaskResult.ActivityScheduleFailed -> return "TEST PASS"
             | _ -> return "TEST FAIL"
         }
@@ -465,10 +465,10 @@ module TestRequestCancelActivityTask =
         let signalName = "Signal for RequestCancelActivityTask"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -479,9 +479,9 @@ module TestRequestCancelActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
             
-            let! wait = FlowSharpAction.WaitForWorkflowExecutionSignaled(signalName)
+            let! wait = FsDeciderAction.WaitForWorkflowExecutionSignaled(signalName)
 
-            do! FlowSharpAction.RequestCancelActivityTask(activity)
+            do! FsDeciderAction.RequestCancelActivityTask(activity)
 
             return "TEST PASS"
         }

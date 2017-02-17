@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -36,10 +36,10 @@ module TestWaitForActivityTask =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -51,7 +51,7 @@ module TestWaitForActivityTask =
                             )
 
             // Wait for Activity Task
-            do! FlowSharpAction.WaitForActivityTask(activity)
+            do! FsDeciderAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> return "TEST PASS"
@@ -123,10 +123,10 @@ module TestWaitForActivityTask =
         let activityDetails = "Test Activity 1 Canceled Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -138,7 +138,7 @@ module TestWaitForActivityTask =
                             )
 
             // Wait for Activity Task
-            do! FlowSharpAction.WaitForActivityTask(activity)
+            do! FsDeciderAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.Canceled(attr) when attr.Details = activityDetails -> return "TEST PASS"
@@ -211,10 +211,10 @@ module TestWaitForActivityTask =
         let activityDetails = "Test Activity 1 Failed Details"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -226,7 +226,7 @@ module TestWaitForActivityTask =
                             )
 
             // Wait for Activity Task
-            do! FlowSharpAction.WaitForActivityTask(activity)
+            do! FsDeciderAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.Failed(attr) when attr.Reason = activityReason && attr.Details = activityDetails -> return "TEST PASS"
@@ -298,10 +298,10 @@ module TestWaitForActivityTask =
         let activityTimeoutType = ActivityTaskTimeoutType.SCHEDULE_TO_START
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId, 
                                 input=activityInput,
@@ -312,7 +312,7 @@ module TestWaitForActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            do! FlowSharpAction.WaitForActivityTask(activity)
+            do! FsDeciderAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.TimedOut(attr) 
@@ -387,10 +387,10 @@ module TestWaitForActivityTask =
         let activityCause = ScheduleActivityTaskFailedCause.ACTIVITY_TYPE_DOES_NOT_EXIST
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule an Activity Task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 activityType, 
                                 activityId, 
                                 input=activityInput,
@@ -401,7 +401,7 @@ module TestWaitForActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            do! FlowSharpAction.WaitForActivityTask(activity)
+            do! FsDeciderAction.WaitForActivityTask(activity)
 
             match activity with
             | ScheduleActivityTaskResult.ScheduleFailed(attr) 

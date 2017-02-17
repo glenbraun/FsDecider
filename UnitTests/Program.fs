@@ -1,12 +1,12 @@
-﻿module FlowSharp.UnitTests.Main
+﻿module FsDecider.UnitTests.Main
 
 open System
 open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 open Fuchu
-open FlowSharp
-open FlowSharp.UnitTests.Tests
+open FsDecider
+open FsDecider.UnitTests.Tests
 
 
 [<EntryPoint>]
@@ -14,9 +14,9 @@ let main argv =
     // The TestConfiguration type is used to set global configuration information. These
     // values can be changed to match your preferences.
     TestConfiguration.GetSwfClient  <- fun () -> new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2) :> IAmazonSimpleWorkflow
-    TestConfiguration.Domain        <- "FlowSharp"
-    TestConfiguration.WorkflowType  <- WorkflowType(Name="FlowSharp Test Workflow", Version="1")
-    TestConfiguration.ActivityType  <- ActivityType(Name="FlowSharp Test Activity", Version="1")
+    TestConfiguration.Domain        <- "FsDecider"
+    TestConfiguration.WorkflowType  <- WorkflowType(Name="FsDecider Test Workflow", Version="1")
+    TestConfiguration.ActivityType  <- ActivityType(Name="FsDecider Test Activity", Version="1")
     TestConfiguration.LambdaName    <- "SwfLambdaTest"
     TestConfiguration.LambdaRole    <- null  // Note: The Lambda unit tests only run in offline mode if LambdaRole is not specified.
 

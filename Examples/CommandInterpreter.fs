@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.CommandInterpreter
+﻿module FsDecider.Examples.CommandInterpreter
 
 open System
 
@@ -6,7 +6,7 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp.UnitTests
+open FsDecider.UnitTests
 
 type Command =
     | StartWorkflow of string
@@ -126,9 +126,9 @@ let internal ExecuteOperation op =
 
             CurrentWorkflowExecution <- WorkflowExecution(WorkflowId=workflowId, RunId=startResponse.Run.RunId)
 
-            FlowSharp.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input (startResponse.Run.RunId) 
+            FsDecider.Trace.WorkflowExecutionStarted workflowType workflowId (startRequest.TaskList) input (startResponse.Run.RunId) 
         with 
-        | ex -> FlowSharp.Trace.TraceException ex
+        | ex -> FsDecider.Trace.TraceException ex
 
     | Operation.DecisionTask(decider, reverseOrder, tasklist) ->
         let pollRequest = PollForDecisionTaskRequest()
@@ -143,7 +143,7 @@ let internal ExecuteOperation op =
 
         let respondRequest = decider(pollResponse.DecisionTask)
         if respondRequest = null then
-            FlowSharp.Trace.TraceInformation("Decider retuned null.")
+            FsDecider.Trace.TraceInformation("Decider retuned null.")
         else 
             let respondResponse = swf.RespondDecisionTaskCompleted(respondRequest)
 
@@ -168,7 +168,7 @@ let internal ExecuteOperation op =
         if respondResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
             failwith "Error while responding activity task completed."
       
-        FlowSharp.Trace.ActivityCompleted activityType (respondRequest.Result) (pollRequest.TaskList)
+        FsDecider.Trace.ActivityCompleted activityType (respondRequest.Result) (pollRequest.TaskList)
 
     | Operation.SignalWorkflow(workflowId, signalName) ->
         let signalRequest = SignalWorkflowExecutionRequest()
@@ -181,13 +181,13 @@ let internal ExecuteOperation op =
             if signalResponse.HttpStatusCode <> System.Net.HttpStatusCode.OK then
                 failwith "Error while signalling workflow execution."
         with 
-        | ex -> FlowSharp.Trace.TraceException(ex)
+        | ex -> FsDecider.Trace.TraceException(ex)
 
-        FlowSharp.Trace.TraceInformation("Workflow signal sent.")
+        FsDecider.Trace.TraceInformation("Workflow signal sent.")
 
     | Operation.History ->
         if CurrentWorkflowExecution = null then
-            FlowSharp.Trace.TraceInformation("Unable to get history. No workflow has been started yet.")
+            FsDecider.Trace.TraceInformation("Unable to get history. No workflow has been started yet.")
         else
             let request = GetWorkflowExecutionHistoryRequest()
             request.Domain <- TestConfiguration.Domain
@@ -198,7 +198,7 @@ let internal ExecuteOperation op =
             if response.HttpStatusCode <> System.Net.HttpStatusCode.OK then
                 failwith "Error while getting workflow execution history."
 
-            FlowSharp.Trace.History CurrentWorkflowExecution (response.History)
+            FsDecider.Trace.History CurrentWorkflowExecution (response.History)
 
 let rec public Loop() =
     Console.WriteLine("------------------------------------------------")

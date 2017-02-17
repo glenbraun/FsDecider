@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -31,10 +31,10 @@ module TestStartTimer =
         let startToFireTimeout = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) -> return "TEST PASS"
@@ -51,7 +51,7 @@ module TestStartTimer =
                           |> OfflineHistoryEvent (        // EventId = 3
                               DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
-                              WorkflowExecutionTerminatedEventAttributes(Cause=WorkflowExecutionTerminatedCause.OPERATOR_INITIATED, ChildPolicy=ChildPolicy.TERMINATE, Details="Terminated intentionally", Reason="FlowSharp Unit Tests"))
+                              WorkflowExecutionTerminatedEventAttributes(Cause=WorkflowExecutionTerminatedCause.OPERATOR_INITIATED, ChildPolicy=ChildPolicy.TERMINATE, Details="Terminated intentionally", Reason="FsDecider Unit Tests"))
 
         // Start the workflow
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
@@ -70,7 +70,7 @@ module TestStartTimer =
                 resp.Decisions.[1].CompleteWorkflowExecutionDecisionAttributes.Result 
                                                         |> should equal "TEST PASS"
 
-                TestHelper.TerminateWorkflow runId workflowId "FlowSharp Unit Tests" "Terminated intentionally"
+                TestHelper.TerminateWorkflow runId workflowId "FsDecider Unit Tests" "Terminated intentionally"
             | _ -> ()
 
         // Generate Offline History
@@ -83,14 +83,14 @@ module TestStartTimer =
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId -> return "TEST PASS"
 
@@ -157,14 +157,14 @@ module TestStartTimer =
         let startToFireTimeout = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartTimerResult.Fired(attr) when attr.TimerId = timerId -> return "TEST PASS"
 
@@ -233,21 +233,21 @@ module TestStartTimer =
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartTimerResult.Started(attr) when attr.TimerId = timerId -> 
-                let! wait = FlowSharpAction.CancelTimer(timer1)
+                let! wait = FsDeciderAction.CancelTimer(timer1)
 
                 match wait with
                 | CancelTimerResult.Canceling(_) ->
-                    do! FlowSharpAction.Wait()
+                    do! FsDeciderAction.Wait()
 
                 | _ -> return "TEST FAIL" 
 
@@ -339,14 +339,14 @@ module TestStartTimer =
         let cause = StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
                 return "TEST PASS"
@@ -409,10 +409,10 @@ module TestStartTimer =
         let startToFireTimeout = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            do! FlowSharpAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
+            do! FsDeciderAction.StartTimer (timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             return "TEST PASS"
         }
@@ -426,7 +426,7 @@ module TestStartTimer =
                           |> OfflineHistoryEvent (        // EventId = 3
                               DecisionTaskStartedEventAttributes(Identity=TestConfiguration.Identity, ScheduledEventId=2L))
                           |> OfflineHistoryEvent (        // EventId = 4
-                              WorkflowExecutionTerminatedEventAttributes(Cause=WorkflowExecutionTerminatedCause.OPERATOR_INITIATED, ChildPolicy=ChildPolicy.TERMINATE, Details="Terminated intentionally", Reason="FlowSharp Unit Tests"))
+                              WorkflowExecutionTerminatedEventAttributes(Cause=WorkflowExecutionTerminatedCause.OPERATOR_INITIATED, ChildPolicy=ChildPolicy.TERMINATE, Details="Terminated intentionally", Reason="FsDecider Unit Tests"))
 
         // Start the workflow
         let runId = TestHelper.StartWorkflowExecutionOnTaskList (TestConfiguration.WorkflowType) workflowId (TestConfiguration.TaskList) None None None
@@ -445,7 +445,7 @@ module TestStartTimer =
                 resp.Decisions.[1].CompleteWorkflowExecutionDecisionAttributes.Result 
                                                         |> should equal "TEST PASS"
 
-                TestHelper.TerminateWorkflow runId workflowId "FlowSharp Unit Tests" "Terminated intentionally"
+                TestHelper.TerminateWorkflow runId workflowId "FsDecider Unit Tests" "Terminated intentionally"
             | _ -> ()
 
         // Generate Offline History

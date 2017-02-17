@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.ChildWorkflowExamples
+﻿module FsDecider.Examples.ChildWorkflowExamples
 
 open System
 
@@ -6,10 +6,10 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Actions
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 // Example c1 : Start and wait for a child workflow 
 //      This example demonstrates starting a child workflow and waiting for it to complete
@@ -20,24 +20,24 @@ open FlowSharp.UnitTests
 //    dt c1c            (Processes the decision task for the child workflow, completes workflow)
 //    dt c1p            (Processes the final decision task for the parent workflow, completes workflow)
 let private LoadChildWorkflowExample() =
-    let parentWorkflowId = "FlowSharp Child Workflow Example (parent)"
-    let childWorkflowId = "FlowSharp Child Workflow Example (child)"
+    let parentWorkflowId = "FsDecider Child Workflow Example (parent)"
+    let childWorkflowId = "FsDecider Child Workflow Example (child)"
 
     let parentDecider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             // Start a child workflow
-            let! child = FlowSharpAction.StartChildWorkflowExecution(TestConfiguration.WorkflowType, childWorkflowId)
+            let! child = FsDeciderAction.StartChildWorkflowExecution(TestConfiguration.WorkflowType, childWorkflowId)
 
             match child with
             | StartChildWorkflowExecutionResult.Completed(_) ->
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
         }
 
     let childDecider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             return "OK"
         }
 

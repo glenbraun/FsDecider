@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.ActivityExamples
+﻿module FsDecider.Examples.ActivityExamples
 
 open System
 
@@ -6,13 +6,13 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Actions
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 // Example a1 : Activities in series
-//      This example demonstrates a simple FlowSharp decider for a workflow with two 
+//      This example demonstrates a simple FsDecider for a workflow with two 
 //      activity tasks. Once the first activity task completes, the second is started. 
 //      The workflow execution completes when after the second activity task completes.
 // To Run, start the project and type these commands into the command line interpreter.
@@ -24,25 +24,25 @@ open FlowSharp.UnitTests
 //    dt a1             (Processes the final decision task, completes the workflow)
 let private LoadActivitiesInSeries() =
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             // Schedule the first activity task
-            let! first = FlowSharpAction.ScheduleActivityTask (
+            let! first = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "First Activity")
             
             // Wait for the first activity task to finish
-            do! FlowSharpAction.WaitForActivityTask(first)
+            do! FsDeciderAction.WaitForActivityTask(first)
 
             // Schedule the second activity task
-            let! second = FlowSharpAction.ScheduleActivityTask (
+            let! second = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "Second Activity")
 
             // Wait for the second activity task to finish
-            do! FlowSharpAction.WaitForActivityTask(second)
+            do! FsDeciderAction.WaitForActivityTask(second)
 
-            // FlowSharp.WaitForAllActivityTask can be used to wait for a list of activity tasks to finish.
-            // FlowSharp.WaitForAnyActivityTask can be used to wait for any of a list of activity tasks to finish.
+            // FsDecider.WaitForAllActivityTask can be used to wait for a list of activity tasks to finish.
+            // FsDecider.WaitForAnyActivityTask can be used to wait for any of a list of activity tasks to finish.
 
             // Complete the workflow execution with a result of "OK"
             return "OK"
@@ -55,7 +55,7 @@ let private LoadActivitiesInSeries() =
     AddOperation (Command.DecisionTask("a1")) (Operation.DecisionTask(decider, false, None))
 
 // Example a2 : Activities in parallel
-//      This example demonstrates a simple FlowSharp decider for a workflow with two 
+//      This example demonstrates a simple FsDecider for a workflow with two 
 //      activity tasks. The activity tasks run in parallel. The workflow completes when both
 //      activity tasks have completed.
 // To Run, start the project and type these commands into the command line interpreter.
@@ -66,19 +66,19 @@ let private LoadActivitiesInSeries() =
 //    dt a2             (Processes the final decision task, completes the workflow)
 let private LoadActivitiesInParallel() =
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             // Schedule the first activity task
-            let! first = FlowSharpAction.ScheduleActivityTask (
+            let! first = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "First Activity")
             
             // Schedule the second activity task
-            let! second = FlowSharpAction.ScheduleActivityTask (
+            let! second = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "Second Activity")
 
             // Wait for both of the activity tasks to finish
-            do! FlowSharpAction.WaitForAllActivityTask([first; second;])
+            do! FsDeciderAction.WaitForAllActivityTask([first; second;])
 
             // Complete the workflow execution with a result of "OK"
             return "OK"
@@ -91,7 +91,7 @@ let private LoadActivitiesInParallel() =
     AddOperation (Command.DecisionTask("a2")) (Operation.DecisionTask(decider, false, None))
 
 // Example a3 : Conditional logic based on the status of an activity task
-//      This example demonstrates a simple FlowSharp decider for a workflow with one 
+//      This example demonstrates a simple FsDecider for a workflow with one 
 //      activity task. The activity task has a short timeout (10 seconds), once it times out the 
 //      workflow execution completes.
 // To Run, start the project and type these commands into the command line interpreter.
@@ -100,9 +100,9 @@ let private LoadActivitiesInParallel() =
 //    dt a3         (Processes the final decision task, at 10 seconds after previous step activity will timeout)
 let private LoadActivityStatus() =
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             // Schedule the activity task
-            let! activity = FlowSharpAction.ScheduleActivityTask (
+            let! activity = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 "Activity Example",  
                                 scheduleToStartTimeout="10")
@@ -112,7 +112,7 @@ let private LoadActivityStatus() =
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
         }
 
     // The code below supports the example runner

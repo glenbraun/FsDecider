@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -38,10 +38,10 @@ module TestWaitForAllChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start1 = FlowSharpAction.StartChildWorkflowExecution
+            let! start1 = FsDeciderAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
@@ -53,7 +53,7 @@ module TestWaitForAllChildWorkflowExecution =
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                               )
 
-            let! start2 = FlowSharpAction.StartChildWorkflowExecution
+            let! start2 = FsDeciderAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
@@ -68,7 +68,7 @@ module TestWaitForAllChildWorkflowExecution =
             let childList = [start1; start2;]
 
             // Wait for All Child Workflow Execution
-            do! FlowSharpAction.WaitForAllChildWorkflowExecution(childList)
+            do! FsDeciderAction.WaitForAllChildWorkflowExecution(childList)
 
             let finishedList = 
                 childList
@@ -83,7 +83,7 @@ module TestWaitForAllChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 
@@ -222,10 +222,10 @@ module TestWaitForAllChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start1 = FlowSharpAction.StartChildWorkflowExecution
+            let! start1 = FsDeciderAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
@@ -237,7 +237,7 @@ module TestWaitForAllChildWorkflowExecution =
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                               )
 
-            let! start2 = FlowSharpAction.StartChildWorkflowExecution
+            let! start2 = FsDeciderAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
@@ -252,7 +252,7 @@ module TestWaitForAllChildWorkflowExecution =
             let childList = [start1; start2;]
 
             // Wait for All Child Workflow Execution
-            do! FlowSharpAction.WaitForAllChildWorkflowExecution(childList)
+            do! FsDeciderAction.WaitForAllChildWorkflowExecution(childList)
 
             let finishedList = 
                 childList
@@ -267,7 +267,7 @@ module TestWaitForAllChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 
@@ -428,10 +428,10 @@ module TestWaitForAllChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start1 = FlowSharpAction.StartChildWorkflowExecution
+            let! start1 = FsDeciderAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "1",
@@ -443,7 +443,7 @@ module TestWaitForAllChildWorkflowExecution =
                                 taskStartToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                               )
 
-            let! start2 = FlowSharpAction.StartChildWorkflowExecution
+            let! start2 = FsDeciderAction.StartChildWorkflowExecution
                               (
                                 TestConfiguration.WorkflowType,
                                 childWorkflowId + "2",
@@ -458,7 +458,7 @@ module TestWaitForAllChildWorkflowExecution =
             let childList = [start1; start2;]
 
             // Wait for Any Child Workflow Execution
-            do! FlowSharpAction.WaitForAnyChildWorkflowExecution(childList)
+            do! FsDeciderAction.WaitForAnyChildWorkflowExecution(childList)
 
             let finishedList = 
                 childList
@@ -473,7 +473,7 @@ module TestWaitForAllChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return childResult
             }
 

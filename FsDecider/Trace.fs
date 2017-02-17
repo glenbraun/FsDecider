@@ -1,4 +1,4 @@
-﻿namespace FlowSharp
+﻿namespace FsDecider
 
 open System
 open System.Diagnostics
@@ -7,10 +7,10 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp.Actions
-open FlowSharp.HistoryWalker
-open FlowSharp.EventPatterns
-open FlowSharp.ExecutionContext
+open FsDecider.Actions
+open FsDecider.HistoryWalker
+open FsDecider.EventPatterns
+open FsDecider.ExecutionContext
 
 type private TraceWriter() =
     static member private GetUnionCaseName (x:obj) t = 
@@ -140,7 +140,7 @@ type Trace() =
         else
             DecisionList response (i+1) ((if s.Length > 0 then s + "," else s) + response.Decisions.[i].DecisionType.ToString())
 
-    static member val TraceSource = new TraceSource("FlowSharp", SourceLevels.All)
+    static member val TraceSource = new TraceSource("FsDecider", SourceLevels.All)
 
     [<Conditional("TRACE")>]
     static member WorkflowExecutionStarted workflowType workflowId tasklist input runid =

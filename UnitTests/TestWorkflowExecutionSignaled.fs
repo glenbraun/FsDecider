@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -31,13 +31,13 @@ module TestWorkflowExecutionSignaled =
         let signalInput = "Test Signal Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
-            let! signal = FlowSharpAction.WorkflowExecutionSignaled(signalName)
+            let! signal = FsDeciderAction.WorkflowExecutionSignaled(signalName)
                 
             match signal with
             | WorkflowExecutionSignaledResult.NotSignaled -> 
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
                 
             | WorkflowExecutionSignaledResult.Signaled(attr) when
                 attr.SignalName = signalName &&
@@ -99,9 +99,9 @@ module TestWorkflowExecutionSignaled =
         let signalInput = "Test Signal Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
-            let! signal = FlowSharpAction.WorkflowExecutionSignaled(signalName)
+            let! signal = FsDeciderAction.WorkflowExecutionSignaled(signalName)
                 
             match signal with
             | WorkflowExecutionSignaledResult.NotSignaled -> return "TEST PASS"

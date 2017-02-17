@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -40,10 +40,10 @@ module TestWorkflowExecutionCancelRequested =
         let cause = WorkflowExecutionCancelRequestedCause.CHILD_POLICY_APPLIED
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -57,9 +57,9 @@ module TestWorkflowExecutionCancelRequested =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Started(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -72,12 +72,12 @@ module TestWorkflowExecutionCancelRequested =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
-            let! cancel = FlowSharpAction.WorkflowExecutionCancelRequested()
+            Decider(dt, TestConfiguration.ReverseOrder) {
+            let! cancel = FsDeciderAction.WorkflowExecutionCancelRequested()
                 
             match cancel with
             | WorkflowExecutionCancelRequestedResult.NotRequested ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | WorkflowExecutionCancelRequestedResult.CancelRequested(attr) when
                 attr.Cause = cause &&
@@ -210,9 +210,9 @@ module TestWorkflowExecutionCancelRequested =
         let workflowId = "Workflow Execution Cancel Requested with result of NotRequested"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
-            let! cancel = FlowSharpAction.WorkflowExecutionCancelRequested()
+            let! cancel = FsDeciderAction.WorkflowExecutionCancelRequested()
                 
             match cancel with
             | WorkflowExecutionCancelRequestedResult.NotRequested -> return "TEST PASS"

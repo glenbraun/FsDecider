@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -33,14 +33,14 @@ module TestRecordMarker =
         let markerDetails = "Test Marker Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            let! marker = FlowSharpAction.RecordMarker(markerName, markerDetails)
+            let! marker = FsDeciderAction.RecordMarker(markerName, markerDetails)
 
             match marker with
             | RecordMarkerResult.Recording ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | RecordMarkerResult.Recorded(attr) when attr.MarkerName = markerName && attr.Details = markerDetails -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
@@ -106,10 +106,10 @@ module TestRecordMarker =
         let markerDetails = "Test Marker Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            let! marker = FlowSharpAction.RecordMarker(markerName, markerDetails)
+            let! marker = FsDeciderAction.RecordMarker(markerName, markerDetails)
 
             match marker with
             | RecordMarkerResult.Recording -> return "TEST PASS"
@@ -162,14 +162,14 @@ module TestRecordMarker =
         let cause = RecordMarkerFailedCause.OPERATION_NOT_PERMITTED
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            let! marker = FlowSharpAction.RecordMarker(markerName, markerDetails)
+            let! marker = FsDeciderAction.RecordMarker(markerName, markerDetails)
 
             match marker with
             | RecordMarkerResult.Recording ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | RecordMarkerResult.RecordMarkerFailed(attr) when attr.MarkerName = markerName && attr.Cause = cause -> return "TEST PASS"
             | _ -> return "TEST FAIL"                        
@@ -234,10 +234,10 @@ module TestRecordMarker =
         let markerDetails = "Test Marker Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Record a Marker
-            do! FlowSharpAction.RecordMarker(markerName, markerDetails)
+            do! FsDeciderAction.RecordMarker(markerName, markerDetails)
 
             return "TEST PASS"
         }

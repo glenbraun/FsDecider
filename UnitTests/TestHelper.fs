@@ -1,6 +1,6 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
+open FsDecider
 
 open System
 open Amazon

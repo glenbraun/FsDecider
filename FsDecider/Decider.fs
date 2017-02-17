@@ -1,19 +1,19 @@
-﻿namespace FlowSharp
+﻿namespace FsDecider
 
 open System
 open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.HistoryWalker
-open FlowSharp.EventPatterns
-open FlowSharp.ExecutionContext
+open FsDecider
+open FsDecider.Actions
+open FsDecider.HistoryWalker
+open FsDecider.EventPatterns
+open FsDecider.ExecutionContext
 
-exception FlowSharpBuilderException of HistoryEvent option * string
+exception FsDeciderBuilderException of HistoryEvent option * string
 
-type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
+type Decider (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:IContextManager option) =
     let response = new RespondDecisionTaskCompletedRequest(Decisions = ResizeArray<Decision>(), TaskToken = DecisionTask.TaskToken)            
     let walker = HistoryWalker(DecisionTask.Events, ReverseOrder)
     let mutable waitFlag = false
@@ -45,9 +45,9 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             response.ExecutionContext <- cm.Write()
         | None -> ()
 
-    new (decisionTask:DecisionTask) = FlowSharp(decisionTask, false, None)
-    new (decisionTask:DecisionTask, reverseOrder:bool) = FlowSharp(decisionTask, reverseOrder, None)
-    new (decisionTask:DecisionTask, contextManager:IContextManager option) = FlowSharp(decisionTask, false, contextManager)
+    new (decisionTask:DecisionTask) = Decider(decisionTask, false, None)
+    new (decisionTask:DecisionTask, reverseOrder:bool) = Decider(decisionTask, reverseOrder, None)
+    new (decisionTask:DecisionTask, contextManager:IContextManager option) = Decider(decisionTask, false, contextManager)
 
     member this.Delay(f) =
         Trace.BuilderDelay(DecisionTask)
@@ -98,7 +98,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 AddExceptionEventId (hev.EventId)
                 raise (CompleteWorkflowExecutionFailedException(hev.CompleteWorkflowExecutionFailedEventAttributes))
 
-            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of CompleteWorkflowExecution during return operation."))
+            | _ -> raise (FsDeciderBuilderException(exceptionEvent, "Unexpected state of CompleteWorkflowExecution during return operation."))
 
             Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CompleteWorkflowExecutionFailed)
 
@@ -120,7 +120,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 AddExceptionEventId (hev.EventId)
                 raise (CancelWorkflowExecutionFailedException(hev.CancelWorkflowExecutionFailedEventAttributes))
 
-            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of CancelWorkflowExecution during return operation."))
+            | _ -> raise (FsDeciderBuilderException(exceptionEvent, "Unexpected state of CancelWorkflowExecution during return operation."))
 
             Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.CancelWorkflowExecutionFailed)
 
@@ -143,7 +143,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 AddExceptionEventId (hev.EventId)
                 raise (FailWorkflowExecutionFailedException(hev.FailWorkflowExecutionFailedEventAttributes))
 
-            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of FailWorkflowExecution during return operation."))
+            | _ -> raise (FsDeciderBuilderException(exceptionEvent, "Unexpected state of FailWorkflowExecution during return operation."))
 
             Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.FailWorkflowExecutionFailed)
             
@@ -164,7 +164,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 AddExceptionEventId (hev.EventId)
                 raise (ContinueAsNewWorkflowExecutionFailedException(hev.ContinueAsNewWorkflowExecutionFailedEventAttributes))
 
-            | _ -> raise (FlowSharpBuilderException(exceptionEvent, "Unexpected state of ContinueAsNewWorkflowExecution during return operation."))
+            | _ -> raise (FsDeciderBuilderException(exceptionEvent, "Unexpected state of ContinueAsNewWorkflowExecution during return operation."))
 
             Trace.BuilderReturn DecisionTask result response exceptionEvent (EventType.ContinueAsNewWorkflowExecutionFailed)
 
@@ -266,7 +266,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
 
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of ScheduleActivityTaskAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of ScheduleActivityTaskAction."))
 
         | ScheduleActivityTaskAction.ResultFromContext(_, result) ->
             Trace.BuilderBindScheduleActivityTaskAction DecisionTask action result true
@@ -368,7 +368,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
 
                     f(result)
 
-                | _ -> raise (FlowSharpBuilderException(cancelHistory, "Unexpected event history of RequestCancelActivityTaskAction."))
+                | _ -> raise (FsDeciderBuilderException(cancelHistory, "Unexpected event history of RequestCancelActivityTaskAction."))
 
     // Start Child Workflow Execution (do!)
     member this.Bind(action:StartChildWorkflowExecutionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) =
@@ -452,7 +452,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of StartChildWorkflowExecutionAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of StartChildWorkflowExecutionAction."))
 
         | StartChildWorkflowExecutionAction.ResultFromContext(_, result) ->
             Trace.BuilderBindStartChildWorkflowExecutionAction DecisionTask action result true
@@ -531,7 +531,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             Trace.BuilderBindRequestCancelExternalWorkflowExecutionAction DecisionTask action result
             f(result)
 
-        | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of RequestCancelExternalWorkflowExecutionAction."))
+        | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of RequestCancelExternalWorkflowExecutionAction."))
 
     // Schedule Lambda Function (do!)
     member this.Bind(action:ScheduleLambdaFunctionAction, f:(unit -> RespondDecisionTaskCompletedRequest)) = 
@@ -606,7 +606,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result false
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of ScheduleLambdaFunctionAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of ScheduleLambdaFunctionAction."))
 
         | ScheduleLambdaFunctionAction.ResultFromContext(_, result) ->
             Trace.BuilderBindScheduleLambdaFunctionAction DecisionTask action result true
@@ -697,7 +697,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindStartTimerAction DecisionTask action result false
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of StartTimerAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of StartTimerAction."))
 
         | StartTimerAction.ResultFromContext(_, result) -> 
             Trace.BuilderBindStartTimerAction DecisionTask action result true
@@ -776,7 +776,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindCancelTimerAction DecisionTask action (Some(result))
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of CancelTimerAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of CancelTimerAction."))
 
     // Marker Recorded (let!)
     member this.Bind(action:MarkerRecordedAction, f:(MarkerRecordedResult -> RespondDecisionTaskCompletedRequest)) =
@@ -806,7 +806,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindMarkerRecordedAction DecisionTask action result false
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of MarkerRecordedAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of MarkerRecordedAction."))
 
         | MarkerRecordedAction.ResultFromContext(_, result) ->
             Trace.BuilderBindMarkerRecordedAction DecisionTask action result true
@@ -852,7 +852,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindRecordMarkerAction DecisionTask action result false
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of RecordMarkerAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of RecordMarkerAction."))
 
         | RecordMarkerAction.ResultFromContext(_, result) ->
             Trace.BuilderBindRecordMarkerAction DecisionTask action result true
@@ -905,7 +905,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result false
                 f(result)
 
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of SignalExternalWorkflowExecutionAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of SignalExternalWorkflowExecutionAction."))
 
         | SignalExternalWorkflowExecutionAction.ResultFromContext(_, result) ->
             Trace.BuilderBindSignalExternalWorkflowExecutionAction DecisionTask action result true
@@ -931,7 +931,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) false
                 f()
         
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WaitForWorkflowExecutionSignaledAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of WaitForWorkflowExecutionSignaledAction."))
 
         | WaitForWorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             Trace.BuilderBindWaitForWorkflowExecutionSignaledAction DecisionTask action (Some(result)) true
@@ -958,7 +958,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
                 Trace.BuilderBindWorkflowExecutionSignaledAction DecisionTask action result false
                 f(result)
         
-            | _ -> raise (FlowSharpBuilderException(combinedHistory, "Unexpected event history of WorkflowExecutionSignaledAction."))
+            | _ -> raise (FsDeciderBuilderException(combinedHistory, "Unexpected event history of WorkflowExecutionSignaledAction."))
 
         | WorkflowExecutionSignaledAction.ResultFromContext(_, result) ->
             Trace.BuilderBindWorkflowExecutionSignaledAction DecisionTask action result true
@@ -981,7 +981,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             Trace.BuilderBindWorkflowExecutionCancelRequestedAction DecisionTask action result
             f(result)
             
-        | _ -> raise (FlowSharpBuilderException(cancelRequestedEvent, "Unexpected event history of WorkflowExecutionCancelRequestedAction."))
+        | _ -> raise (FsDeciderBuilderException(cancelRequestedEvent, "Unexpected event history of WorkflowExecutionCancelRequestedAction."))
 
     // Get Workflow Execution Input (let!)
     member this.Bind(action:GetWorkflowExecutionInputAction, f:(string -> RespondDecisionTaskCompletedRequest)) =
@@ -998,7 +998,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             Trace.BuilderBindGetWorkflowExecutionInputAction DecisionTask action input
             f(input)
 
-        | _ -> raise (FlowSharpBuilderException(startedEvent, "Unexpected event history of GetWorkflowExecutionInputAction."))
+        | _ -> raise (FsDeciderBuilderException(startedEvent, "Unexpected event history of GetWorkflowExecutionInputAction."))
 
     // Get Execution Context (let!)
     member this.Bind(action:GetExecutionContextAction, f:(string -> RespondDecisionTaskCompletedRequest)) =
@@ -1015,7 +1015,7 @@ type FlowSharp (DecisionTask:DecisionTask, ReverseOrder:bool, ContextManager:ICo
             Trace.BuilderBindGetExecutionContextAction DecisionTask action context
             f(context)
 
-        | _ -> raise (FlowSharpBuilderException(completedEvent, "Unexpected event history of GetExecutionContextAction."))
+        | _ -> raise (FsDeciderBuilderException(completedEvent, "Unexpected event history of GetExecutionContextAction."))
 
     // Set Execution Context (do!)
     member this.Bind(SetExecutionContextAction.Attributes(context), f:(unit -> RespondDecisionTaskCompletedRequest)) =

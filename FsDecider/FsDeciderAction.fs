@@ -1,13 +1,13 @@
-﻿namespace FlowSharp
+﻿namespace FsDecider
 
 open System
 open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp.Actions
+open FsDecider.Actions
 
-type FlowSharpAction = 
+type FsDeciderAction = 
     /// <summary>Determines if a request to cancel this workflow execution was made.</summary>
     /// <returns>A WorkflowExecutionCancelRequestedResult of CancelRequested or NotRequested.</returns>
     static member WorkflowExecutionCancelRequested() =

@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>LP4-3.FlowSharp.FlowSharp</id>
+    <id>LP4-3.FsDecider.FsDecider</id>
     <version>1.0.0</version>
-    <title>FlowSharp</title>
+    <title>FsDecider</title>
     <authors>Glen Braun</authors>
     <owners>LP4-3, LLC</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.txt</licenseUrl>
-    <projectUrl>https://github.com/glenbraun/FlowSharp</projectUrl>
+    <projectUrl>https://github.com/glenbraun/FsDecider</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>F# computation expression builder for AWS SimpleWorkflow.</description>
     <releaseNotes>Initial release.</releaseNotes>

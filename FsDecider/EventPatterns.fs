@@ -1,4 +1,4 @@
-﻿module FlowSharp.EventPatterns
+﻿module FsDecider.EventPatterns
 
 open System
 open Amazon

@@ -1,10 +1,10 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.ExecutionContext
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.ExecutionContext
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -29,9 +29,9 @@ module TestGetExecutionContext =
         let workflowId = "Get Execution Context"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
-            let! context = FlowSharpAction.GetExecutionContext()
+            let! context = FsDeciderAction.GetExecutionContext()
 
             if context = null then
                 return "TEST PASS"
@@ -75,14 +75,14 @@ module TestGetExecutionContext =
         let executionContext = "Test Execution Context"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
-            let! context = FlowSharpAction.GetExecutionContext()
+            let! context = FsDeciderAction.GetExecutionContext()
 
             match context with
             | null ->
-                do! FlowSharpAction.SetExecutionContext(executionContext)
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.SetExecutionContext(executionContext)
+                do! FsDeciderAction.Wait()
             | _ when context = executionContext ->
                 return "TEST PASS"
             | _ -> 

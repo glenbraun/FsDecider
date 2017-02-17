@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -47,10 +47,10 @@ module TestSignalExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -64,10 +64,10 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(attr) ->
-                let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
+                let! signal = FsDeciderAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> return "TEST PASS"
@@ -161,10 +161,10 @@ module TestSignalExternalWorkflowExecution =
         let signalInput = "Test Signal Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -178,14 +178,14 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(attr) ->
-                let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
+                let! signal = FsDeciderAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> 
-                    do! FlowSharpAction.Wait()
+                    do! FsDeciderAction.Wait()
 
                 | SignalExternalWorkflowExecutionResult.Initiated(ia) when
                         ia.SignalName = signalName &&
@@ -297,10 +297,10 @@ module TestSignalExternalWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -314,14 +314,14 @@ module TestSignalExternalWorkflowExecution =
 
             match start with 
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartChildWorkflowExecutionResult.Started(attr) ->
-                let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
+                let! signal = FsDeciderAction.SignalExternalWorkflowExecution(signalName, attr.WorkflowExecution.WorkflowId, signalInput, attr.WorkflowExecution.RunId)
                 
                 match signal with
                 | SignalExternalWorkflowExecutionResult.Signaling -> 
-                    do! FlowSharpAction.Wait()
+                    do! FsDeciderAction.Wait()
 
                 | SignalExternalWorkflowExecutionResult.Signaled(sa) when
                         sa.WorkflowExecution.WorkflowId = childWorkflowId -> return "TEST PASS"
@@ -427,13 +427,13 @@ module TestSignalExternalWorkflowExecution =
         let cause = SignalExternalWorkflowExecutionFailedCause.UNKNOWN_EXTERNAL_WORKFLOW_EXECUTION
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
-            let! signal = FlowSharpAction.SignalExternalWorkflowExecution(signalName, childWorkflowId, signalInput)
+            let! signal = FsDeciderAction.SignalExternalWorkflowExecution(signalName, childWorkflowId, signalInput)
                 
             match signal with
             | SignalExternalWorkflowExecutionResult.Signaling -> 
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | SignalExternalWorkflowExecutionResult.Failed(attr) when
                         attr.Cause = cause &&

@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -35,17 +35,17 @@ module TestWaitForAllLambdaFunction =
 
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
+            let! lambda1 = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId + "1",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            let! lambda2 = FlowSharpAction.ScheduleLambdaFunction (
+            let! lambda2 = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId + "2",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -54,7 +54,7 @@ module TestWaitForAllLambdaFunction =
 
             let lambdaList = [lambda1; lambda2;]
 
-            do! FlowSharpAction.WaitForAllLambdaFunction(lambdaList)
+            do! FsDeciderAction.WaitForAllLambdaFunction(lambdaList)
 
             let finishedList = 
                 lambdaList
@@ -169,17 +169,17 @@ module TestWaitForAllLambdaFunction =
 
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
+            let! lambda1 = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId + "1",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            let! lambda2 = FlowSharpAction.ScheduleLambdaFunction (
+            let! lambda2 = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId + "2",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -188,7 +188,7 @@ module TestWaitForAllLambdaFunction =
 
             let lambdaList = [lambda1; lambda2;]
 
-            do! FlowSharpAction.WaitForAllLambdaFunction(lambdaList)
+            do! FsDeciderAction.WaitForAllLambdaFunction(lambdaList)
 
             let finishedList = 
                 lambdaList
@@ -292,17 +292,17 @@ module TestWaitForAllLambdaFunction =
 
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! lambda1 = FlowSharpAction.ScheduleLambdaFunction (
+            let! lambda1 = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId + "1",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            let! lambda2 = FlowSharpAction.ScheduleLambdaFunction (
+            let! lambda2 = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId + "2",
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
@@ -311,7 +311,7 @@ module TestWaitForAllLambdaFunction =
 
             let lambdaList = [lambda1; lambda2;]
 
-            do! FlowSharpAction.WaitForAllLambdaFunction(lambdaList)
+            do! FsDeciderAction.WaitForAllLambdaFunction(lambdaList)
 
             let finishedList = 
                 lambdaList

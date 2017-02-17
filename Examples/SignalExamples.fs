@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.SignalExamples
+﻿module FsDecider.Examples.SignalExamples
 
 open System
 
@@ -6,10 +6,10 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Actions
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 // Example s1 : Sending and receiving signals
 //      This example has two workflows. One which sends a signal and the other which receives it.
@@ -21,25 +21,25 @@ open FlowSharp.UnitTests
 //    dt s1r            (Processes the receiving workflow, gets signal and completes)
 //    dt s1s            (Processes the sending workflow initial decision task, sends signal and completes)
 let private LoadSendingAndReceivingSignals() =
-    let receivingWorkflowId = "FlowSharp Signals Example (receiver)"
-    let sendingWorkflowId = "FlowSharp Signals Example (sender)"
+    let receivingWorkflowId = "FsDecider Signals Example (receiver)"
+    let sendingWorkflowId = "FsDecider Signals Example (sender)"
 
     let sendSignalDecider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             // Send a signal to an external workflow
-            let! signal = FlowSharpAction.SignalExternalWorkflowExecution("Some Signal", receivingWorkflowId)
+            let! signal = FsDeciderAction.SignalExternalWorkflowExecution("Some Signal", receivingWorkflowId)
 
             match signal with
             | SignalExternalWorkflowExecutionResult.Signaled(_) ->
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
         }
 
     let receiveSignalDecider(dt:DecisionTask) =
-        FlowSharp(dt) {
-            do! FlowSharpAction.WaitForWorkflowExecutionSignaled("Some Signal")
+        Decider(dt) {
+            do! FsDeciderAction.WaitForWorkflowExecutionSignaled("Some Signal")
 
             return "OK"
         }

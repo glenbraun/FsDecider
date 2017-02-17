@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.MarkerExamples
+﻿module FsDecider.Examples.MarkerExamples
 
 open System
 
@@ -6,10 +6,10 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Actions
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 // Example m1 : Recording markers
 //      This example demonstrates recording and detecting a marker.
@@ -19,20 +19,20 @@ open FlowSharp.UnitTests
 //    sg m1             (Sends a signal to the workflow to force a decision task)
 //    dt m1             (Processes the final decision task, detects marker and completes workflow)
 let private LoadRecordAndDetectMarker() =
-    let workflowId = "FlowSharp Markers Example"
+    let workflowId = "FsDecider Markers Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
-            do! FlowSharpAction.RecordMarker("Some Marker")
+        Decider(dt) {
+            do! FsDeciderAction.RecordMarker("Some Marker")
 
-            let! marker = FlowSharpAction.MarkerRecorded("Some Marker")
+            let! marker = FsDeciderAction.MarkerRecorded("Some Marker")
 
             match marker with
             | MarkerRecordedResult.Recorded(attr) ->
                 // Complete the workflow execution with a result of "OK"
                 return "OK"
             | _ -> 
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
         }
 
     // The code below supports the example runner

@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.TimerExamples
+﻿module FsDecider.Examples.TimerExamples
 
 open System
 
@@ -6,10 +6,10 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Actions
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 // Example t1 : Start a timer and wait for it to fire
 //      This example demonstracts starting a timer and then waiting for it to fire.
@@ -18,13 +18,13 @@ open FlowSharp.UnitTests
 //    dt t1             (Processes the initial decision task, starts the timer and waits)
 //    dt t1             (Processes the final decision task, after 15 seconds detects fired timer and completes workflow)
 let private LoadTimerExample() =
-    let workflowId = "FlowSharp Timer Example"
+    let workflowId = "FsDecider Timer Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
-            let! timer = FlowSharpAction.StartTimer("Some Timer", "15")
+        Decider(dt) {
+            let! timer = FsDeciderAction.StartTimer("Some Timer", "15")
 
-            do! FlowSharpAction.WaitForTimer(timer)
+            do! FsDeciderAction.WaitForTimer(timer)
 
             // Complete the workflow execution with a result of "OK"
             return "OK"
@@ -44,17 +44,17 @@ let private LoadTimerExample() =
 //    dt t2             (Processes a decision task, waits for timer to time out and resets it)
 //    dt t2             (Processes the final decision task, after 15 seconds detects fired timer and completes workflow)
 let private LoadRestartTimerExample() =
-    let workflowId = "FlowSharp Restart Timer Example"
+    let workflowId = "FsDecider Restart Timer Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             for i = 1 to 3 do
                 // Once a timer name has been used, it cannot be used again.
                 // Append a unique value to the new timer name each time.
-                let! timer = FlowSharpAction.StartTimer("Some Timer " + (i.ToString()), "15")
+                let! timer = FsDeciderAction.StartTimer("Some Timer " + (i.ToString()), "15")
 
                 // Wait for the timer to complete
-                do! FlowSharpAction.WaitForTimer(timer)
+                do! FsDeciderAction.WaitForTimer(timer)
 
                 // Unit value required for 'for' loop
                 ()

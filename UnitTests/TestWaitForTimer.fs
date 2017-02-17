@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -30,12 +30,12 @@ module TestWaitForTimer =
         let startToFireTimeout = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
-            do! FlowSharpAction.WaitForTimer(timer1)
+            do! FsDeciderAction.WaitForTimer(timer1)
 
             match timer1 with
             | StartTimerResult.Fired(attr) when attr.TimerId = timerId -> return "TEST PASS"
@@ -103,18 +103,18 @@ module TestWaitForTimer =
         let startToFireTimeout = TimeSpan.FromDays(100.0).TotalSeconds.ToString()
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) -> 
-                do! FlowSharpAction.WaitForTimer(timer1)
+                do! FsDeciderAction.WaitForTimer(timer1)
 
             | StartTimerResult.Started(_) ->
-                do! FlowSharpAction.CancelTimer(timer1)
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.CancelTimer(timer1)
+                do! FsDeciderAction.Wait()
                 
             | StartTimerResult.Canceled(attr) when attr.TimerId = timerId -> return "TEST PASS"
 
@@ -204,17 +204,17 @@ module TestWaitForTimer =
         let cause = StartTimerFailedCause.TIMER_ID_ALREADY_IN_USE
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Timer
-            let! timer1 = FlowSharpAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
+            let! timer1 = FsDeciderAction.StartTimer(timerId=timerId, startToFireTimeout = startToFireTimeout)
 
             match timer1 with
             | StartTimerResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartTimerResult.StartTimerFailed(attr) when attr.TimerId = timerId && attr.Cause = cause -> 
-                do! FlowSharpAction.WaitForTimer(timer1)
+                do! FsDeciderAction.WaitForTimer(timer1)
                 return "TEST PASS"
 
             | _ -> return "TEST FAIL"                        

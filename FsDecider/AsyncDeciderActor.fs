@@ -1,4 +1,4 @@
-﻿namespace FlowSharp
+﻿namespace FsDecider
 
 open System
 open System.Threading

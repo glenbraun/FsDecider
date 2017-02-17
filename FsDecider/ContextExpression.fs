@@ -1,4 +1,4 @@
-﻿module internal FlowSharp.ContextExpression
+﻿module internal FsDecider.ContextExpression
 
 open System
 open System.Text
@@ -7,7 +7,7 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp.Actions
+open FsDecider.Actions
 
 type internal ContextExpression =
     | Mappings of ActionToResultMapping list

@@ -1,4 +1,4 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
 open System
 open System.IO

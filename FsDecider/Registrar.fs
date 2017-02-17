@@ -1,4 +1,4 @@
-﻿module FlowSharp.Registrar
+﻿module FsDecider.Registrar
 
 open System
 open Amazon

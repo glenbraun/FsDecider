@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.ContextExamples
+﻿module FsDecider.Examples.ContextExamples
 
 open System
 
@@ -6,19 +6,19 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.ExecutionContext
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Actions
+open FsDecider.ExecutionContext
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 // Example x1 : Context example
-//      This example demonstrates the use of the FlowSharp ExecutionContextManager. Without a context 
-//      manager, FlowSharp uses the workflow execution history to determine what decisions to make.
+//      This example demonstrates the use of the FsDecider ExecutionContextManager. Without a context 
+//      manager, FsDecider uses the workflow execution history to determine what decisions to make.
 //      However, the execution history can be very long if you consider a workflow which might run thousands of
-//      activity tasks, for example. Determining the state of each FlowSharp action might not be necessary
+//      activity tasks, for example. Determining the state of each FsDecider action might not be necessary
 //      to support the logic of the workflow. In these cases, an IContextManager can be used to retrieve the
-//      state from another source. FlowSharp contains an implementation of the IContextManager interface that
+//      state from another source. FsDecider contains an implementation of the IContextManager interface that
 //      uses the ExecutionContext property provided by the RespondDecisionTaskCompletedRequest
 //      and the DecisionTaskCompletedEventAttributes types. Other possible implementations could use files
 //      stored in S3, a DynamoDB table, etc.
@@ -31,22 +31,22 @@ open FlowSharp.UnitTests
 //    sg x1             (Sends a signal to the workflow to trigger a decision task)
 //    dt x1             (Processes the final decistion task, activity results retrieved from context, not history.)
 let private LoadContextExample() =
-    let workflowId = "FlowSharp Context Example"
+    let workflowId = "FsDecider Context Example"
 
     let decider(dt:DecisionTask) =
-        // The FlowSharp ExecutionContextManager stores context in the ExecutionContext property 
+        // The FsDecider ExecutionContextManager stores context in the ExecutionContext property 
         // of the DecisionTaskCompletedEventAttributes type.
         let context = ExecutionContextManager()
 
-        // Construct the FlowSharp computation expression with ReverseOrder=true, and passing in the context manager.
+        // Construct the FsDecider computation expression with ReverseOrder=true, and passing in the context manager.
         // Using ReverseOrder, the decider could retrieve only the latest history events since the last decision
         // task.
-        FlowSharp(dt, true, Some(context :> IContextManager) ) {
-            let! marker = FlowSharpAction.MarkerRecorded("Marker 1", pushToContext=true)
+        Decider(dt, true, Some(context :> IContextManager) ) {
+            let! marker = FsDeciderAction.MarkerRecorded("Marker 1", pushToContext=true)
 
             // Notice "let" not "let!" here. Binding contextActivityAction so both branches of the match
             // statement below can access it. 
-            let contextActivityAction = FlowSharpAction.ScheduleActivityTask(TestConfiguration.ActivityType, "Context Activity", pushToContext=true)
+            let contextActivityAction = FsDeciderAction.ScheduleActivityTask(TestConfiguration.ActivityType, "Context Activity", pushToContext=true)
 
             match marker with
             | MarkerRecordedResult.NotRecorded ->
@@ -55,16 +55,16 @@ let private LoadContextExample() =
 
                 // This activity is not stored in context. It's state cannot be determined without all the
                 // execution history events.
-                let! noContextActivity = FlowSharpAction.ScheduleActivityTask(TestConfiguration.ActivityType, "No Context Activity")
+                let! noContextActivity = FsDeciderAction.ScheduleActivityTask(TestConfiguration.ActivityType, "No Context Activity")
 
                 // Wait for both activity tasks to complete.
-                do! FlowSharpAction.WaitForAllActivityTask([contextActivity; noContextActivity;])
+                do! FsDeciderAction.WaitForAllActivityTask([contextActivity; noContextActivity;])
 
                 // Record a marker and store in context.
-                do! FlowSharpAction.RecordMarker("Marker 1", pushToContext=true)
+                do! FsDeciderAction.RecordMarker("Marker 1", pushToContext=true)
 
                 // Keep the workflow active using Wait.
-                do! FlowSharpAction.Wait()                
+                do! FsDeciderAction.Wait()                
 
             | MarkerRecordedResult.Recorded(_) ->
                 // Notice "let!" used here. This will retrieve the activity task result from the context manager

@@ -131,8 +131,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FlowSharp\FlowSharp.fsproj">
-      <Name>FlowSharp</Name>
+    <ProjectReference Include="..\FsDecider\FsDecider.fsproj">
+      <Name>FsDecider</Name>
       <Project>{d053eddf-ef2c-4c7c-8e07-e97a2369e19d}</Project>
       <Private>True</Private>
     </ProjectReference>

@@ -1,12 +1,12 @@
-﻿module FlowSharp.Examples.Program
+﻿module FsDecider.Examples.Program
 
 open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 (*
 How to use the command iterpreter
@@ -26,22 +26,22 @@ How to use the command iterpreter
 *)
 
 
-// Example 1 : Hello FlowSharp
-//      This example demonstrates a simple FlowSharp decider for a workflow with one simple action, it 
-//      completes with a result of "Hello FlowSharp"
+// Example 1 : Hello FsDecider
+//      This example demonstrates a simple FsDecider for a workflow with one simple action, it 
+//      completes with a result of "Hello FsDecider"
 // To Run, start the project and type these commands into the command line interpreter.
 //    sw hello
 //    dt hello
-let LoadHelloFlowSharp() =
-    // This creates a decider function using the FlowSharp decider builder. This
-    // decider expression simply completes the workflow with a result of "Hello FlowSharp"
+let LoadHelloDecider() =
+    // This creates a decider function using the FsDecider builder. This
+    // decider expression simply completes the workflow with a result of "Hello FsDecider"
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
-            return "Hello FlowSharp"            
+        Decider(dt) {
+            return "Hello FsDecider"            
         }
 
     // The code below supports the example runner
-    let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Hello FlowSharp Example", None, None)
+    let start = Operation.StartWorkflowExecution(TestConfiguration.WorkflowType, "Hello FsDecider Example", None, None)
     AddOperation (Command.StartWorkflow("hello")) start
     AddOperation (Command.DecisionTask("hello")) (Operation.DecisionTask(decider, false, None))
 
@@ -49,9 +49,9 @@ let LoadHelloFlowSharp() =
 let main argv = 
     // The examples use the same configuration as the unit tests.
     TestConfiguration.GetSwfClient  <- fun () -> new AmazonSimpleWorkflowClient(RegionEndpoint.USWest2) :> IAmazonSimpleWorkflow
-    TestConfiguration.Domain        <- "FlowSharp"
-    TestConfiguration.WorkflowType  <- WorkflowType(Name="FlowSharp Test Workflow", Version="1")
-    TestConfiguration.ActivityType  <- ActivityType(Name="FlowSharp Test Activity", Version="1")
+    TestConfiguration.Domain        <- "FsDecider"
+    TestConfiguration.WorkflowType  <- WorkflowType(Name="FsDecider Test Workflow", Version="1")
+    TestConfiguration.ActivityType  <- ActivityType(Name="FsDecider Test Activity", Version="1")
     TestConfiguration.IsConnected   <- true
 
     if TestConfiguration.IsConnected then
@@ -60,14 +60,14 @@ let main argv =
         failwith "The examples require online access to SWF. Verify TestConfiguration and set the IsConnected property to true."    
 
     // Load the examples into the interpreter
-    LoadHelloFlowSharp()
-    FlowSharp.Examples.ActivityExamples.Load()
-    FlowSharp.Examples.SignalExamples.Load()
-    FlowSharp.Examples.MarkerExamples.Load()
-    FlowSharp.Examples.ChildWorkflowExamples.Load()
-    FlowSharp.Examples.TimerExamples.Load()
-    FlowSharp.Examples.InputAndReturnExamples.Load()
-    FlowSharp.Examples.ContextExamples.Load()
+    LoadHelloDecider()
+    FsDecider.Examples.ActivityExamples.Load()
+    FsDecider.Examples.SignalExamples.Load()
+    FsDecider.Examples.MarkerExamples.Load()
+    FsDecider.Examples.ChildWorkflowExamples.Load()
+    FsDecider.Examples.TimerExamples.Load()
+    FsDecider.Examples.InputAndReturnExamples.Load()
+    FsDecider.Examples.ContextExamples.Load()
 
     // Set up the trace listener
     Trace.TraceSource.Listeners.Clear()

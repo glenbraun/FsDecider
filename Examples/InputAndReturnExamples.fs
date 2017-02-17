@@ -1,4 +1,4 @@
-﻿module FlowSharp.Examples.InputAndReturnExamples
+﻿module FsDecider.Examples.InputAndReturnExamples
 
 open System
 
@@ -6,10 +6,10 @@ open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.Examples.CommandInterpreter
-open FlowSharp.UnitTests
+open FsDecider
+open FsDecider.Actions
+open FsDecider.Examples.CommandInterpreter
+open FsDecider.UnitTests
 
 // Example ir1 : Input and Return Example
 //      This example demonstracts getting the input to a workflow and return a result based on it.
@@ -21,12 +21,12 @@ open FlowSharp.UnitTests
 //    sw ir1n           (Starts the workflow with input of "Canceled")
 //    dt ir1            (Processes the one decision task, gets input and cancels workflow with details)
 let private LoadInputAndReturnExample() =
-    let workflowId = "FlowSharp Input and Return Example"
+    let workflowId = "FsDecider Input and Return Example"
 
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             // Get the input to the workflow, set when starting the workflow
-            let! input = FlowSharpAction.GetWorkflowExecutionInput()
+            let! input = FsDeciderAction.GetWorkflowExecutionInput()
 
             // Based on the input value, return as Completed, Failed, or Canceled
             match input with

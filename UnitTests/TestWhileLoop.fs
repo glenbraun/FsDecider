@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -30,7 +30,7 @@ module TestWhileLoop =
         let deciderFunc(dt:DecisionTask) =
             let keepgoing = ref true
 
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 while !keepgoing do
                     keepgoing := false
                    
@@ -80,12 +80,12 @@ module TestWhileLoop =
         let deciderFunc(dt:DecisionTask) =
             let tries = ref 0
 
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 while !tries < 3 do
                     tries := !tries + 1
 
                     // Schedule and Wait for an Activity Task
-                    let! result = FlowSharpAction.ScheduleActivityTask (
+                    let! result = FsDeciderAction.ScheduleActivityTask (
                                     TestConfiguration.ActivityType, 
                                     activityId+((!tries).ToString()), 
                                     input=(!tries).ToString(),
@@ -96,7 +96,7 @@ module TestWhileLoop =
                                     startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                                 )
 
-                    do! FlowSharpAction.WaitForActivityTask(result)
+                    do! FsDeciderAction.WaitForActivityTask(result)
 
                     match result with
                     | ScheduleActivityTaskResult.Completed(attr) -> return "TEST PASS"

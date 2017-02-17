@@ -68,6 +68,11 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FsDecider\FsDecider.fsproj">
+      <Name>FsDecider</Name>
+      <Project>{d053eddf-ef2c-4c7c-8e07-e97a2369e19d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\UnitTests\UnitTests.fsproj">
       <Name>UnitTests</Name>
       <Project>{0a139c2d-fd75-4784-a0a6-19193d409934}</Project>
@@ -88,11 +93,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\FlowSharp\FlowSharp.fsproj">
-      <Name>FlowSharp</Name>
-      <Project>{d053eddf-ef2c-4c7c-8e07-e97a2369e19d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,13 +1,13 @@
-﻿namespace FlowSharp.ExecutionContext
+﻿namespace FsDecider.ExecutionContext
 
 open System
 open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp.Actions
-open FlowSharp.ContextExpression
-open FlowSharp.ContextExpression.Extensions
+open FsDecider.Actions
+open FsDecider.ContextExpression
+open FsDecider.ContextExpression.Extensions
 
 type IContextManager =
     interface 

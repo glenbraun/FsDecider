@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FlowSharp", "FlowSharp\FlowSharp.fsproj", "{D053EDDF-EF2C-4C7C-8E07-E97A2369E19D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsDecider", "FsDecider\FsDecider.fsproj", "{D053EDDF-EF2C-4C7C-8E07-E97A2369E19D}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{0A139C2D-FD75-4784-A0A6-19193D409934}"
 EndProject

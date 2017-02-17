@@ -1,4 +1,4 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
 open System
 open Amazon
@@ -29,21 +29,21 @@ type TestConfiguration() =
         // Register the Domain
         let registerDomain = RegisterDomainRequest()
         registerDomain.Name <- TestConfiguration.Domain
-        registerDomain.Description <- "Registered by FlowSharp unit tests"
+        registerDomain.Description <- "Registered by FsDecider unit tests"
         registerDomain.WorkflowExecutionRetentionPeriodInDays <- "5"
-        FlowSharp.Registrar.RegisterDomain (TestConfiguration.GetSwfClient) registerDomain
+        FsDecider.Registrar.RegisterDomain (TestConfiguration.GetSwfClient) registerDomain
 
         // Register the WorkflowType
         let registerWorkflowType = RegisterWorkflowTypeRequest()
         registerWorkflowType.Domain <- TestConfiguration.Domain
         registerWorkflowType.Name <- TestConfiguration.WorkflowType.Name
         registerWorkflowType.Version <- TestConfiguration.WorkflowType.Version
-        registerWorkflowType.Description <- "Registered by FlowSharp unit tests."
+        registerWorkflowType.Description <- "Registered by FsDecider unit tests."
         registerWorkflowType.DefaultChildPolicy <- ChildPolicy.TERMINATE
         registerWorkflowType.DefaultTaskList <- TestConfiguration.TaskList
         registerWorkflowType.DefaultExecutionStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout
         registerWorkflowType.DefaultTaskStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout
-        FlowSharp.Registrar.RegisterWorkflowType (TestConfiguration.GetSwfClient) registerWorkflowType
+        FsDecider.Registrar.RegisterWorkflowType (TestConfiguration.GetSwfClient) registerWorkflowType
 
         // Register the ActivityType
         let registerActivityType = RegisterActivityTypeRequest()
@@ -52,9 +52,9 @@ type TestConfiguration() =
         registerActivityType.DefaultTaskScheduleToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout
         registerActivityType.DefaultTaskScheduleToStartTimeout <- TestConfiguration.TwentyMinuteTimeout
         registerActivityType.DefaultTaskStartToCloseTimeout <- TestConfiguration.TwentyMinuteTimeout
-        registerActivityType.Description <- "Registered by FlowSharp unit tests"
+        registerActivityType.Description <- "Registered by FsDecider unit tests"
         registerActivityType.Domain <- TestConfiguration.Domain
         registerActivityType.Name <- TestConfiguration.ActivityType.Name
         registerActivityType.Version <- TestConfiguration.ActivityType.Version
-        FlowSharp.Registrar.RegisterActivityType (TestConfiguration.GetSwfClient) registerActivityType
+        FsDecider.Registrar.RegisterActivityType (TestConfiguration.GetSwfClient) registerActivityType
 

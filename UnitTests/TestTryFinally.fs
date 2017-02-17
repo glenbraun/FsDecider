@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -29,7 +29,7 @@ module TestTryFinally =
         let deciderFunc(dt:DecisionTask) =
             let x = ref 0
 
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 try
                     try 
                         x := !x + 1
@@ -84,7 +84,7 @@ module TestTryFinally =
         let activityResult = "Test Activity 1 Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             let x = ref 0
             try 
@@ -92,7 +92,7 @@ module TestTryFinally =
                     x := !x + 1
 
                     // Schedule and Wait for an Activity Task
-                    let! result = FlowSharpAction.ScheduleActivityTask (
+                    let! result = FsDeciderAction.ScheduleActivityTask (
                                     TestConfiguration.ActivityType, 
                                     activityId, 
                                     input=activityInput,
@@ -103,7 +103,7 @@ module TestTryFinally =
                                     startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                                 )
 
-                    do! FlowSharpAction.WaitForActivityTask(result)
+                    do! FsDeciderAction.WaitForActivityTask(result)
 
                     match result with
                     | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult -> 
@@ -185,7 +185,7 @@ module TestTryFinally =
         let cause = ContinueAsNewWorkflowExecutionFailedCause.WORKFLOW_TYPE_DOES_NOT_EXIST
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 let x = ref 0
 
                 try

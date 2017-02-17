@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -33,10 +33,10 @@ module TestWaitForAllActivityTask =
         let activityResult = "Test Activity Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity1 = FlowSharpAction.ScheduleActivityTask (
+            let! activity1 = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId1, 
                                 input="1",
@@ -47,7 +47,7 @@ module TestWaitForAllActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            let! activity2 = FlowSharpAction.ScheduleActivityTask (
+            let! activity2 = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId2, 
                                 input="2",
@@ -61,7 +61,7 @@ module TestWaitForAllActivityTask =
             let activityList = [activity1; activity2;]
 
             // Wait for All Activity Task
-            do! FlowSharpAction.WaitForAllActivityTask(activityList)
+            do! FsDeciderAction.WaitForAllActivityTask(activityList)
 
             let finishedList = 
                 activityList
@@ -153,10 +153,10 @@ module TestWaitForAllActivityTask =
         let activityResult = "Test Activity Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity1 = FlowSharpAction.ScheduleActivityTask (
+            let! activity1 = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId1, 
                                 input="1",
@@ -167,7 +167,7 @@ module TestWaitForAllActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            let! activity2 = FlowSharpAction.ScheduleActivityTask (
+            let! activity2 = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId2, 
                                 input="2",
@@ -181,7 +181,7 @@ module TestWaitForAllActivityTask =
             let activityList = [activity1; activity2;]
 
             // Wait for All Activity Task
-            do! FlowSharpAction.WaitForAllActivityTask(activityList)
+            do! FsDeciderAction.WaitForAllActivityTask(activityList)
 
             let finishedList = 
                 activityList
@@ -287,10 +287,10 @@ module TestWaitForAllActivityTask =
         let activityResult = "Test Activity Result"
         
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule Activity Task
-            let! activity1 = FlowSharpAction.ScheduleActivityTask (
+            let! activity1 = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId1, 
                                 input="1",
@@ -301,7 +301,7 @@ module TestWaitForAllActivityTask =
                                 startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                             )
 
-            let! activity2 = FlowSharpAction.ScheduleActivityTask (
+            let! activity2 = FsDeciderAction.ScheduleActivityTask (
                                 TestConfiguration.ActivityType, 
                                 activityId2, 
                                 input="2",
@@ -315,7 +315,7 @@ module TestWaitForAllActivityTask =
             let activityList = [activity1; activity2;]
 
             // Wait for All Activity Task
-            do! FlowSharpAction.WaitForAllActivityTask(activityList)
+            do! FsDeciderAction.WaitForAllActivityTask(activityList)
 
             let finishedList = 
                 activityList

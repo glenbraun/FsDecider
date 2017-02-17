@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -33,17 +33,17 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharpAction.ScheduleLambdaFunction (
+            let! result = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharpAction.WaitForLambdaFunction(result)
+            do! FsDeciderAction.WaitForLambdaFunction(result)
 
             match result with
             | ScheduleLambdaFunctionResult.Completed(attr) when attr.Result = TestConfiguration.LambdaResult -> return "TEST PASS"
@@ -124,17 +124,17 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharpAction.ScheduleLambdaFunction (
+            let! result = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=lambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharpAction.WaitForLambdaFunction(result)
+            do! FsDeciderAction.WaitForLambdaFunction(result)
 
             match result with
             | ScheduleLambdaFunctionResult.TimedOut(attr) when attr.TimeoutType = timeoutType -> return "TEST PASS"
@@ -214,17 +214,17 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"   // Note: Lambda function must run for more than 5 seconds
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharpAction.ScheduleLambdaFunction (
+            let! result = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=lambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharpAction.WaitForLambdaFunction(result)
+            do! FsDeciderAction.WaitForLambdaFunction(result)
 
             match result with
             | ScheduleLambdaFunctionResult.Failed(attr) -> return "TEST PASS"
@@ -304,17 +304,17 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharpAction.ScheduleLambdaFunction (
+            let! result = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharpAction.WaitForLambdaFunction(result)
+            do! FsDeciderAction.WaitForLambdaFunction(result)
             
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with
@@ -390,17 +390,17 @@ module TestWaitForLambdaFunction =
         let FiveSeconds = "5"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Schedule a Lambda Function
-            let! result = FlowSharpAction.ScheduleLambdaFunction (
+            let! result = FsDeciderAction.ScheduleLambdaFunction (
                             id=lambdaId,
                             name=TestConfiguration.LambdaName,
                             input=TestConfiguration.LambdaInput,
                             startToCloseTimeout=FiveSeconds
                           )
 
-            do! FlowSharpAction.WaitForLambdaFunction(result)
+            do! FsDeciderAction.WaitForLambdaFunction(result)
             
             // Note: This test relies on intionally duplicating the schedule lambda decision to force the error
             match result with

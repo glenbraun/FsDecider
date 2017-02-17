@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -30,7 +30,7 @@ module TestForLoop =
         let deciderFunc(dt:DecisionTask) =
             let sum = ref 0
 
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 for i = 1 to 2 do
                     sum := !sum + i
                     ()
@@ -79,7 +79,7 @@ module TestForLoop =
         let deciderFunc(dt:DecisionTask) =
             let sum = ref 0
 
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 for i in [1 .. 2] do
                     sum := !sum + i
                     ()
@@ -130,10 +130,10 @@ module TestForLoop =
 
         let deciderFunc(dt:DecisionTask) =
 
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 for i = 1 to 2 do
                     // Schedule and Wait for an Activity Task
-                    let! result = FlowSharpAction.ScheduleActivityTask (
+                    let! result = FsDeciderAction.ScheduleActivityTask (
                                     TestConfiguration.ActivityType, 
                                     activityId+(i.ToString()), 
                                     input=i.ToString(),
@@ -144,7 +144,7 @@ module TestForLoop =
                                     startToCloseTimeout=TestConfiguration.TwentyMinuteTimeout
                                 )
 
-                    do! FlowSharpAction.WaitForActivityTask(result)
+                    do! FsDeciderAction.WaitForActivityTask(result)
 
                     match result with
                     | ScheduleActivityTaskResult.Completed(attr) when attr.Result = activityResult + (i.ToString()) -> ()
@@ -246,14 +246,14 @@ module TestForLoop =
 
         let deciderFunc(dt:DecisionTask) =
 
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 let results = ref List.empty<string * ScheduleActivityTaskResult>
 
                 for i in [ 1 .. 2 ] do
                     let activityInput = (i.ToString())
 
                     // Schedule an Activity Task
-                    let! schedule = FlowSharpAction.ScheduleActivityTask (
+                    let! schedule = FsDeciderAction.ScheduleActivityTask (
                                         TestConfiguration.ActivityType, 
                                         activityId + (i.ToString()), 
                                         input=activityInput,
@@ -266,7 +266,7 @@ module TestForLoop =
 
                     results := (activityInput, schedule) :: !results
 
-                do! FlowSharpAction.WaitForAllActivityTask(!results |> List.map (fun (_, r) -> r))
+                do! FsDeciderAction.WaitForAllActivityTask(!results |> List.map (fun (_, r) -> r))
 
                 let allCompleted =
                     !results

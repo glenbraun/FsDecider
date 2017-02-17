@@ -1,15 +1,15 @@
-# FlowSharp
+# FsDecider
 F# computation expression builder for AWS SimpleWorkflow.
 
-Use the FlowSharp library for AWS SimpleWorkflow to write deciders using F# computation expressions.
+Use the FsDecider library for AWS SimpleWorkflow to write deciders using F# computation expressions.
 
     let decider(dt:DecisionTask) =
-        FlowSharp(dt) {
+        Decider(dt) {
             // Schedule activity tasks
-            let! activity = FlowSharpAction.ScheduleActivityTask("ActivityType", "id1")
+            let! activity = FsDeciderAction.ScheduleActivityTask("ActivityType", "id1")
 
             // Wait for activities to complete
-            do! FlowSharpAction.WaitForActivityTask(activity)
+            do! FsDeciderAction.WaitForActivityTask(activity)
 
             return "OK"
 
@@ -24,10 +24,10 @@ Use the FlowSharp library for AWS SimpleWorkflow to write deciders using F# comp
 ## Focus on decider logic. 
 A SWF solution is composed of code which registers workflow metadata, starts workflows, processes activities (workers), and makes control flow logic decisions (deciders). Of these, writing the decider logic is by far the most complicated.
 
-The FlowSharp decider builder uses F# computation expressions to capture the sequence of steps which define the logic of a workflow. FlowSharp deciders look like a single unit of code but they are executed over a sequence of independent decision loops, perhaps spread across many machines. Each loop iteration is picked up from where the last left off by searching the workflow history provided by SWF.
+FsDecider uses F# computation expressions to capture the sequence of steps which define the logic of a workflow. FsDecider expressions look like a single unit of code but they are executed over a sequence of independent decision loops, perhaps spread across many machines. Each loop iteration is picked up from where the last left off by searching the workflow history provided by SWF.
 		
 ## Expose the AWS .NET SDK
-The FlowSharp library uses the classes of the AWS .NET SDK for SimpleWorkflow wherever possible rather than creating new types.
+The FsDecider library uses the classes of the AWS .NET SDK for SimpleWorkflow wherever possible rather than creating new types.
 
 # Features
 * Schedule and wait for activity tasks. Provides full for support for input, timeouts, task lists, and task priority and all activity task results of completed, canceled, failed, and timed out. Activity tasks can be executed in series and in parallel and supports logic to wait for some or all of them to complete. Cancel activity tasks with a request to cancel.

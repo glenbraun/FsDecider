@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -37,10 +37,10 @@ module TestStartChildWorkflowExecution =
         let childTaskList = TaskList(Name="Child")
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -116,10 +116,10 @@ module TestStartChildWorkflowExecution =
         let childTaskList = TaskList(Name="Child")
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -133,7 +133,7 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-               do! FlowSharpAction.Wait()
+               do! FsDeciderAction.Wait()
                                
             | StartChildWorkflowExecutionResult.Initiated(attr) when
                     attr.ChildPolicy = ChildPolicy.TERMINATE &&
@@ -220,10 +220,10 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -237,9 +237,9 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Started(start) when 
                 start.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 start.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -252,7 +252,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return "OK"
             }
 
@@ -339,10 +339,10 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -356,11 +356,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Completed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -373,7 +373,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return "OK"
             }
 
@@ -484,10 +484,10 @@ module TestStartChildWorkflowExecution =
         let cancelDetails = "Child Canceled Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -501,11 +501,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Canceled(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -518,7 +518,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return ReturnResult.CancelWorkflowExecution(cancelDetails)
             }
 
@@ -630,10 +630,10 @@ module TestStartChildWorkflowExecution =
         let failedDetails = "Child Failed Details"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -647,11 +647,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Failed(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -666,7 +666,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return ReturnResult.FailWorkflowExecution(failedReason, failedDetails)
             }
 
@@ -780,10 +780,10 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -797,11 +797,11 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Started(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.TimedOut(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -815,7 +815,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {                
+            Decider(dt, TestConfiguration.ReverseOrder) {                
                 return "OK"
             }
 
@@ -908,10 +908,10 @@ module TestStartChildWorkflowExecution =
         let childRunId = ref ""
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,
@@ -925,12 +925,12 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Initiated(_) ->
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Started(start) ->
                 childRunId := start.WorkflowExecution.RunId
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
             | StartChildWorkflowExecutionResult.Terminated(attr) when 
                 attr.WorkflowType.Name = TestConfiguration.WorkflowType.Name &&
                 attr.WorkflowType.Version = TestConfiguration.WorkflowType.Version &&
@@ -940,7 +940,7 @@ module TestStartChildWorkflowExecution =
         }
 
         let childDeciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
                 return "OK"
             }
 
@@ -1043,10 +1043,10 @@ module TestStartChildWorkflowExecution =
         let cause = StartChildWorkflowExecutionFailedCause.WORKFLOW_TYPE_DOES_NOT_EXIST
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            let! start = FlowSharpAction.StartChildWorkflowExecution
+            let! start = FsDeciderAction.StartChildWorkflowExecution
                           (
                             childWorkflowType,
                             childWorkflowId,
@@ -1060,7 +1060,7 @@ module TestStartChildWorkflowExecution =
 
             match start with
             | StartChildWorkflowExecutionResult.Starting(_) -> 
-                do! FlowSharpAction.Wait()
+                do! FsDeciderAction.Wait()
 
             | StartChildWorkflowExecutionResult.StartFailed(attr) when
                     attr.WorkflowId = childWorkflowId &&
@@ -1140,10 +1140,10 @@ module TestStartChildWorkflowExecution =
         let childTaskList = TaskList(Name="Child")
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
             
             // Start a Child Workflow Execution
-            do! FlowSharpAction.StartChildWorkflowExecution
+            do! FsDeciderAction.StartChildWorkflowExecution
                           (
                             TestConfiguration.WorkflowType,
                             childWorkflowId,

@@ -1,9 +1,9 @@
-﻿namespace FlowSharp.UnitTests
+﻿namespace FsDecider.UnitTests
 
-open FlowSharp
-open FlowSharp.Actions
-open FlowSharp.UnitTests.TestHelper
-open FlowSharp.UnitTests.OfflineHistory
+open FsDecider
+open FsDecider.Actions
+open FsDecider.UnitTests.TestHelper
+open FsDecider.UnitTests.OfflineHistory
 
 open System
 open Amazon
@@ -29,9 +29,9 @@ module TestGetWorkflowExecutionInput =
         let workflowInput = "Test Workflow Input"
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
-            let! input = FlowSharpAction.GetWorkflowExecutionInput()
+            let! input = FsDeciderAction.GetWorkflowExecutionInput()
 
             if input = workflowInput then
                 return "TEST PASS"
@@ -75,9 +75,9 @@ module TestGetWorkflowExecutionInput =
         let workflowInput = null
 
         let deciderFunc(dt:DecisionTask) =
-            FlowSharp(dt, TestConfiguration.ReverseOrder) {
+            Decider(dt, TestConfiguration.ReverseOrder) {
 
-            let! input = FlowSharpAction.GetWorkflowExecutionInput()
+            let! input = FsDeciderAction.GetWorkflowExecutionInput()
 
             if input = workflowInput then
                 return "TEST PASS"

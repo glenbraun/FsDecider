@@ -1,4 +1,4 @@
-﻿namespace FlowSharp.Actions
+﻿namespace FsDecider.Actions
 
 open System
 open Amazon

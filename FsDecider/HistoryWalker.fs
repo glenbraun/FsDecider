@@ -1,12 +1,12 @@
-﻿namespace FlowSharp
+﻿namespace FsDecider
 
 open System
 open Amazon
 open Amazon.SimpleWorkflow
 open Amazon.SimpleWorkflow.Model
 
-open FlowSharp.Actions
-open FlowSharp.EventPatterns
+open FsDecider.Actions
+open FsDecider.EventPatterns
 
 module internal HistoryWalker =
 

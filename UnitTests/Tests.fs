@@ -1,4 +1,4 @@
-﻿module FlowSharp.UnitTests.Tests
+﻿module FsDecider.UnitTests.Tests
 
 open System
 

@@ -7,9 +7,9 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("FlowSharp Examples")>]
-[<assembly: AssemblyDescription("FlowSharp. F# computation expressions for writing AWS SimpleWorkflow deciders")>]
-[<assembly: AssemblyProduct("FlowSharp")>]
+[<assembly: AssemblyTitle("FsDecider Examples")>]
+[<assembly: AssemblyDescription("FsDecider. F# computation expressions for writing AWS SimpleWorkflow deciders")>]
+[<assembly: AssemblyProduct("FsDecider")>]
 [<assembly: AssemblyCompany("LP4-3, LLC")>]
 [<assembly: AssemblyCopyright("Copyright 2017 LP4-3, LLC. All Rights Reserved.")>]
 [<assembly: AssemblyConfiguration("")>]

@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>FlowSharp</Name>
+    <Name>FsDecider</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,7 +63,7 @@
     <Compile Include="ContextExpression.fs" />
     <Compile Include="ExecutionContextManager.fs" />
     <Compile Include="Trace.fs" />
-    <Compile Include="FlowSharp.fs" />
+    <Compile Include="Decider.fs" />
     <Compile Include="AsyncDeciderActor.fs" />
     <Content Include="packages.config" />
     <None Include="FlowSharp.nuspec" />
